@@ -1,40 +1,51 @@
 <!DOCTYPE html>
 <head>
-	<meta charset="utf-8">
-	<title>Homepie</title>
-	<link rel="stylesheet" type="text/css" href="/style/master.css">
+  <meta charset="utf-8" />
+  <title>Homepie</title>
+  <link rel="stylesheet" type="text/css" href="style/index.css" />
 </head>
 <body>
-	<div id="root">
-		<span>Günaydin-Homeserve</span>	
+  <div id="root">
+    <span>Günaydin-Homeserver</span>
 
-		<main>
-			<span>Melde dich an:</span>
+    <main>
+      <span>Melde dich an:</span>
 
-			<div class="box">
-				<div id="burak" class="profile">Burak</div>
-				<div id="beyza" class="profile">Beyza</div>
-				<div id="yasar" class="profile">Yasar</div>
-			</div>
-		</main>
-		
-		<nav>
-			<span>Wähle ein Modul:</div>
-			
-			<div class="box">
-				<a id="home" class="image" href="/home">
-					<img src="/res/homepie_logo.svg">
-				</a>
-				<a id="lockkliye" class="image" href="http://lockkliye.viewdns.net">
-					<img src="/res/lockkliye_logo.svg">
-				</a>
-				<a id="synthia" class="image" href="http://synthia.viewdns.net">
-					<img src="/res/synthia_logo.svg">
-				</a>
-			</div>
-		</nav>
+      <div class="box">
+        <div id="burak" class="profile">
+          <div id="admin" class="cat">Admin</div>
+          <div class="name">Burak</div>
+        </div>
 
-		<footer>Powered by a measly Raspberry PI 3</footer>
-	</div>
+        <div id="beyza" class="profile">
+          <div id="user" class="cat">Nutzer</div>
+          <div class="name">Beyza</div>
+        </div>
+
+        <div id="yasar" class="profile">
+          <div id="user" class="cat">Nutzer</div>
+          <div class="name">Yasar</div>
+        </div>
+      </div>
+    </main>
+
+    <nav>
+      <span>Wähle ein Modul:</span>
+
+      <div class="box">
+        <a id="home" class="image" href="pages/home.html">
+          <img src="/res/homepie_logo.svg" />
+        </a>
+        <a id="lockkliye" class="image" href="http://lockkliye.viewdns.net">
+          <img src="/res/lockkliye_logo.svg" />
+        </a>
+        <a id="synthia" class="image" href="http://synthia.viewdns.net">
+          <img src="/res/synthia_logo.svg" />
+        </a>
+      </div>
+    </nav>
+
+    <footer>Powered by a measly Raspberry PI 3</footer>
+  </div>
 </body>
-<html>
+<html></html>
