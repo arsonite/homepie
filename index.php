@@ -7,12 +7,7 @@
 <body>
   <div id="root">
     <span>Günaydin-Homeserve</span>
-
-	<?php
-	$version = 7.0;
-	echo "PHP version " . $version . " installed";
-	?>
-
+	
     <main>
       <span>Melde dich an:</span>
 

@@ -1,33 +1,80 @@
-function dateiauswahl(evt) {
-  evt.stopPropagation();
-  evt.preventDefault();
+const ALLOWED_EXT = ['jpeg', 'jpg', 'png'];
+const _ = undefined;
 
-  var gewaehlteDateien = evt.dataTransfer.files; // FileList Objekt
-  var output = [];
-  for (var i = 0, f; (f = gewaehlteDateien[i]); i++) {
-    output.push(
-      '<li><strong>',
-      escape(f.name),
-      '</strong> (',
-      f.type || 'n/a',
-      ') - ',
-      f.size,
-      ' bytes, last modified: ',
-      f.lastModifiedDate.toLocaleDateString(),
-      '</li>'
-    );
-  }
+let files = [];
+let uploadBuffer = _;
 
-  document.getElementById('drop').innerHTML =
-    '<ul>' + output.join('') + '</ul>';
+let uploadSize = 0;
+let progress = 0;
+
+function uploadCompleted(e) {
+	progress += uploadBuffer.size;
 }
 
-function handleDragOver(evt) {
-  evt.stopPropagation();
-  evt.preventDefault();
-  evt.dataTransfer.dropEffect = 'copy';
+function errorHandling(e) {
+	alert("Upload failed");
+}
+
+function calculateProgress(e) {
+	let p = progress + e.loaded;
+	console.log((p / progress) + "%");
+}
+
+/* Sacrifinc runtime efficiency to enable logging and progress callback */
+function upload() {	
+	for(let f of files) {
+		uploadSize += f.size;
+		uploadBuffer = f;
+	
+		let xhr = new XMLHttpRequest(); // Creating AJAX-req
+		xhr.open('POST', '../php/fileupload.php'); // URL and req-type
+		
+		xhr.upload.addEventListener("progress", calculateProgress);
+		xhr.addEventListener("load", uploadCompleted);
+		xhr.addEventListener("Error", errorHandling);
+
+		let data = new FormData(); // FormData-object to handle formless file
+		data.append('uploadfile', uploadBuffer);
+		xhr.send(data);
+
+		/* Response-Logging using Fetch-API */
+		fetch("../php/fileupload.php", {
+			method: "POST",
+			body: data,
+		}).then(response => {
+			console.log(response);
+		})
+	}
+}
+
+function dropEvent(e) {
+	e.stopPropagation();
+  	e.preventDefault();
+
+	files = e.dataTransfer.files;
+
+	let ul = document.createElement('ul');
+	for(let f of files) {
+		/* Listing all the files */
+		let li = document.createElement('li');
+		li.innerHTML = "<b>" + f.name + "</b>";
+		li.innerHTML += " (" + f.type || "n/a";
+		li.innerHTML += ") - " + f.size/1000 + " kb";	
+		ul.appendChild(li);
+	}
+	ul.innerHTML += "Total upload size: " + uploadSize/1000 + " kb";
+	document.getElementById('drop').appendChild(ul);
+
+	upload();
+}
+
+function dragOver(e) {
+	e.stopPropagation();
+	e.preventDefault();
+
+	e.dataTransfer.dropEffect = 'copy';
 }
 
 var drop = document.getElementById('drop');
-drop.addEventListener('dragover', handleDragOver, false);
-drop.addEventListener('drop', dateiauswahl, false);
+drop.addEventListener('drop', dropEvent);
+drop.addEventListener('dragover', dragOver);
