@@ -1,5 +1,12 @@
 /* It makes more sense to catch unallowed extensions in the front-end, but for training purposes I do it on the backend */
 //const ALLOWED_EXT = ['jpeg', 'jpg', 'png'];
+/*const FILE_TYPES = {
+	"image": "img",
+	"video": "vid",
+	"audio": "sfx",
+	"text" : "txt"
+}*/
+
 const _ = undefined;
 
 let files = [];
