@@ -1,37 +1,36 @@
-const ALLOWED_EXT = ['jpeg', 'jpg', 'png'];
+/* It makes more sense to catch unallowed extensions in the front-end, but for training purposes I do it on the backend */
+//const ALLOWED_EXT = ['jpeg', 'jpg', 'png'];
 const _ = undefined;
 
 let files = [];
 let uploadBuffer = _;
-
 let uploadSize = 0;
 let progress = 0;
 
-function uploadCompleted(e) {
+function handleCompletion(e) {
 	progress += uploadBuffer.size;
 }
 
-function errorHandling(e) {
+function handleError(e) {
 	alert("Upload failed");
 }
 
-function calculateProgress(e) {
+function handleProgress(e) {
 	let p = progress + e.loaded;
-	console.log((p / progress) + "%");
+	console.log((p / uploadSize) + "%");
 }
 
 /* Sacrifinc runtime efficiency to enable logging and progress callback */
 function upload() {	
 	for(let f of files) {
-		uploadSize += f.size;
 		uploadBuffer = f;
 	
 		let xhr = new XMLHttpRequest(); // Creating AJAX-req
 		xhr.open('POST', '../php/fileupload.php'); // URL and req-type
 		
-		xhr.upload.addEventListener("progress", calculateProgress);
-		xhr.addEventListener("load", uploadCompleted);
-		xhr.addEventListener("Error", errorHandling);
+		xhr.addEventListener("load", handleCompletion);
+		xhr.addEventListener("Error", handleError);
+		xhr.upload.addEventListener("progress", handleProgress);	
 
 		let data = new FormData(); // FormData-object to handle formless file
 		data.append('uploadfile', uploadBuffer);
@@ -47,7 +46,7 @@ function upload() {
 	}
 }
 
-function dropEvent(e) {
+function handleDrop(e) {
 	e.stopPropagation();
   	e.preventDefault();
 
@@ -61,6 +60,8 @@ function dropEvent(e) {
 		li.innerHTML += " (" + f.type || "n/a";
 		li.innerHTML += ") - " + f.size/1000 + " kb";	
 		ul.appendChild(li);
+
+		uploadSize += f.size;
 	}
 	ul.innerHTML += "Total upload size: " + uploadSize/1000 + " kb";
 	document.getElementById('drop').appendChild(ul);
@@ -68,7 +69,7 @@ function dropEvent(e) {
 	upload();
 }
 
-function dragOver(e) {
+function handleDragOver(e) {
 	e.stopPropagation();
 	e.preventDefault();
 
@@ -76,5 +77,5 @@ function dragOver(e) {
 }
 
 var drop = document.getElementById('drop');
-drop.addEventListener('drop', dropEvent);
-drop.addEventListener('dragover', dragOver);
+drop.addEventListener('drop', handleDrop);
+drop.addEventListener('dragover', handleDragOver);
