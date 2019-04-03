@@ -8,7 +8,7 @@
 	ini_set("post_max_size", "1G");	
 
 	/* Custom upload directory, root document directory with backwards tree depth of 2 */ 
-	$target = dirname(__DIR__, 2) . "/uploads/";
+	$target = dirname(__DIR__, 2) . "/tmp/";
 	
 	/* Accessing client induced inner array of global file array */
 	$files = $_FILES['uploadfile'];
