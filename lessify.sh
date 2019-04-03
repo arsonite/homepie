@@ -3,6 +3,8 @@
 #availableFlags=
 #flags="$@"
 
+# Implement algorith which flags already compressed and compiled files with this shell script with a /*#!c!#*/ flag to save processing power by skipping them
+
 if [ "$1" = "-v" ]; then
 	find . -name "*.less" | while read line; do
 		echo ... Processing "$line"
