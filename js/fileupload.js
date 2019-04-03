@@ -57,10 +57,10 @@ function handleDrop(e) {
 	e.stopPropagation();
   	e.preventDefault();
 
-	files = e.dataTransfer.files;
+	let fileList = e.dataTransfer.files;
 
 	let ul = document.createElement('ul');
-	for(let f of files) {
+	for(let f of fileList) {
 		/* Listing all the files */
 		let li = document.createElement('li');
 		li.innerHTML = "<b>" + f.name + "</b>";
@@ -69,6 +69,7 @@ function handleDrop(e) {
 		ul.appendChild(li);
 
 		uploadSize += f.size;
+		files.push(f);
 	}
 	ul.innerHTML += "Total upload size: " + uploadSize/1000 + " kb";
 	document.getElementById('drop').appendChild(ul);

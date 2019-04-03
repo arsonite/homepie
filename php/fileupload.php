@@ -25,17 +25,14 @@
 	print_r($files);
 
 	/* Returns file if it exists */
-	$fileName = !empty($files['name']) ? $files['name'] : null;
+	$fileName = $files['name'] ?: null;
 	if($fileName != null) {
 		$originalType = explode('/', $files['type'])[0];
 		$fileType = key($fileTypes[$originalType]) ?: null;
 		$fileExt = strtolower(explode('.', $fileName)[1]);
 
 		/* Determines the subdirectory by evaluation file extension */
-		$subdir = in_array($fileExt, $fileTypes[$originalType][$fileType]) ? $fileType."/" : null;
- 		var_dump($fileTypes[$originalType][$fileType]);
-		var_dump($subdir);
-	
+		$subdir = in_array($fileExt, $fileTypes[$originalType][$fileType]) ? $fileType."/" : null;	
 		if($subdir != null) {
 			$path = $target.$subdir.$fileName;
 			if(move_uploaded_file($files['tmp_name'], $path)) {
