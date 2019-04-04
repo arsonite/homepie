@@ -4,7 +4,8 @@ import os;
 import shutil;
 
 # CONST-definitions
-ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+print(ROOT);
 
 # Outsource to JSON shared between JS, PHP and python
 SUB_DIRS = ["img", "sfx", "txt", "vid"]

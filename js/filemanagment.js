@@ -16,6 +16,8 @@ let progress = 0;
 
 function handleCompletion(e) {
 	progress += uploadBuffer.size;
+	getRessources();
+	
 }
 
 function handleError(e) {
@@ -24,10 +26,10 @@ function handleError(e) {
 
 function handleProgress(e) {
 	let p = progress + e.loaded;
-	console.log((p / uploadSize) + "%");
+	//console.log((p / uploadSize) + "%");
 }
 
-/* Sacrifinc runtime efficiency to enable logging and progress callback */
+/* Sacrificing runtime efficiency to enable logging and progress callback */
 function postFiles() {	
 	const URL = "http://homepie.ddns.net/php/fileupload.php";
 
@@ -67,7 +69,6 @@ function handleDrop(e) {
 		files.push(f);
 	}
 	postFiles();
-	getRessources();
 }
 
 function handleDragOver(e) {
@@ -86,6 +87,7 @@ function getRessources() {
 		let tree = JSON.parse(this.response);
 			
 		let ressources = document.getElementById('ressources');
+		ressources.innerHTML = "";
 		Object.keys(tree).forEach(dir => {
 			let drop = document.createElement('div');
 			drop.id = dir;
