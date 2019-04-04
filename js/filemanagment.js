@@ -29,11 +29,13 @@ function handleProgress(e) {
 
 /* Sacrifinc runtime efficiency to enable logging and progress callback */
 function upload() {	
+	const URL = "http://homepie.ddns.net/php/fileupload.php";
+
 	for(let f of files) {
 		uploadBuffer = f;
 	
 		let xhr = new XMLHttpRequest(); // Creating AJAX-req
-		xhr.open('POST', '../php/fileupload.php'); // URL and req-type
+		xhr.open('POST', URL); // URL and req-type
 		
 		xhr.addEventListener("load", handleCompletion);
 		xhr.addEventListener("Error", handleError);
@@ -44,7 +46,7 @@ function upload() {
 		xhr.send(data);
 
 		/* Response-Logging using Fetch-API */
-		fetch("../php/fileupload.php", {
+		fetch(URL, {
 			method: "POST",
 			body: data,
 		}).then(response => {
@@ -84,6 +86,33 @@ function handleDragOver(e) {
 	e.dataTransfer.dropEffect = 'copy';
 }
 
-var drop = document.getElementById('drop');
-drop.addEventListener('drop', handleDrop);
-drop.addEventListener('dragover', handleDragOver);
+document.addEventListener('DOMContentLoaded', function() {
+	let xhr = new XMLHttpRequest();
+	
+	xhr.addEventListener('load', function() {
+		let tree = JSON.parse(this.response);	
+	
+		const dropzone = document.getElementById('dropzone');
+		Object.keys(tree).forEach(dir => {
+			let drop = document.createElement('div');
+			drop.className = 'drop';
+			drop.innerHTML = dir;
+			drop.addEventListener('drop', handleDrop);
+			drop.addEventListener('dragover', handleDragOver);
+			
+
+			tree[dir].forEach(file => {
+				let node = document.createElement('div');
+				node.className = 'node';
+				node.innerHTML = file;
+
+				drop.appendChild(node);
+			});
+			
+			dropzone.appendChild(drop);
+		});
+	});
+
+	xhr.open('GET', 'http://homepie.ddns.net/php/fileretrieval.php');
+	xhr.send();
+});

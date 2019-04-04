@@ -1,38 +1,47 @@
 * {
 	padding: 0;
 	margin: 0;
+	
 	color: #fff;
 	font-size: 20px;
 	outline: 0;
-	text-decoration: 0;
+	text-decoration: none;
 }
 
 body {
-  overflow-x: hidden;
-  height: 100vh;
-  width: 100vw;
-  background-color: #353535;
+	overflow: hidden;
+	  
+	height: 100vh;
+	width: 100vw;
+	 
+	background-color: #353535;
 
 	#root {
-		overflow-x: hidden;
-		overflow-y: auto;
 		display: flex;
 		flex-direction: column;
 		justify-content: space-around;
 		flex-wrap: nowrap;
 		height: 100%;
 		width: 100%;
+		
 		text-align: center;
+		
+		main {
+			height: 100%;
+			width: 100%;
 	
-		.dropbox {
-			 top: 0;
-			 left: 0;
-			 right: 0;
-			 bottom: 0;
-			 margin: 0 auto;
-			 height: 800px;
-			 width: 80%;
-			 background-color: #111;
+			#dropzone {
+				top: 0;
+				left: 0;
+				right: 0;
+				bottom: 0;
+				
+				margin: 0 auto;
+				height: 600px;
+				width: 600px;
+				
+				background-color: #111;
+			}
 		}
 	}
 }
