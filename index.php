@@ -1,8 +1,12 @@
 <!DOCTYPE html>
+
 <head>
 	<meta charset="utf-8" />
 	<title>Homepie</title>
-	<link rel="stylesheet" type="text/css" href="style/index.css" />
+
+	<!--<link rel="stylesheet" type="text/css" href="style/index.css" />-->
+	<link rel="stylesheet/less" type="text/css" href="style/index.less" />
+	<script src="js/less.min.js" ></script>
 </head>
 <body>
 	<div id="root">
@@ -48,4 +52,5 @@
 		<footer>Powered by a measly Raspberry PI 3</footer>
 	</div>
 </body>
-<html></html>
+
+</html>

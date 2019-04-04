@@ -1,1 +1,135 @@
-*{padding:0;margin:0;color:#fff;font-size:20px;outline:0;text-decoration:0}body{height:100vh;width:100vw;background-color:#353535}body .large{font-size:50px!important}body span{top:0;left:0;right:0;bottom:0;margin:0 auto;text-align:center;font-size:30px;font-weight:700}body #root{overflow-x:hidden;overflow-y:auto;display:flex;flex-direction:column;justify-content:space-around;flex-wrap:nowrap;height:100%;width:100%;text-align:center}body #root .box{display:flex;flex:1 1 0;flex-direction:row;flex-wrap:wrap;justify-content:space-around;margin-top:1%;width:100%}body #root main{margin-left:10%;width:80%}body #root main .box{width:100%}body #root main .box .profile{display:flex;flex-direction:row}body #root main .box .profile div{padding:25px;width:100px;font-weight:700}body #root main .box .profile .name{width:100px;color:#222;background-color:#ccc}body #root main .box .profile .name:hover{cursor:pointer;color:#000;background-color:#fff}body #root main .box .profile .cat{margin:0 -35px;width:0;transition:.5s all}body #root main .box .profile .cat:hover{margin:0;width:100px}body #root main .box .profile #admin{color:#eee;background-color:#ff4343}body #root main .box .profile #user{color:#eee;background-color:#111}body #root nav{margin-left:10%;width:80%}body #root nav .box{width:100%}body #root nav .box .image{position:relative;height:400px;width:400px}body #root nav .box .image img{position:absolute;top:0;right:0;left:0;bottom:0;margin:auto;height:50%;width:50%}body #root nav .box .image:hover{cursor:pointer}body #root nav .box #home{background-color:#555}body #root nav .box #home:hover{background-color:#666}body #root nav .box #lockkliye{background-color:#f80}body #root nav .box #lockkliye:hover{background-color:#f91}body #root nav .box #synthia{background-color:#ba55d3}body #root nav .box #synthia:hover{background-color:#cb66e4}body #root footer{width:100%}
+* {
+  padding: 0;
+  margin: 0;
+  color: #fff;
+  font-size: 20px;
+  outline: 0;
+  text-decoration: 0;
+}
+body {
+  height: 100vh;
+  width: 100vw;
+  background-color: #353535;
+}
+body .large {
+  font-size: 50px !important;
+}
+body span {
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  margin: 0 auto;
+  text-align: center;
+  font-size: 30px;
+  font-weight: bold;
+}
+body #root {
+  overflow-x: hidden;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  flex-wrap: nowrap;
+  height: 100%;
+  width: 100%;
+  text-align: center;
+}
+body #root .box {
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: space-around;
+  margin-top: 1%;
+  width: 100%;
+}
+body #root main {
+  margin-left: 10%;
+  width: 80%;
+}
+body #root main .box {
+  width: 100%;
+}
+body #root main .box .profile {
+  display: flex;
+  flex-direction: row;
+}
+body #root main .box .profile div {
+  padding: 25px;
+  width: 100px;
+  font-weight: bold;
+}
+body #root main .box .profile .name {
+  width: 100px;
+  color: #222;
+  background-color: #ccc;
+}
+body #root main .box .profile .name:hover {
+  cursor: pointer;
+  color: #000;
+  background-color: #fff;
+}
+body #root main .box .profile .cat {
+  margin: 0 -35px;
+  width: 0px;
+  transition: 0.5s all;
+}
+body #root main .box .profile .cat:hover {
+  margin: 0;
+  width: 100px;
+}
+body #root main .box .profile #admin {
+  color: #eee;
+  background-color: #ff4343;
+}
+body #root main .box .profile #user {
+  color: #eee;
+  background-color: #111;
+}
+body #root nav {
+  margin-left: 10%;
+  width: 80%;
+}
+body #root nav .box {
+  width: 100%;
+}
+body #root nav .box .image {
+  position: relative;
+  height: 400px;
+  width: 400px;
+}
+body #root nav .box .image img {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  bottom: 0;
+  margin: auto;
+  height: 50%;
+  width: 50%;
+}
+body #root nav .box .image:hover {
+  cursor: pointer;
+}
+body #root nav .box #home {
+  background-color: #555;
+}
+body #root nav .box #home:hover {
+  background-color: #666;
+}
+body #root nav .box #lockkliye {
+  background-color: #ff8800;
+}
+body #root nav .box #lockkliye:hover {
+  background-color: #ff9911;
+}
+body #root nav .box #synthia {
+  background-color: #ba55d3;
+}
+body #root nav .box #synthia:hover {
+  background-color: #cb66e4;
+}
+body #root footer {
+  width: 100%;
+}
