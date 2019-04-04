@@ -22,16 +22,33 @@ body #root {
   text-align: center;
 }
 body #root main {
-  height: 100%;
-  width: 100%;
+  display: flex;
+  flex-direction: row;
+  flex: 1 1 0;
+  justify-content: space-between;
+}
+body #root main #dropzone,
+body #root main #ressources {
+  background-color: #111;
 }
 body #root main #dropzone {
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  margin: 0 auto;
-  height: 600px;
-  width: 600px;
+  height: 20vw;
+  width: 20vw;
+}
+body #root main #ressources {
+  height: 100%;
+  width: 80vw;
   background-color: #111;
+}
+body #root main #ressources #img {
+  background-color: #e6bcde;
+}
+body #root main #ressources #vid {
+  background-color: #bccee6;
+}
+body #root main #ressources #sfx {
+  background-color: #e6e0bc;
+}
+body #root main #ressources #txt {
+  background-color: #aaa;
 }

@@ -28,7 +28,7 @@ function handleProgress(e) {
 }
 
 /* Sacrifinc runtime efficiency to enable logging and progress callback */
-function upload() {	
+function postFiles() {	
 	const URL = "http://homepie.ddns.net/php/fileupload.php";
 
 	for(let f of files) {
@@ -61,22 +61,13 @@ function handleDrop(e) {
 
 	let fileList = e.dataTransfer.files;
 
-	let ul = document.createElement('ul');
 	for(let f of fileList) {
 		/* Listing all the files */
-		let li = document.createElement('li');
-		li.innerHTML = "<b>" + f.name + "</b>";
-		li.innerHTML += " (" + f.type || "n/a";
-		li.innerHTML += ") - " + f.size/1000 + " kb";	
-		ul.appendChild(li);
-
 		uploadSize += f.size;
 		files.push(f);
 	}
-	ul.innerHTML += "Total upload size: " + uploadSize/1000 + " kb";
-	document.getElementById('drop').appendChild(ul);
-
-	upload();
+	postFiles();
+	getRessources();
 }
 
 function handleDragOver(e) {
@@ -86,33 +77,47 @@ function handleDragOver(e) {
 	e.dataTransfer.dropEffect = 'copy';
 }
 
-document.addEventListener('DOMContentLoaded', function() {
+function getRessources() {
 	let xhr = new XMLHttpRequest();
-	
+	xhr.open('GET', 'http://homepie.ddns.net/php/fileretrieval.php');
+	xhr.send();
+
 	xhr.addEventListener('load', function() {
-		let tree = JSON.parse(this.response);	
-	
-		const dropzone = document.getElementById('dropzone');
+		let tree = JSON.parse(this.response);
+			
+		let ressources = document.getElementById('ressources');
 		Object.keys(tree).forEach(dir => {
 			let drop = document.createElement('div');
+			drop.id = dir;
 			drop.className = 'drop';
-			drop.innerHTML = dir;
-			drop.addEventListener('drop', handleDrop);
-			drop.addEventListener('dragover', handleDragOver);
 			
+			let label = document.createElement('span');
+			label.className = 'label';
+			label.innerHTML = drop.id;
+			drop.appendChild(label);
+
+			let content = document.createElement('div');
+			content.className = 'content';		
+			drop.appendChild(content);
 
 			tree[dir].forEach(file => {
 				let node = document.createElement('div');
+				node.id = file;
 				node.className = 'node';
-				node.innerHTML = file;
+				node.innerHTML = node.id;
 
-				drop.appendChild(node);
+				content.appendChild(node);
 			});
 			
-			dropzone.appendChild(drop);
+			ressources.appendChild(drop);
 		});
 	});
+}
 
-	xhr.open('GET', 'http://homepie.ddns.net/php/fileretrieval.php');
-	xhr.send();
+document.addEventListener('DOMContentLoaded', function() {
+	let dropzone = document.getElementById('dropzone');
+	dropzone.addEventListener('drop', handleDrop);
+	dropzone.addEventListener('dragover', handleDragOver);
+
+	getRessources();
 });

@@ -26,21 +26,52 @@ body {
 		
 		text-align: center;
 		
+		nav,
 		main {
-			height: 100%;
-			width: 100%;
-	
-			#dropzone {
-				top: 0;
-				left: 0;
-				right: 0;
-				bottom: 0;
-				
-				margin: 0 auto;
-				height: 600px;
-				width: 600px;
-				
+		}	
+
+		main {
+			display: flex;
+			flex-direction: row;
+			flex: 1 1 0;
+			justify-content: space-between;
+			
+			#dropzone,
+			#ressources {
 				background-color: #111;
+			}
+			
+			#dropzone {
+				height: 20vw;
+				width: 20vw;
+			}
+		
+			#ressources {
+				height: 100%;
+				width: 80vw;
+
+				background-color: #111;
+
+				.drop {
+					.node {
+					}
+				}
+				
+				#img {
+					background-color: #e6bcde;
+				}
+
+				#vid{
+					background-color: #bccee6;
+				}
+
+				#sfx {
+					background-color: #e6e0bc;
+				}
+
+				#txt {
+					background-color: #aaa;
+				}
 			}
 		}
 	}
