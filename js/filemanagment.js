@@ -7,6 +7,7 @@
 	"text" : "txt"
 }*/
 
+const URL = 'http://homepie.ddns.net/';
 const _ = undefined;
 
 let files = [];
@@ -17,11 +18,10 @@ let progress = 0;
 function handleCompletion(e) {
 	progress += uploadBuffer.size;
 	getRessources();
-	
 }
 
 function handleError(e) {
-	alert("Upload failed");
+	alert('Upload failed');
 }
 
 function handleProgress(e) {
@@ -31,25 +31,25 @@ function handleProgress(e) {
 
 /* Sacrificing runtime efficiency to enable logging and progress callback */
 function postFiles() {	
-	const URL = "http://homepie.ddns.net/php/fileupload.php";
+	const POST = URL + 'php/fileupload.php';
 
 	for(let f of files) {
 		uploadBuffer = f;
 	
 		let xhr = new XMLHttpRequest(); // Creating AJAX-req
-		xhr.open('POST', URL); // URL and req-type
+		xhr.open('POST', POST); // URL and req-type
 		
-		xhr.addEventListener("load", handleCompletion);
-		xhr.addEventListener("Error", handleError);
-		xhr.upload.addEventListener("progress", handleProgress);	
+		xhr.addEventListener('load', handleCompletion);
+		xhr.addEventListener('Error', handleError);
+		xhr.upload.addEventListener('progress', handleProgress);	
 
 		let data = new FormData(); // FormData-object to handle formless file
 		data.append('uploadfile', uploadBuffer);
 		xhr.send(data);
 
 		/* Response-Logging using Fetch-API */
-		fetch(URL, {
-			method: "POST",
+		fetch(POST, {
+			method: 'POST',
 			body: data,
 		}).then(response => {
 			console.log(response);
@@ -62,9 +62,7 @@ function handleDrop(e) {
   	e.preventDefault();
 
 	let fileList = e.dataTransfer.files;
-
 	for(let f of fileList) {
-		/* Listing all the files */
 		uploadSize += f.size;
 		files.push(f);
 	}
@@ -79,9 +77,18 @@ function handleDragOver(e) {
 }
 
 function getRessources() {
+	const GET = URL + 'php/fileretrieval.php';
+
 	let xhr = new XMLHttpRequest();
-	xhr.open('GET', 'http://homepie.ddns.net/php/fileretrieval.php');
+	xhr.open('GET', GET);
 	xhr.send();
+
+	/* Response-Logging using Fetch-API */
+	fetch(GET, {
+		method: "GET"
+	}).then(response => {
+		console.log(response);
+	})
 
 	xhr.addEventListener('load', function() {
 		let tree = JSON.parse(this.response);
@@ -106,7 +113,20 @@ function getRessources() {
 				let node = document.createElement('div');
 				node.id = file;
 				node.className = 'node';
-				node.innerHTML = node.id;
+
+				let fileName = document.createElement('span');
+				fileName.innerHTML = node.id;
+				node.appendChild(fileName);
+			
+				let image = document.createElement('div');
+				image.className = 'image';
+				let img = document.createElement('img');
+				img.src = URL + 'res/' + 'image' + '_symbol.svg'; 
+				image.appendChild(img);
+				node.appendChild(image);
+	
+				let dataFrame = document.createElement('div');
+				node.appendChild(dataFrame);
 
 				content.appendChild(node);
 			});

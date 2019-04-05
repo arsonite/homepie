@@ -1,4 +1,6 @@
 * {
+	box-sizing: border-box;
+
 	padding: 0;
 	margin: 0;
 	
@@ -35,7 +37,7 @@ body {
 			flex-direction: row;
 			flex: 1 1 0;
 			justify-content: space-between;
-			padding: 10%;		
+			padding: 5%;		
 	
 			#dropzone,
 			#ressources {
@@ -43,35 +45,93 @@ body {
 			}
 			
 			#dropzone {
+				margin-right: 5%;
 				height: 20vw;
 				width: 20vw;
 			}
 		
 			#ressources {
-				height: 100%;
+				overflow-y: auto;
+			
+				min-height: 100%;
 				width: 80vw;
 
 				background-color: #111;
 
 				.drop {
-					.node {
+					padding: 2.5%;
+					width: 100%;
+					
+					.label {
+						display: block;
+						padding: 1%; 
+						height: 100%;
+						width: 100%;
+					}
+
+					.label:hover {
+						cursor: pointer;
+					}
+
+					.content {
+						display: flex;
+						justify-content: space-between;
+						flex-wrap: wrap;
+						flex-direction: row;
+						padding: 1%;
+		
+						.node {
+							height: 50px;
+							width: 50px;
+							
+							.fileName {
+
+							}
+	
+							.image {
+								img {
+								}
+							}
+				
+							.dataFrame {
+				
+							}	
+						}
 					}
 				}
 				
-				#img {
-					background-color: #e6bcde;
+				#img {	
+					@bg: #e6bcde;
+					
+					.label {
+						background-color: darken(@bg, 5);
+					}
+
+					.label:hover {
+						background-color: darken(@bg, 10);
+					}
+					
+					.content {
+						background-color: @bg;
+					}
 				}
 
 				#vid{
-					background-color: #bccee6;
+					.label {
+						background-color: #bccee6;
+					}
 				}
 
 				#sfx {
-					background-color: #e6e0bc;
+					.label {
+						background-color: #e6e0bc;
+					}
 				}
 
 				#txt {
-					background-color: #aaa;
+					.label {
+						background-color: #aaa;
+					}
 				}
 			}
 		}
