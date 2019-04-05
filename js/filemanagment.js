@@ -103,6 +103,12 @@ function getRessources() {
 			let label = document.createElement('span');
 			label.className = 'label';
 			label.innerHTML = drop.id;
+			label.addEventListener('click', function(e) {
+				const c = ' collapsed';
+				let node = e.target.parentElement.childNodes[1];
+				let className = node.className;
+				node.className = className.includes(c) ? 'content' : className + c;
+			});
 			drop.appendChild(label);
 
 			let content = document.createElement('div');
@@ -113,18 +119,20 @@ function getRessources() {
 				let node = document.createElement('div');
 				node.className = 'node';
 
-				let fileName = document.createElement('span');
-				fileName.innerHTML = file; 
+				let fileName = document.createElement('p');
+				fileName.className = 'fileName';
+				fileName.innerHTML = file;
 				node.appendChild(fileName);
 			
-				let image = document.createElement('div');
-				image.className = 'image';
 				let img = document.createElement('img');
 				img.src = URL + 'res/' + 'image' + '_symbol.svg'; 
-				image.appendChild(img);
-				node.appendChild(image);
+				node.appendChild(img);
 	
-				let dataFrame = document.createElement('div');
+				let dataFrame = document.createElement('span');
+				dataFrame.className = 'dataFrame';
+				let collapser = document.createElement('p');
+				collapser.className = 'collapser';
+				collapser.innerHTML = 'V';
 				node.appendChild(dataFrame);
 
 				content.appendChild(node);

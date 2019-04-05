@@ -1,138 +1,154 @@
-* {
-	box-sizing: border-box;
+nav,
+main {
+}	
 
-	padding: 0;
-	margin: 0;
+main {
+	display: flex;
+	flex-direction: row;
+	flex: 1 1 0;
+	justify-content: space-between;
+	padding: 5%;		
+
+	#dropzone,
+	#ressources {
+		background-color: #111;
+	}
 	
-	color: #fff;
-	font-size: 20px;
-	outline: 0;
-	text-decoration: none;
-}
+	#dropzone {
+		margin-right: 5%;
+		height: 20vw;
+		width: 20vw;
+	}
 
-body {
-	overflow: hidden;
-	  
-	height: 100vh;
-	width: 100vw;
-	 
-	background-color: #353535;
-
-	#root {
-		display: flex;
-		flex-direction: column;
-		justify-content: space-around;
-		flex-wrap: nowrap;
-		height: 100%;
-		width: 100%;
-		
-		text-align: center;
-		
-		nav,
-		main {
-		}	
-
-		main {
-			display: flex;
-			flex-direction: row;
-			flex: 1 1 0;
-			justify-content: space-between;
-			padding: 5%;		
+	#ressources {
+		overflow-y: auto;
 	
-			#dropzone,
-			#ressources {
-				background-color: #111;
-			}
-			
-			#dropzone {
-				margin-right: 5%;
-				height: 20vw;
-				width: 20vw;
-			}
-		
-			#ressources {
-				overflow-y: auto;
-			
-				min-height: 100%;
-				width: 80vw;
+		min-height: 100%;
+		width: 80vw;
 
-				background-color: #111;
+		background-color: #111;
 
-				.drop {
-					padding: 2.5%;
-					width: 100%;
-					
-					.label {
-						display: block;
-						padding: 1%; 
+		.drop {
+			padding: 2.5%;
+			width: 100%;
+			
+			.label {
+				display: block;
+				padding: 1%; 
+				height: 100%;
+				width: 100%;
+			}
+
+			.label:hover {
+				cursor: pointer;
+			}
+
+			.content {
+				display: flex;
+				justify-content: space-between;
+				flex-wrap: wrap;
+				flex-direction: row;
+
+				.node {
+					position: relative;
+
+					display: flex;
+					flex-direction: column;
+					margin: 5px;
+					height: 150px;
+					width: 150px;
+
+					.fileName {
+						overflow: hidden;
+
+						height: auto;
+						width: 100%;
+
+						text-overflow: ellipsis;								
+					}
+
+					img {
+						padding: 0;
+						margin: 0 auto;
 						height: 100%;
 						width: 100%;
 					}
-
-					.label:hover {
-						cursor: pointer;
-					}
-
-					.content {
-						display: flex;
-						justify-content: space-between;
-						flex-wrap: wrap;
-						flex-direction: row;
-						padding: 1%;
 		
-						.node {
-							height: 50px;
-							width: 50px;
-							
-							.fileName {
-
-							}
-	
-							.image {
-								img {
-								}
-							}
-				
-							.dataFrame {
-				
-							}	
-						}
-					}
+					.dataFrame {
+					}	
 				}
-				
-				#img {	
-					@bg: #e6bcde;
-					
-					.label {
-						background-color: darken(@bg, 5);
-					}
+			}
 
-					.label:hover {
-						background-color: darken(@bg, 10);
-					}
-					
-					.content {
-						background-color: @bg;
-					}
-				}
+			.content.collapsed {
+				display: none;
+			}
+		}
+		
+		#img {
+			@bg: #e6bcde;	
+			
+			.label {
+				background-color: darken(@bg, 10);
+			}
 
-				#vid{
-					.label {
-						background-color: #bccee6;
-					}
-				}
+			.label:hover {
+				background-color: darken(@bg, 15);
+			}
+			
+			.content {
+				background-color: @bg;
 
-				#sfx {
-					.label {
-						background-color: #e6e0bc;
-					}
+				.node {
+					background-color: darken(@bg, 5);
 				}
+			}	
+		}
 
-				#txt {
-					.label {
-						background-color: #aaa;
-					}
-				}
+		#vid{
+			@bg: #bccee6;
+
+			.label {
+				background-color: darken(@bg, 5);
+			}
+
+			.label:hover {
+				background-color: darken(@bg, 10);
+			}
+			
+			.content {
+				background-color: @bg;
+			}	
+		}
+
+		#sfx {
+			@bg: #e6e0bc;
+		
+			.label {
+				background-color: darken(@bg, 5);
+			}
+
+			.label:hover {
+				background-color: darken(@bg, 10);
+			}
+			
+			.content {
+				background-color: @bg;
+			}	
+		}
+		
+		#txt {
+			@bg: #aaa;
+		
+			.label {
+				background-color: darken(@bg, 5);
+			}
+
+			.label:hover {
+				background-color: darken(@bg, 10);
+			}
+			
+			.content {
+				background-color: @bg;
 			}
 		}
 	}
