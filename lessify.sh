@@ -1,8 +1,5 @@
 #!/bin/bash
 
-#availableFlags=
-#flags="$@"
-
 # Implement algorith which flags already compressed and compiled files with this shell script with a /*#!c!#*/ flag to save processing power by skipping them
 
 compileAndCompress() {
@@ -14,8 +11,6 @@ compileAndCompress() {
 	[ $v = 1 ] && echo ... Compiling "$line"
 	lessc $line $css
 	[ $v = 1 ] && echo ... Finished compiling "$line"
-
-	return 1
 
 	[ $v = 1 ] && echo ... Applying compression on "$css"
 	cleancss -o $css $css
