@@ -15,6 +15,8 @@ compileAndCompress() {
 	lessc $line $css
 	[ $v = 1 ] && echo ... Finished compiling "$line"
 
+	return 1
+
 	[ $v = 1 ] && echo ... Applying compression on "$css"
 	cleancss -o $css $css
 	[ $v = 1 ] && echo ... Finished compressing "$css"

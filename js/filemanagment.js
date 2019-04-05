@@ -111,11 +111,10 @@ function getRessources() {
 
 			tree[dir].forEach(file => {
 				let node = document.createElement('div');
-				node.id = file;
 				node.className = 'node';
 
 				let fileName = document.createElement('span');
-				fileName.innerHTML = node.id;
+				fileName.innerHTML = file; 
 				node.appendChild(fileName);
 			
 				let image = document.createElement('div');
