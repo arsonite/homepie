@@ -7,7 +7,7 @@
 	"text" : "txt"
 }*/
 
-const URL = 'http://homepie.ddns.net/';
+const URL = window.location.origin + '/';
 const _ = undefined;
 
 let files = [];
