@@ -1,5 +1,11 @@
 #!/bin/bash
 
+compile() {
+	replace="css"
+	temp=$1
+	echo ${temp//less/$replace} # Parse and replace the path of the .less file with the new .css file
+}
+
 # Function that appends a custom flag to the beginning of the specified file
 flagFile() {
 	flag=$1
@@ -14,9 +20,7 @@ compileAndCompress() {
 	flag="/*#C#*/" # Custom appendage flag
 	
 	$v && echo ... Processing "$line"
-	replace="css"
-	css=${line//less/$replace} # Parse and replace the path of the .less file with the new .css file
-		
+	css=$(compile $line)		
 	if [ -a $css ]; then
 		content=`cat $css`
 		if [[ $content == *$flag* ]]; then # Reads file and evaluates if compression flag was set
@@ -38,8 +42,10 @@ compileAndCompress() {
 	$v && echo "... Applied flag " $flag " to " $css
 }
 
-find . -name "*.less" | while read line; do
-	compileAndCompress $1
-done
-
-echo Exiting script.
+if [[ $3 == *".less"* ]]; then # Triggers only the vimscript-dependent auto-compile function
+	lessc $3 $(compile $3)
+else
+	find . -name "*.less" | while read line; do
+		compileAndCompress $1
+	done
+fi
