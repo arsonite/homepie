@@ -31,7 +31,7 @@ OUTPUT = """What do you want to do?
 
 # Function definitions
 def emptyCache():
-	src = os.path.join(ROOT, input("Which cache do you want to empty?"))
+	src = os.path.join(root, input("Which cache do you want to empty?"))
 
 	for src_dir, dirs, files in os.walk(src):
 		for f in files:
@@ -46,8 +46,8 @@ def moveContent():
 	roots = [input('Enter source directory (default: "tmp"):'), input('Enter target directory (default: "uploads"):')]
 
 	op = input("\tDo you want to copy (cp) or move (mv)?")
-	rootTmp = os.path.join(ROOT, 'tmp')
-	rootUploads = os.path.join(ROOT, 'uploads') 
+	rootTmp = os.path.join(root, 'tmp')
+	rootUploads = os.path.join(root, 'uploads') 
 
 	for src_dir, dirs, files in os.walk(rootTmp):
 		target = src_dir.replace(rootTmp, rootUploads)
