@@ -24,6 +24,8 @@
 	/* Browser response logging */
 	print_r($files);
 
+	print($_POST);
+
 	/* Returns file if it exists */
 	$fileName = $files['name'] ?: null;
 	if($fileName != null) {

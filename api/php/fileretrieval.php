@@ -1,4 +1,7 @@
 <?php
+	header('Access-Control-Allow-Headers: GET');
+	header('Access-Control-Allow-Origin: http://homepie.net');
+
 	function recursiveTreeTraversal($src, $depth = 0, $hidden = false) {
 		if($fp = @opendir($src)) {
 			$filedata = array();
@@ -22,7 +25,7 @@
 		return false;
 	}
 
-	$source = dirname(__DIR__, 2)."/tmp/";
+	$source = dirname(__DIR__, 2).'/tmp/';
 	$files = recursiveTreeTraversal($source, 2);
 	echo json_encode($files);
 ?>
