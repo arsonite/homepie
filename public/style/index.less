@@ -1,141 +1,188 @@
-span {
-	top: 0;
-	left: 0;
-	right: 0;
-	bottom: 0;
-	margin: 0 auto;
+#root {
+	background: url('/res/img/prism.png');
+	background-size: 75%;
 
-	text-align: center;
-	font-size: 30px;
-	font-weight: bold;
+	#loginFrame {
+		position: fixed;
+		top: 0;
+
+		display: block;
+		height: 100vh;
+		width: 100vw;	
+		
+		z-index: 5;
+
+		#login,
+		#modal {
+			position: absolute;
+			top: 0;
+			bottom: 0;
+			left: 0;
+			right: 0;
+		}
+
+		#login {
+			height: 50%;
+			width: 50%;
+
+			background-color: #eee; 
+			
+			z-index: 15;
+		}
+
+		#modal {
+			top: 0;
+			left: 0;
+
+			height: 100%;
+			width: 100%;
+			
+			background-color: #000;
+			opacity: 0.5;
+
+			z-index: 5;		
+		}
+	}
+
+	span {
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		margin: 0 auto;
+
+		text-align: center;
+		font-size: 30px;
+		font-weight: bold;
+	}
+
+	.box {
+		display: flex;
+		flex: 1 1 0;
+		flex-direction: row;
+		flex-wrap: wrap;
+		justify-content: space-around;
+		margin-top: 1%;
+		width: 100%;
+	}
+		
+	main {
+		margin-left: 10%;
+	      	width: 80%;
+
+	      	.box {
+			width: 100%;
+
+			.profile {
+				display: flex;
+				flex-direction: row;
+
+				div {
+					padding: 25px;
+					width: 100px;
+
+					font-weight: bold;
+				}
+
+				.name {
+					width: 100px;
+
+					color: #222;
+					background-color: #ccc;
+				}
+
+				.name:hover {
+				    	cursor: pointer;
+
+				    	color: #000;
+				    	background-color: #fff;
+				}
+
+				.cat {
+				    	margin: 0 -35px;
+				    	width: 0px;
+
+				    	transition: 0.5s all;
+				}
+
+
+		  		#admin {
+		    			color: #eee;
+		    			background-color: #ff4343;
+		  		}
+
+				#user {
+					color: #eee;
+					background-color: #111;
+		  		}
+			}
+	
+			.profile:hover {
+				.cat {
+					margin: 0;
+					width: 100px;
+				}
+			}
+		}
+	}
+
+	    nav {
+	      margin-left: 10%;
+	      width: 80%;
+
+	      .box {
+		width: 100%;
+
+		.image {
+		  position: relative;
+
+		  height: 400px;
+		  width: 400px;
+
+		  img {
+		    position: absolute;
+		    top: 0;
+		    right: 0;
+		    left: 0;
+		    bottom: 0;
+		    margin: auto;
+
+		    height: 50%;
+		    width: 50%;
+		  }
+		}
+
+		.image:hover {
+		  cursor: pointer;
+		}
+
+		#home {
+		  background-color: #555;
+		}
+
+		#home:hover {
+		  background-color: #666;
+		}
+
+		#lockkliye {
+		  background-color: #ff8800;
+		}
+
+		#lockkliye:hover {
+		  background-color: #ff9911;
+		}
+
+		#synthia {
+		  background-color: #ba55d3;
+		}
+
+		#synthia:hover {
+		  background-color: #cb66e4;
+		}
+	      }
+	}
+
+	footer {
+		width: 100%;
+	}
 }
-
-.box {
-	display: flex;
-	flex: 1 1 0;
-	flex-direction: row;
-	flex-wrap: wrap;
-	justify-content: space-around;
-	margin-top: 1%;
-	width: 100%;
-}
-
-main {
-      margin-left: 10%;
-      width: 80%;
-
-      .box {
-	width: 100%;
-
-	.profile {
-	  display: flex;
-	  flex-direction: row;
-
-	  div {
-	    padding: 25px;
-
-	    width: 100px;
-
-	    font-weight: bold;
-	  }
-
-	  .name {
-	    width: 100px;
-
-	    color: #222;
-	    background-color: #ccc;
-	  }
-
-	  .name:hover {
-	    cursor: pointer;
-
-	    color: #000;
-	    background-color: #fff;
-	  }
-
-	  .cat {
-	    margin: 0 -35px;
-	    width: 0px;
-
-	    transition: 0.5s all;
-	  }
-
-	  .cat:hover {
-	    margin: 0;
-	    width: 100px;
-	  }
-
-	  #admin {
-	    color: #eee;
-	    background-color: #ff4343;
-	  }
-
-	  #user {
-	    color: #eee;
-	    background-color: #111;
-	  }
-	}
-      }
-    }
-
-    nav {
-      margin-left: 10%;
-      width: 80%;
-
-      .box {
-	width: 100%;
-
-	.image {
-	  position: relative;
-
-	  height: 400px;
-	  width: 400px;
-
-	  img {
-	    position: absolute;
-	    top: 0;
-	    right: 0;
-	    left: 0;
-	    bottom: 0;
-	    margin: auto;
-
-	    height: 50%;
-	    width: 50%;
-	  }
-	}
-
-	.image:hover {
-	  cursor: pointer;
-	}
-
-	#home {
-	  background-color: #555;
-	}
-
-	#home:hover {
-	  background-color: #666;
-	}
-
-	#lockkliye {
-	  background-color: #ff8800;
-	}
-
-	#lockkliye:hover {
-	  background-color: #ff9911;
-	}
-
-	#synthia {
-	  background-color: #ba55d3;
-	}
-
-	#synthia:hover {
-	  background-color: #cb66e4;
-	}
-      }
-}
-
-footer {
-	width: 100%;
-}
-
-

@@ -1,13 +1,8 @@
-/* It makes more sense to catch unallowed extensions in the front-end, but for training purposes I do it on the backend */
-//const ALLOWED_EXT = ['jpeg', 'jpg', 'png'];
-/*const FILE_TYPES = {
-	"image": "img",
-	"video": "vid",
-	"audio": "sfx",
-	"text" : "txt"
-}*/
+import auth from '/auth.js';
 
 const LOC = window.location;
+
+//auth.setToken('accessToken');
 
 const URL = LOC.protocol + '//api.' + LOC.hostname.replace('www\.', '') + '/';   
 const GET_FILES = URL + 'fileretrieval.php';
@@ -86,7 +81,7 @@ function getRessources() {
 
 	let xhr = new XMLHttpRequest();
 	xhr.open('GET', GET);
-	xhr.send();
+	xhr.send("Hello World");
 
 	/* Response-Logging using Fetch-API */
 	fetch(GET, {
