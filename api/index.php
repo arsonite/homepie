@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<head>
+	<meta charset="utf-8" />
+	<title>Homepie | API</title>
+	
+</head>
+<body>
+	<div id="root">
+		<nav>
+		</nav>
+
+		<main>
+		</main>
+	</div>
+</body>
+</html>

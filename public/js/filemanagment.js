@@ -7,7 +7,8 @@
 	"text" : "txt"
 }*/
 
-const URL = window.location.origin + '/';
+const loc = window.location;
+const URL = loc.protocol + '//api.' + loc.hostname + '/';   
 const _ = undefined;
 
 let files = [];
