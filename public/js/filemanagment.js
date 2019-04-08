@@ -7,8 +7,12 @@
 	"text" : "txt"
 }*/
 
-const loc = window.location;
-const URL = loc.protocol + '//api.' + loc.hostname + '/';   
+const LOC = window.location;
+
+const URL = LOC.protocol + '//api.' + LOC.hostname.replace('www\.', '') + '/';   
+const GET_FILES = URL + 'fileretrieval.php';
+const POST_FILE = URL + 'fileupload.php';
+
 const _ = undefined;
 
 let files = [];
@@ -32,7 +36,7 @@ function handleProgress(e) {
 
 /* Sacrificing runtime efficiency to enable logging and progress callback */
 function postFiles() {	
-	const POST = URL + 'php/fileupload.php';
+	const POST = URL + 'fileupload.php';
 
 	for(let f of files) {
 		uploadBuffer = f;
@@ -78,7 +82,7 @@ function handleDragOver(e) {
 }
 
 function getRessources() {
-	const GET = URL + 'php/fileretrieval.php';
+	const GET = URL + 'fileretrieval.php';
 
 	let xhr = new XMLHttpRequest();
 	xhr.open('GET', GET);

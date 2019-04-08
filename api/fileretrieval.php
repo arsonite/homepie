@@ -1,5 +1,5 @@
 <?php
-	header('Access-Control-Allow-Headers: GET');
+	header('Access-Control-Allow-Headers: GET, POST');
 	header('Access-Control-Allow-Origin: http://homepie.net');
 
 	function recursiveTreeTraversal($src, $depth = 0, $hidden = false) {
