@@ -1,6 +1,5 @@
 <?php
-	header('Access-Control-Allow-Headers: GET, POST');
-	header('Access-Control-Allow-Origin: http://homepie.net');
+	include 'middleware/cors.php';
 
 	function recursiveTreeTraversal($src, $depth = 0, $hidden = false) {
 		if($fp = @opendir($src)) {
@@ -25,7 +24,7 @@
 		return false;
 	}
 
-	$source = dirname(__DIR__, 2).'/tmp/';
+	$source = dirname(__DIR__, 1).'/tmp/';
 	$files = recursiveTreeTraversal($source, 2);
 	echo json_encode($files);
 ?>
