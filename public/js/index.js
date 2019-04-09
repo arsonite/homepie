@@ -1,18 +1,31 @@
 document.addEventListener('DOMContentLoaded', function() {
-	let profiles = document.getElementsByClassName('profile');
+	let names = document.getElementsByClassName('name');
 	
-	for(let profile of profiles) {
-		profile.addEventListener('click', function(e) {
+	for(let name of names) {
+		name.addEventListener('click', function(e) {
 			let user = {
-				id: e.target.id
+				name: e.target.innerHTML,
+				password: '',
+				admin: 0,
+				color: window.getComputedStyle(e.target.parentElement.children[0]).backgroundColor
 			};
-
+			console.log(user);
+	
+					
+		
 			let login = document.createElement('div');
 			login.id = 'login';
+			login.style.backgroundColor = user.color;
+			
+			let username = document.createElement('span');
+			username.id = 'username';
+			username.innerHTML = 'Profil: ' + user.name; 
+			login.appendChild(username);
+
+			let passwordFrame = document.createElement
 
 			let modal = document.createElement('div');
 			modal.id = 'modal';
-
 			modal.addEventListener('click', function(e) {
 				document.getElementById('root').removeChild(e.target.parentElement);
 			});
