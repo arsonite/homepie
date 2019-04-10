@@ -22,8 +22,10 @@
 		}
 
 		#login {
+			display: flex;
+			flex-direction: column;
+			flex-wrap: wrap;
 			margin: auto;	
-	
 			height: 50%;
 			width: 50%;
 
@@ -132,59 +134,59 @@
 	}
 
 	nav {
-	      margin-left: 10%;
-	      width: 80%;
+		margin-left: 10%;
+		width: 80%;
 
-	      .box {
-		width: 100%;
+	      	.box {
+			width: 100%;
 
-		.image {
-		  position: relative;
+			.image {
+				position: relative;
+	
+				height: 400px;
+				width: 400px;
 
-		  height: 400px;
-		  width: 400px;
+				img {
+					position: absolute;
+					top: 0;
+					right: 0;
+					left: 0;
+					bottom: 0;
+					
+					margin: auto;
+					height: 50%;
+					width: 50%;
+				}
+			}
 
-		  img {
-		    position: absolute;
-		    top: 0;
-		    right: 0;
-		    left: 0;
-		    bottom: 0;
-		    margin: auto;
+			.image:hover {
+				cursor: pointer;
+			}
 
-		    height: 50%;
-		    width: 50%;
-		  }
+			#home {
+				background-color: #555;
+			}
+
+			#home:hover {
+				background-color: #666;
+			}
+
+			#lockkliye {
+				background-color: #ff8800;
+			}
+
+			#lockkliye:hover {
+				background-color: #ff9911;
+			}
+
+			#synthia {
+				background-color: #ba55d3;
+			}
+
+			#synthia:hover {
+				background-color: #cb66e4;
+			}
 		}
-
-		.image:hover {
-		  cursor: pointer;
-		}
-
-		#home {
-		  background-color: #555;
-		}
-
-		#home:hover {
-		  background-color: #666;
-		}
-
-		#lockkliye {
-		  background-color: #ff8800;
-		}
-
-		#lockkliye:hover {
-		  background-color: #ff9911;
-		}
-
-		#synthia {
-		  background-color: #ba55d3;
-		}
-
-		#synthia:hover {
-		  background-color: #cb66e4;
-		}
-	      }
 	}
 
 	footer {

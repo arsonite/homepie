@@ -1,21 +1,17 @@
-import { config } from '../config.js';
-
-const token = 'token';
+const key = 'token';
 
 function authenticate(user, password) {
 	const url = config.API_URL + config.AUTH;
-	console.log(url);
 	let login = new XMLHttpRequest();
 	xhr.open('POST', );
 }
 
-function setToken(jwt) {
-	console.log(API_URL);
-	sessionStorage.set(token, jwt);
+function setToken(token) {
+	sessionStorage.set(key, token);
 }
 
 function getToken() {
-	return sessionStorage.getItem(token);
+	return sessionStorage.getItem(key);
 }
 
 export default {

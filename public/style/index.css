@@ -19,6 +19,9 @@
   right: 0;
 }
 #root #loginFrame #login {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
   margin: auto;
   height: 50%;
   width: 50%;

@@ -1,41 +1,80 @@
+const MD5 = new Hashes.MD5;
+const SHA256 = new Hashes.SHA256;
+const SHA512 = new Hashes.SHA512;
+
 document.addEventListener('DOMContentLoaded', function() {
-	let names = document.getElementsByClassName('name');
-	
-	for(let name of names) {
-		name.addEventListener('click', function(e) {
-			let user = {
-				name: e.target.innerHTML,
-				password: '',
-				admin: 0,
-				color: window.getComputedStyle(e.target.parentElement.children[0]).backgroundColor
-			};
-			console.log(user);
-	
-					
-		
-			let login = document.createElement('div');
-			login.id = 'login';
-			login.style.backgroundColor = user.color;
-			
-			let username = document.createElement('span');
-			username.id = 'username';
-			username.innerHTML = 'Profil: ' + user.name; 
-			login.appendChild(username);
+	const url = window.location.protocol + '//api.' + window.location.hostname.replace('www\.', '') + '/';
+	const get = url + 'get/salt.php';
+	const post = url + 'post/login.php';
+	let xhr = new XMLHttpRequest();
+	xhr.open('GET', get);
+	xhr.send();
+	xhr.addEventListener('load', function() {
+		const res = this.response;
+		const config = JSON.parse(res);
+		const entropy = 10000;
+		const salt1 = config.SALT1;
+		const salt2 = config.SALT2;
 
-			let passwordFrame = document.createElement
+		let names = document.getElementsByClassName('name');
+		for(let name of names) {
+			name.addEventListener('click', function(e) {
+				let user = {
+					name: e.target.innerHTML,
+					password: '',
+					admin: 0,
+					color: window.getComputedStyle(e.target.parentElement.children[0]).backgroundColor
+				};
+	
+				let login = document.createElement('div');
+				login.id = 'login';
+				login.style.backgroundColor = user.color;
 
-			let modal = document.createElement('div');
-			modal.id = 'modal';
-			modal.addEventListener('click', function(e) {
-				document.getElementById('root').removeChild(e.target.parentElement);
+				let username = document.createElement('span');
+				username.id = 'username';
+				username.innerHTML = 'Profil: ' + user.name;
+				login.appendChild(username);
+
+				let passwordFrame = document.createElement('div');
+				passwordFrame.id = 'passwordFrame';
+				login.appendChild(passwordFrame);
+				
+				let password = document.createElement('input')
+				password.id = 'password';
+				password.type = 'password';
+				passwordFrame.appendChild(password);
+
+				let loginButton = document.createElement('button');
+				loginButton.id = 'loginButton';
+				loginButton.className = 'roundButton';
+				loginButton.innerHTML = 'Anmelden';
+				loginButton.addEventListener('click', function(e) {
+					for(let i = 0; i < entropy; i++) {
+						user.password = SHA512.hex_hmac(SHA256.hex_hmac(password.value, salt1), salt2);
+					}
+					console.log(user.password);
+					let xhr2 = new XMLHttpRequest();
+					xhr2.open('POST', post);
+					xhr2.addEventListener('load', function() {
+						console.log(post);
+						console.log(this.response);
+					});
+				});
+				passwordFrame.appendChild(loginButton);
+
+				let modal = document.createElement('div');
+				modal.id = 'modal';
+				modal.addEventListener('click', function(e) {
+					document.getElementById('root').removeChild(e.target.parentElement);
+				});
+
+				let loginFrame = document.createElement('div');
+				loginFrame.id = 'loginFrame';
+				loginFrame.appendChild(login);
+				loginFrame.appendChild(modal);
+
+				document.getElementById('root').appendChild(loginFrame);
 			});
-
-			let loginFrame = document.createElement('div');
-			loginFrame.id = 'loginFrame';
-			loginFrame.appendChild(login);
-			loginFrame.appendChild(modal);
-
-			document.getElementById('root').appendChild(loginFrame);
-		});
-	}
+		}
+	});
 });

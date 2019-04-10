@@ -1,12 +1,9 @@
 import auth from '/auth.js';
 
 const LOC = window.location;
-
-//auth.setToken('accessToken');
-
-const URL = LOC.protocol + '//api.' + LOC.hostname.replace('www\.', '') + '/';   
-const GET_FILES = URL + 'fileretrieval.php';
-const POST_FILE = URL + 'fileupload.php';
+const url = loc.protocol + '//api.' + loc.hostname.replace('www\.', '') + '/';   
+const get = url + 'get/files.php':
+const post = url + 'post/files.php';
 
 const _ = undefined;
 
@@ -31,13 +28,11 @@ function handleProgress(e) {
 
 /* Sacrificing runtime efficiency to enable logging and progress callback */
 function postFiles() {	
-	const POST = URL + 'fileupload.php';
-
 	for(let f of files) {
 		uploadBuffer = f;
 	
 		let xhr = new XMLHttpRequest(); // Creating AJAX-req
-		xhr.open('POST', POST); // URL and req-type
+		xhr.open('POST', post); // URL and req-type
 		
 		xhr.addEventListener('load', handleCompletion);
 		xhr.addEventListener('Error', handleError);
@@ -77,10 +72,8 @@ function handleDragOver(e) {
 }
 
 function getRessources() {
-	const GET = URL + 'fileretrieval.php';
-
 	let xhr = new XMLHttpRequest();
-	xhr.open('GET', GET);
+	xhr.open('GET', get);
 	xhr.send("Hello World");
 
 	/* Response-Logging using Fetch-API */
