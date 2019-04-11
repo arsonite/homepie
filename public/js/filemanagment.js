@@ -1,5 +1,7 @@
 import auth from '/auth.js';
 
+console.log(auth.token);
+
 const LOC = window.location;
 const url = loc.protocol + '//api.' + loc.hostname.replace('www\.', '') + '/';   
 const get = url + 'get/files.php':

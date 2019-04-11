@@ -14,7 +14,7 @@ function getToken() {
 	return sessionStorage.getItem(key);
 }
 
-export default {
+export {
 	authenticate,
 	setToken,
 	getToken
