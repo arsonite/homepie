@@ -1,5 +1,5 @@
 <?php
-	include 'middleware/cors.php';
+	include '../middleware/cors.php';
 
 	function recursiveTreeTraversal($src, $depth = 0, $hidden = false) {
 		if($fp = @opendir($src)) {
@@ -24,7 +24,7 @@
 		return false;
 	}
 
-	$source = dirname(__DIR__, 1).'/tmp/';
+	$source = dirname(__DIR__, 2).'/tmp/';
 	$files = recursiveTreeTraversal($source, 2);
 	echo json_encode($files);
 ?>

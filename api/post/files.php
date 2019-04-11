@@ -1,5 +1,5 @@
 <?php	
-	include 'middleware/cors.php';
+	include '../middleware/cors.php';
 
 	/* Fallback if .htaccess doesn't work
 	 * Overwriting default php.ini settings in local scope during runtime
