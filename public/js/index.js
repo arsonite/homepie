@@ -3,6 +3,12 @@ const SHA256 = new Hashes.SHA256;
 const SHA512 = new Hashes.SHA512;
 
 document.addEventListener('DOMContentLoaded', function() {
+	if(sessionStorage.getItem('token')) {
+		document.getElementsByTagName('main')[0].className = 'hidden';
+		document.getElementsByTagName('nav')[0].className = '';
+		return;
+	}
+
 	const url = window.location.protocol + '//api.' + window.location.hostname.replace('www\.', '') + '/';
 	const get = url + 'get/salt.php';
 	const post = url + 'post/login.php';

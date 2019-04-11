@@ -1,13 +1,7 @@
-import auth from '/auth.js';
-
-console.log(auth.token);
-
-const LOC = window.location;
+const loc = window.location;
 const url = loc.protocol + '//api.' + loc.hostname.replace('www\.', '') + '/';   
-const get = url + 'get/files.php':
+const get = url + 'get/files.php';
 const post = url + 'post/files.php';
-
-const _ = undefined;
 
 let files = [];
 let uploadBuffer = _;
@@ -45,7 +39,7 @@ function postFiles() {
 		xhr.send(data);
 
 		/* Response-Logging using Fetch-API */
-		fetch(POST, {
+		fetch(post, {
 			method: 'POST',
 			body: data,
 		}).then(response => {
@@ -79,7 +73,7 @@ function getRessources() {
 	xhr.send("Hello World");
 
 	/* Response-Logging using Fetch-API */
-	fetch(GET, {
+	fetch(get, {
 		method: "GET"
 	}).then(response => {
 		console.log(response);
