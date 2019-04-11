@@ -1,5 +1,3 @@
-import * as auth from './auth.mjs';
-
 const MD5 = new Hashes.MD5;
 const SHA256 = new Hashes.SHA256;
 const SHA512 = new Hashes.SHA512;
@@ -71,10 +69,7 @@ document.addEventListener('DOMContentLoaded', function() {
 							};
 							xhr2.send(data);
 						});
-						if(token.length > 0) {
-							setToken(token);
-							console.log(sessionStorage);
-						}
+						if(token.length > 0) sessionStorage.setItem('token', token);
 					})()	
 				});
 				passwordFrame.appendChild(loginButton);
