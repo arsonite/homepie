@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <head>
 	<meta charset="utf-8" />
-	<title>Homepie</title>
+	<title>Home Pie</title>
 	
 	<!-- Global -->
 	<link rel="stylesheet" type="text/css" href="style/global.css" />
@@ -19,11 +19,12 @@
 </head>
 <body>
 	<div id="root">
-		<span>Home Pie</span>
+		<div id="homepie">
+			<img src="res/icon/homepie.svg" alt="An icon depicting a pie in front of a house">
+			<span><p id="home">Home</p> <p id="pie">Pie</p></span>
+		</div>	
 
 		<main>
-			<span>Melde dich an:</span>
-
 			<div class="box">
 				<div id="burak" class="profile">
 					<div id="admin" class="cat">Admin</div>
@@ -43,22 +44,40 @@
 		</main>
 
 		<nav class="hidden">
-			<span>Wähle ein Modul:</span>
-
 			<div class="box">
-				<a id="home" class="image" href="/home">
-					<img src="/res/icon/homepie_logo.svg" />
+				<div class"imageBox">
+					<a id="filemanager" class="image" href="/filemanager">
+						<img src="/res/icon/nav/filemanager.svg" />
+					</a>
+					<span>FileManager</span>
+				</div>
+				
+				<a id="profile" class="image" href="/profile">
+					<img src="/res/icon/nav/profile.svg" />
 				</a>
+				
+				<a id="settings" class="image" href="/settings">
+					<img src="/res/icon/nav/settings.svg" />
+				</a>
+				
+				<a id="api" class="image" href="http://api.homepie.net">
+					<img src="/res/icon/nav/api.svg" />
+				</a>
+
 				<a id="lockkliye" class="image" href="http://lockkliye.homepie.net">
-					<img src="/res/icon/lockkliye_logo.svg" />
+					<img src="/res/icon/nav/lockkliye.svg" />
 				</a>
+				
 				<a id="synthia" class="image" href="http://synthia.homepie.net">
-					<img src="/res/icon/synthia_logo.svg" />
+					<img src="/res/icon/nav/synthia.svg" />
 				</a>
 			</div>
 		</nav>
 
-		<footer>Powered by a measly Raspberry PI 3</footer>
+		<footer>
+			<p>Powered by a measly Raspberry PI 3</p>
+			<div />
+		</footer>
 	</div>
 </body>
 </html>

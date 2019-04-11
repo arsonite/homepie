@@ -1,6 +1,8 @@
 #root {
+	padding: 0 10%;
+
 	background: url('/res/img/prism.png');
-	background-size: 75%;
+	background-size: 65%;
 
 	#loginFrame {
 		position: fixed;
@@ -74,9 +76,40 @@
 	}
 	
 	#homepie {
+		left: 0;	
+
+		display: flex;
+		justify-content: space-around;
+		flex-direction: row;
+		flex-wrap: no-wrap;	
+		height: fit-content;
+		width: fit-content;
+
+		span {
+			display: flex;
+			flex-direction: row;
+			flex-wrap: no-wrap;	
+	
+			p {
+				padding-right: 5px;
+				margin: auto;
+
+				font-size: 50px;
+				font-weight: bold;
+			}
+		
+			#home {
+				color: #e4a0ea;
+			}
+	
+			#pie {
+				color: #eab071;
+			}
+		}
+
 		img {
-			height: 50px;
-			width: 50px;
+			height: 200px;
+			width: 200px;
 		}
 	}
 		
@@ -150,8 +183,8 @@
 			.image {
 				position: relative;
 	
-				height: 400px;
-				width: 400px;
+				height: 250px;
+				width: 250px;
 
 				img {
 					position: absolute;
@@ -161,8 +194,8 @@
 					bottom: 0;
 					
 					margin: auto;
-					height: 50%;
-					width: 50%;
+					height: 65%;
+					width: 65%;
 				}
 			}
 
@@ -170,12 +203,36 @@
 				cursor: pointer;
 			}
 
-			#filemanager{
+			#filemanager {
 				background-color: #555;
 			}
 
 			#filemanager:hover {
 				background-color: #666;
+			}
+			
+			#profile {
+				background-color: #55dd88;
+			}
+
+			#profile:hover {
+				background-color: #77ffaa;
+			}
+
+			#settings {
+				background-color: #ee5050;
+			}
+
+			#settings:hover {
+				background-color: #ff6161;
+			}
+
+			#api {
+				background-color: #66ccee;
+			}
+
+			#api:hover {
+				background-color: #77ddff;
 			}
 
 			#lockkliye {
@@ -197,6 +254,19 @@
 	}
 
 	footer {
-		width: 100%;
+		bottom: 0;
+
+		margin: 0 auto;
+		height: 10%;
+		width: 25%;
+	
+		p {
+
+		}
+
+		div {
+			background-color: #000;
+			opacity: 0.5;
+		}
 	}
 }
