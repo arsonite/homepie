@@ -1,16 +1,14 @@
 <?php	
 	include '../middleware/cors.php';
 
-	/* Fallback if .htaccess doesn't work
-	 * Overwriting default php.ini settings in local scope during runtime
-	 */
+	/* Overwriting default php.ini settings in local scope during runtime */
 	ini_set("max_file_uploads", "100");
 	ini_set("upload_max_filesize", "1G");
 	ini_set("max_filesize", "1G");
 	ini_set("post_max_size", "1G");	
 
 	/* Custom upload directory, root document directory with backwards tree depth of 2 */ 
-	$target = dirname(__DIR__, 1) . "/tmp/";
+	$target = dirname(__DIR__, 2) . "/tmp/";
 	
 	/* Accessing client induced inner array of global file array */
 	$files = $_FILES['uploadfile'];

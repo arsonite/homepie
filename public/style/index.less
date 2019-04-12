@@ -174,81 +174,91 @@
 	}
 
 	nav {
-		margin-left: 10%;
-		width: 80%;
+		background-color: rgba(0, 0, 0, 0.5);
 
 	      	.box {
 			width: 100%;
-
-			.image {
-				position: relative;
-	
-				height: 250px;
-				width: 250px;
-
-				img {
-					position: absolute;
-					top: 0;
-					right: 0;
-					left: 0;
-					bottom: 0;
-					
-					margin: auto;
-					height: 65%;
-					width: 65%;
-				}
-			}
-
-			.image:hover {
-				cursor: pointer;
-			}
-
-			#filemanager {
-				background-color: #555;
-			}
-
-			#filemanager:hover {
-				background-color: #666;
-			}
 			
-			#profile {
-				background-color: #55dd88;
-			}
+			.imageBox {
+				display: flex;
+				justify-content: space-around;
+				flex-direction: column;
+				flex-wrap: wrap;	
 
-			#profile:hover {
-				background-color: #77ffaa;
-			}
+				span {
+					margin: 10px;
+				}
+		
+				.image {
+					position: relative;
+					height: 200px;
+					width: 200px;
+					margin: 5px;
 
-			#settings {
-				background-color: #ee5050;
-			}
+					img {
+						position: absolute;
+						top: 0;
+						right: 0;
+						left: 0;
+						bottom: 0;
+					
+						margin: auto;
+						height: 65%;
+						width: 65%;
+					}
+				}
 
-			#settings:hover {
-				background-color: #ff6161;
-			}
+				.image:hover {
+					cursor: pointer;
+				}
 
-			#api {
-				background-color: #66ccee;
-			}
+				#filemanager {
+					background-color: #555;
+				}
 
-			#api:hover {
-				background-color: #77ddff;
-			}
+				#filemanager:hover {
+					background-color: #666;
+				}
+				
+				#profile {
+					background-color: #55dd88;
+				}
 
-			#lockkliye {
-				background-color: #ff8800;
-			}
+				#profile:hover {
+					background-color: #77ffaa;
+				}
 
-			#lockkliye:hover {
-				background-color: #ff9911;
-			}
+				#settings {
+					background-color: #ee5050;
+				}
 
-			#synthia {
-				background-color: #ba55d3;
-			}
+				#settings:hover {
+					background-color: #ff6161;
+				}
 
-			#synthia:hover {
-				background-color: #cb66e4;
+				#api {
+					background-color: #66ccee;
+				}
+
+				#api:hover {
+					background-color: #77ddff;
+				}
+
+				#lockkliye {
+					background-color: #ff8800;
+				}
+
+				#lockkliye:hover {
+					background-color: #ff9911;
+				}
+
+				#synthia {
+					background-color: #ba55d3;
+				}
+
+				#synthia:hover {
+					background-color: #cb66e4;
+				}
 			}
 		}
 	}

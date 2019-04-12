@@ -37,14 +37,6 @@ function postFiles() {
 		let data = new FormData(); // FormData-object to handle formless file
 		data.append('uploadfile', uploadBuffer);
 		xhr.send(data);
-
-		/* Response-Logging using Fetch-API */
-		fetch(post, {
-			method: 'POST',
-			body: data,
-		}).then(response => {
-			console.log(response);
-		})
 	}
 }
 
@@ -70,17 +62,10 @@ function handleDragOver(e) {
 function getRessources() {
 	let xhr = new XMLHttpRequest();
 	xhr.open('GET', get);
-	xhr.send("Hello World");
-
-	/* Response-Logging using Fetch-API */
-	fetch(get, {
-		method: "GET"
-	}).then(response => {
-		console.log(response);
-	})
-
-	xhr.addEventListener('load', function() {
-		let tree = JSON.parse(this.response);
+	xhr.setRequestHeader('Authorization', 'Bearer ' + sessionStorage.getItem('token'));
+	xhr.send();
+	xhr.onload = () => {
+		let tree = JSON.parse(xhr.response);
 			
 		let ressources = document.getElementById('ressources');
 		ressources.innerHTML = "";
@@ -114,7 +99,7 @@ function getRessources() {
 				node.appendChild(fileName);
 			
 				let img = document.createElement('img');
-				img.src = URL + 'res/' + 'image' + '_symbol.svg'; 
+				img.src = URL + 'res/icon/' + 'image' + '.svg'; 
 				node.appendChild(img);
 	
 				let dataFrame = document.createElement('span');
@@ -129,7 +114,7 @@ function getRessources() {
 			
 			ressources.appendChild(drop);
 		});
-	});
+	};
 }
 
 document.addEventListener('DOMContentLoaded', function() {

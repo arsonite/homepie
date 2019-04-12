@@ -10,10 +10,7 @@ compress() {
 	css=$1
 	flag=$2
 	pre=`cat $css`
-	empty=""
-	post=${pre/"\s+"/$empty} # Not compressing spaces according to rules yet, fml :(
-
-	echo $css
+	post=$(echo $pre | sed -e 's/\s+/''/g')
 
 	$v && echo ... Applying compression on "$css"
 	echo $post > $css
@@ -21,17 +18,19 @@ compress() {
 	$v && echo Saved, the compiled and compressed .css under "$css"
 
 	# Print the flag and append it to the beginning of the temporary through the pipeline
-	echo $flag | cat - $css > temp && mv temp $css
+	echo "$flag" | cat - $css > temp && mv temp $css
 	echo Done.
 	echo
 }
 
 compileAndCompress() {
-	v=([ "$2" = "-v" ]) # Conditional statement that determines if verbose flag is set on script
+	v=([ "$1" = "-v" ]) # Conditional statement that determines if verbose flag is set on script
+	o=([ "$2" = "-o" ]) # Conditional statement that determines if override flag is set on script
 	flag="/*#C#*/" # Custom appendage flag
 	
-	$v && echo ... Processing "$line"
-	css=$(compile $line)		
+	$v && echo ... Processing "$3"
+	css=$(compile $3)		
+	$o && rm $css && echo ... Overwritten file
 	if [ -a $css ]; then
 		$v && echo ... File already exists
 		content=`cat $css`
@@ -44,18 +43,18 @@ compileAndCompress() {
 		return
 	fi
 
-	$v && echo ... Compiling "$line"
-	lessc $line $css # Compile the given .less file with the lessc-cli
-	$v && echo ... Finished compiling "$line"
+	$v && echo ... Compiling "$3"
+	lessc $3 $css # Compile the given .less file with the lessc-cli
+	$v && echo ... Finished compiling "$3"
 	
 	# CSS-compression 
 	compress $css $flag
 }
 
-if [[ $2 == *".less"* ]]; then # Triggers only the vimscript-dependent auto-compile function
-	compileAndCompress $1 $2
+if [[ $3 == *".less"* ]]; then # Triggers only the vimscript-dependent auto-compile function
+	compileAndCompress $1 $2 $3
 else
 	find . -name "*.less" | while read line; do
-		compileAndCompress $line $2
+		compileAndCompress $1 $2 $line
 	done
 fi
