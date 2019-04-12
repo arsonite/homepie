@@ -1,6 +1,6 @@
 <?php
+	include '../middleware/auth.php';
 	include '../middleware/cors.php';
 
-	$json = file_get_contents('../../data/salt.json');
-	print_r($json);
+	print_r(getSalt(TRUE));
 ?>
