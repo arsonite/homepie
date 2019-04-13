@@ -19,10 +19,11 @@ document.addEventListener('DOMContentLoaded', function() {
 			xhr.open('GET', get);
 			xhr.onload = function(e) {
 				resolve(xhr.response);
+				console.log(xhr.response);
 			};
 			xhr.send();
 		});			
-		
+	
 		const config = JSON.parse(res);
 		const entropy = 10000;
 		const salt1 = config.SALT1;
@@ -68,7 +69,7 @@ document.addEventListener('DOMContentLoaded', function() {
 						const token = await new Promise(resolve => {
 							let xhr2 = new XMLHttpRequest();
 							xhr2.open('POST', post);
-							let data = new FormData(); // FormData-object to handle formless file
+							let data = new FormData();
 							data.append('hash', user.password);
 							xhr2.onload = function(e) {
 								resolve(xhr2.response);
