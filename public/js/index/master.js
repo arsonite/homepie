@@ -1,34 +1,33 @@
-document.addEventListener('DOMContentLoaded', () => {
-	const users = [];
+document.addEventListener('DOMContentLoaded', function() {
+	const users = {
+		'Burak': true,
+		'Beyza': false,
+		'Yasar': false,
+	};
 
 	let main = document.createElement('main');
+	document.getElementById('root').appendChild(main);
 	
 	let box = document.createElement('box');
 	box.className = 'box';
 	main.appendChild(box);	
 
-	let profile = 
-	profile.id = 
+	Object.keys(users).forEach(user => {
+		let profile = document.createElement('div');
+		profile.id = user.toLowerCase();
+		profile.className = 'profile';
+		box.appendChild(profile);
+
+		const admin = users[user];
+		let cat = document.createElement('div');
+		cat.id = admin ? 'admin' : 'user';
+		cat.className = 'cat';
+		cat.innerHTML = admin ? 'Admin' : 'User';
+		profile.appendChild(cat);
+
+		let name = document.createElement('div');
+		name.className = 'name';
+		name.innerHTML = user;
+		profile.appendChild(name);
+	});
 });
-
-/*document.addEventListener('DOMContentLoaded', () => {
-	<main>
-			<div class="box">
-				<div id="burak" class="profile">
-					<div id="admin" class="cat">Admin</div>
-					<div class="name">Burak</div>
-				</div>
-
-				<div id="beyza" class="profile">
-					<div id="user" class="cat">Nutzer</div>
-					<div class="name">Beyza</div>
-				</div>
-
-				<div id="yasar" class="profile">
-					<div id="user" class="cat">Nutzer</div>
-					<div class="name">Yasar</div>
-				</div>
-			</div>
-		</main>
-
-});*/
