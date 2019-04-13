@@ -1,3 +1,33 @@
+function assembleNavigation() {
+	const imgPath = '/res/icon/nav/';
+	const data = ['FileManager', 'Profile', 'Settings', 'API', 'Lockkliye', 'Synthia'];
+	
+	let nav = document.createElement('nav');
+
+	let box = document.createElement('div');
+	box.className = 'box';
+	nav.appendChild(box);
+
+	data.forEach(sub => {
+		let imageBox = document.createElement('div');
+		box.appendChild(imageBox);
+		
+		let string = sub.toLowerCase();
+		let a = document.createElement('a');
+		a.id = string;
+		a.className = 'image';
+		a.href = '/' + string;
+		let img = document.createElement('img');
+		img.src = imgPath + string + '.svg';
+		a.appendChild(img);
+		imageBox.appendChild(a);
+
+		let span = document.createElement('span');
+		span.innerHTML = sub;
+		imageBox.appendChild(span);
+	});	
+}
+
 document.addEventListener('DOMContentLoaded', function() {
 	if(sessionStorage.getItem('token')) {
 		document.getElementsByTagName('main')[0].className = 'hidden';

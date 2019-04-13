@@ -9,6 +9,9 @@
 	<!------------>
 
 	<link rel="stylesheet" type="text/css" href="style/index/index.css" />
+	<link rel="stylesheet" type="text/css" href="style/index/main.css" />
+	<link rel="stylesheet" type="text/css" href="style/index/nav.css" />
+	<link rel="stylesheet" type="text/css" href="style/index/login.css" />
 
 	<script type="text/javascript" src="js/hash.js" defer></script> 
 	<script type="text/javascript" src="js/index/auth.js" defer></script>
@@ -17,81 +20,15 @@
 	<script type="text/javascript" src="js/index/login.js" defer></script>
 </head>
 <body>
-	<div id="root">
-		<div id="homepie">
+	<div id="homepie">
 			<img src="res/icon/homepie.svg" alt="An icon depicting a pie in front of a house">
 			<span><p id="home">Home</p> <p id="pie">Pie</p></span>
-		</div>	
-
-		<main>
-			<div class="box">
-				<div id="burak" class="profile">
-					<div id="admin" class="cat">Admin</div>
-					<div class="name">Burak</div>
-				</div>
-
-				<div id="beyza" class="profile">
-					<div id="user" class="cat">Nutzer</div>
-					<div class="name">Beyza</div>
-				</div>
-
-				<div id="yasar" class="profile">
-					<div id="user" class="cat">Nutzer</div>
-					<div class="name">Yasar</div>
-				</div>
-			</div>
-		</main>
-
-		<nav class="hidden">
-			<div class="box">
-				<div class="imageBox">
-					<a id="filemanager" class="image" href="/filemanager">
-						<img src="/res/icon/nav/filemanager.svg" />
-					</a>
-					<span>FileManager</span>
-				</div>
-				
-				<div class="imageBox">
-					<a id="profile" class="image" href="/profile">
-						<img src="/res/icon/nav/profile.svg" />
-					</a>
-					<span>Profile</span>
-				</div>
+	</div>	
 	
-				<div class="imageBox">
-					<a id="settings" class="image" href="/settings">
-						<img src="/res/icon/nav/settings.svg" />
-					</a>
-					<span>Settings</span>
-				</div>
+	<div id="root"></div>
 
-				<div class="imageBox">
-					<a id="api" class="image" href="http://api.homepie.net">
-						<img src="/res/icon/nav/api.svg" />
-					</a>
-					<span>API</span>
-				</div>	
-
-				<div class="imageBox">
-					<a id="lockkliye" class="image" href="http://lockkliye.homepie.net">
-						<img src="/res/icon/nav/lockkliye.svg" />
-					</a>
-					<span>Lockkliye</span>
-				</div>			
-	
-				<div class="imageBox">
-					<a id="synthia" class="image" href="http://synthia.homepie.net">
-						<img src="/res/icon/nav/synthia.svg" />
-					</a>
-					<span>Synthia</span>
-				</div>
-			</div>
-		</nav>
-
-		<footer>
-			<p>Powered by a measly Raspberry PI 3</p>
-			<div />
-		</footer>
-	</div>
+	<footer>
+		<p>Powered by a measly Raspberry PI 3</p>
+	</footer>
 </body>
 </html>
