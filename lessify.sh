@@ -11,6 +11,7 @@ compress() {
 	flag=$2
 	pre=`cat $css`
 	post=$(echo $pre | sed -e 's/\s+/''/g')
+	# "*" gets replaced by directories, generally a bash problem
 
 	$v && echo ... Applying compression on "$css"
 	echo $post > $css

@@ -2,5 +2,6 @@
 	include '../middleware/auth.php';
 	include '../middleware/cors.php';
 
-	print_r(getSalt(TRUE));
+	//Deactivated until i figure out a secure method
+	//print_r(getSalt(TRUE));
 ?>

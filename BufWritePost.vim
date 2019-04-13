@@ -9,4 +9,4 @@
 	"# 0: throwing off verbose
 	"# %:p: pass absolute path
 	"# >/dev/null 2>&1: pass off developer messages
-autocmd BufWritePost *.less silent! execute "!/home/pi/Access/www/homepie.net/lessify.sh 0 %:p >> /dev/null 2>&1 &"
+autocmd BufWritePost *.less silent! execute "!/home/pi/www/homepie.net/lessify.sh 0 -o %:p > /dev/null 2>&1 &"
