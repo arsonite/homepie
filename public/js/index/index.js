@@ -10,6 +10,7 @@ function assembleNavigation() {
 
 	data.forEach(sub => {
 		let imageBox = document.createElement('div');
+		imageBox.className = 'imageBox';
 		box.appendChild(imageBox);
 		
 		let string = sub.toLowerCase();

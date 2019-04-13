@@ -1,2 +1,4 @@
+/* CONST */
 const _ = undefined;
-//const $ = document;
+
+/* Document operations */
