@@ -1,0 +1,42 @@
+main {
+  margin-left: 10%;
+  width: 80%;
+}
+main .box {
+  width: 100%;
+}
+main .box .profile {
+  display: flex;
+  flex-direction: row;
+}
+main .box .profile div {
+  padding: 25px;
+  width: 100px;
+  font-weight: bold;
+}
+main .box .profile .name {
+  width: 100px;
+  color: #222;
+  background-color: #ccc;
+}
+main .box .profile .name:hover {
+  cursor: pointer;
+  color: #000;
+  background-color: #fff;
+}
+main .box .profile .cat {
+  margin: 0 -35px;
+  width: 0px;
+  color: #fff;
+  transition: 0.5s all;
+}
+main .box .profile #admin {
+  background-color: #ff4343;
+}
+main .box .profile #user {
+  background-color: #7a9fdb;
+}
+main .box .profile:hover .cat {
+  margin: 0;
+  width: 100px;
+}
