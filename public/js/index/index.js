@@ -19,7 +19,6 @@ document.addEventListener('DOMContentLoaded', function() {
 			xhr.open('GET', get);
 			xhr.onload = function(e) {
 				resolve(xhr.response);
-				console.log(xhr.response);
 			};
 			xhr.send();
 		});			
