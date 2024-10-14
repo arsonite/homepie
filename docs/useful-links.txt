@@ -1,0 +1,3 @@
+# For badges
+https://shields.io/badges
+https://simpleicons.org/

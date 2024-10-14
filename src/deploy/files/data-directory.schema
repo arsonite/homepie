@@ -1,0 +1,36 @@
+{
+    "dirs": [
+        {
+            "name": "~cache"
+        },
+        {
+            "name": "database",
+            "dirs": [
+                {
+                    "name": "archive"
+                },
+                {
+                    "name": "audits"
+                },
+                {
+                    "name": "backups"
+                },
+                {
+                    "name": "data"
+                },
+                {
+                    "name": "dumps"
+                },
+                {
+                    "name": "migration"
+                }
+            ]
+        },
+        {
+            "name": "exports"
+        },
+        {
+            "name": "logs"
+        },
+    ]
+}

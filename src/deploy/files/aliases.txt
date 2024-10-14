@@ -1,0 +1,10 @@
+### HOMEPIE_ALIASES_START_BLOCK ###
+# HomePie-related aliases
+alias hpd='cd $HOMEPIE_DATA_PATH'
+alias hps='cd $HOMEPIE_SOURCE_PATH'
+# Handy aliases
+alias bashrc='vim ~/.bashrc'
+alias home='cd ~'
+alias l='ls -la -h --color'
+alias root='cd /'
+### HOMEPIE_ALIASES_END_BLOCK ###

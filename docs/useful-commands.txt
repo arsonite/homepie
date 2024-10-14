@@ -1,0 +1,3 @@
+# Give execute permissions for scripts in os and git
+sudo chmod a+x <file>
+git update-index --chmod=+x <file>

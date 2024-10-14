@@ -1,0 +1,145 @@
+# Copyright (c) 2024 Burak Günaydin
+# All Rights Reserved
+#
+# This software is the confidential and proprietary information of
+# Burak Günaydin. You may not use, modify, or distribute this
+# software (unless you have the permission of the copyright holder)
+# except in accordance with the terms of any applicable license agreement.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
+# General
+.DS_Store
+Thumbs.db
+*.swp
+*~
+
+# Logs and backups
+*.log
+*.bak
+*.backup
+*.sql
+
+# Environment-specific files
+.env
+.env.local
+.env.*.local
+.env.development
+.env.test
+.env.production
+
+# Node.js / npm
+node_modules/
+npm-debug.log
+yarn-error.log
+.pnp
+.pnp.js
+.cache
+.npm
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pyo
+*.pyc
+
+# Java
+*.class
+
+# Compiled binaries
+target/
+bin/
+build/
+dist/
+*.jar
+*.war
+*.ear
+
+# macOS specific files
+.DS_Store
+
+# Visual Studio Code
+.vscode/
+*.code-workspace
+
+# JetBrains IDEs
+.idea/
+*.iml
+*.iws
+
+# Eclipse IDE
+.classpath
+.project
+.settings/
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# IntelliJ IDEA
+*.ipr
+*.iws
+*.iml
+.idea/
+
+# macOS / Xcode
+*.xcuserdata/
+*.xcworkspace/
+*.pbxproj
+
+# Android
+.gradle/
+/local.properties
+/.idea/workspace.xml
+/.idea/libraries
+
+# Ruby
+.bundle/
+vendor/
+Gemfile.lock
+
+# Compiled files
+*.com
+*.class
+*.dll
+*.exe
+*.o
+*.so
+
+# Archives
+*.7z
+*.dmg
+*.gz
+*.iso
+*.jar
+*.rar
+*.tar
+*.zip
+
+# Fonts
+*.eot
+*.otf
+*.ttf
+*.woff
+*.woff2
+
+# Miscellaneous
+*.tmp
+*.tmp.*
+*.log*
+*.out
+*.lock
+*.sql
+*.log
+
+# Custom project-specific ignores
+# Add specific files or patterns here based on your project needs
+*temp
