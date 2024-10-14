@@ -1,25 +1,63 @@
+/**
+ * Copyright (c) 2024 Burak Günaydin
+ * All Rights Reserved
+ *
+ * This software is the confidential and proprietary information of
+ * Burak Günaydin. You may not use, modify, or distribute this
+ * software (unless you have the permission of the copyright holder)
+ * except in accordance with the terms of any applicable license agreement.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALI* NGS IN THE
+ * SOFTWARE.
+ */
+
+// This is the TypeScript configuration file for the client-side code of the HomePie project.
 {
-  "compilerOptions": {
-    "target": "ES2020",
-    "useDefineForClassFields": true,
-    "lib": ["ES2020", "DOM", "DOM.Iterable"],
-    "module": "ESNext",
-    "skipLibCheck": true,
+    "compilerOptions": {
+        // Specify ECMAScript target version
+        "target": "ES2020",
 
-    /* Bundler mode */
-    "moduleResolution": "bundler",
-    "allowImportingTsExtensions": true,
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "noEmit": true,
-    "jsx": "react-jsx",
+        // Use the new `useDefineForClassFields` flag to ensure class fields are defined correctly
+        "useDefineForClassFields": true,
 
-    /* Linting */
-    "strict": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true
-  },
-  "include": ["src"],
-  "references": [{ "path": "./tsconfig.node.json" }]
+        // Specify library files to be included in the compilation
+        "lib": ["ES2020", "DOM", "DOM.Iterable"],
+
+        // Specify module code generation
+        "module": "ESNext",
+
+        // Skip type checking of declaration files
+        "skipLibCheck": true,
+
+        // Specify type definitions to include
+        "types": ["node", "vite/client"],
+        // "types": ["vite-env.d.ts", "node", "vite/client"], // Alternative type definitions
+
+        // Bundler mode settings
+        "moduleResolution": "bundler", // Use bundler module resolution strategy
+        "allowImportingTsExtensions": true, // Allow importing TypeScript files with extensions
+        "resolveJsonModule": true, // Allow importing JSON modules
+        "isolatedModules": true, // Ensure each file is treated as a separate module
+        "noEmit": true, // Do not emit output files
+        "jsx": "react-jsx", // Specify JSX code generation for React
+
+        // Linting options
+        "strict": true, // Enable all strict type-checking options
+        "noUnusedLocals": true, // Report errors on unused local variables
+        "noUnusedParameters": true, // Report errors on unused parameters
+        "noFallthroughCasesInSwitch": true, // Report errors for fallthrough cases in switch statements
+
+        // Path mapping for module resolution
+        "paths": { "@/*": ["./src/*"] }
+    },
+    // Specify files to be included in the compilation
+    "include": ["src", "**/*.ts", "typings"],
+
+    // Reference to another tsconfig file
+    "references": [{ "path": "./tsconfig.node.json" }]
 }

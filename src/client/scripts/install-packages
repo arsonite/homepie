@@ -35,30 +35,4 @@ fi
 #################### SCRIPT START #####################
 #######################################################
 
-# Asking for sudo permissions before script executes any further and surpresses usage information
-sudo 2>/dev/null
-
-# Get the directory of the script and navigate to it.
-# Necessary code-repetition to ensure being able to execute script from anywhere
-script_directory=$(dirname "$(readlink -f "$0")")
-cd "$script_directory" || exit 1
-cd ..
-
-# Install necessary packages for Node.js and SSL
-sudo apt-get install -y ca-certificates curl gnupg
-sudo mkdir -p /etc/apt/keyrings
-curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | sudo gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg
-
-# Add Node.js repository to package sources
-NODE_VERSION=20
-echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_$NODE_VERSION.x nodistro main" | sudo tee /etc/apt/sources.list.d/nodesource.list
-
-sudo apt update -y
-sudo apt install nodejs -y
-
-# Increasing timeout for weaker internet and wifi connections
-npm config set fetch-retry-maxtimeout 6000000
-npm config set fetch-retry-mintimeout 1000000
-
-# Install pnpm package manager globally
-sudo npm install -g pnpm
+pnpm install
