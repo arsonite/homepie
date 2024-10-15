@@ -30,6 +30,10 @@
             "name": "exports"
         },
         {
+            "name": "filesystem",
+            "dirs": []
+        },
+        {
             "name": "logs"
         },
     ]
