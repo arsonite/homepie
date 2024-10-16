@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Burak Günaydin
+# Copyright (c) 2024-2024 Burak Günaydin
 # All Rights Reserved
 #
 # This software is the confidential and proprietary information of
@@ -169,3 +169,6 @@ dist-ssr
 # Add specific files or patterns here based on your project needs
 *~temp
 *lock*
+*cloudflare-api.token
+*record-id.token
+*zone-id.token
