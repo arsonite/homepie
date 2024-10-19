@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env python3.11
 
 # Copyright (c) 2024-2024 Burak Günaydin
 # All Rights Reserved
@@ -16,12 +16,83 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-while true; do
-    read -p "Enter a command (type 'exit' to quit): " user_input
+# System imports
+import argparse
+import importlib
+import os
 
-    # Check if the user wants to exit
-    if [ "$user_input" == "exit" ]; then
-        echo "Exiting the loop."
-        break
-    fi
-done
+# From own imports
+from src.BaseCLI import BaseCLI
+
+SCRIPTS_DIR = './scripts'
+
+class MainCLI(BaseCLI):
+    def __init__(self):
+        super().__init__(
+            name="hp",
+            description="Main CLI that manages and runs available commands from the 'scripts' directory."
+        )
+
+    def discover_scripts(self):
+        """Discover and import all Python scripts in the `scripts/` directory, skipping __init__.py and non-Python files."""
+        scripts = {}
+        for filename in os.listdir(SCRIPTS_DIR):
+            # TODO: Skip files that are not of class BaseCLI
+            if filename != '__init__.py' and filename != '__pycache__':
+                # TODO: Make this lazy and only if needed
+                formatted_filename = filename.replace('-', '_') + '.py' # Convert filename from kebab-case to snake_case for import
+                os.rename(os.path.join(SCRIPTS_DIR, filename), os.path.join(SCRIPTS_DIR, formatted_filename))
+                
+                try:
+                    # Convert kebab-case to CamelCase
+                    camel_case_name = ''.join(word.capitalize() for word in formatted_filename.split('_'))
+                    module = importlib.import_module(f'scripts.{formatted_filename}')
+                    # module = importlib.import_module(name=camel_case_name, package=f'.scripts.{filename}')
+                finally:
+                    # Revert the filename back to its original form
+                    os.rename(os.path.join(SCRIPTS_DIR, formatted_filename), os.path.join(SCRIPTS_DIR, filename).replace('.py', ''))
+                    
+                # Assuming each script has a class named <ScriptName>Script
+                script_class = getattr(module, f'{filename.capitalize()}Script')
+                script_instance = script_class()
+                scripts[script_instance.name] = script_instance
+        return scripts
+
+    def run(self, args):
+        """Handles the execution of the selected command or lists all commands if no command is provided."""
+        if not args.command:
+            # List all available commands if no command is given
+            print("Available commands:")
+            scripts = self.discover_scripts()
+            for name, script in scripts.items():
+                print(f"{name}: {script.description}")
+        else:
+            # Run the provided command
+            scripts = self.discover_scripts()
+            if args.command in scripts:
+                script = scripts[args.command]
+                command_parser = argparse.ArgumentParser(description=script.description)
+                script.add_arguments(command_parser)
+                command_args = command_parser.parse_args(args.command_args)
+                script.run(command_args)
+            else:
+                print(f"Command '{args.command}' not found.")
+
+    def add_arguments(self, parser):
+        """Defines arguments for the main CLI."""
+        parser.add_argument('command', help="Command to run", nargs='?', default=None)
+        parser.add_argument('command_args', help="Arguments for the command", nargs=argparse.REMAINDER)
+
+if __name__ == '__main__':
+    # Initialize the main CLI and run it with parsed arguments
+    main_cli = MainCLI()
+    
+    # Create the main parser and add main CLI arguments
+    parser = argparse.ArgumentParser(description=main_cli.description)
+    main_cli.add_arguments(parser)
+    
+    # Parse the arguments passed to the script
+    args = parser.parse_args()
+
+    # Run the main CLI logic
+    main_cli.run(args)
