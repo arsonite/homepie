@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env python3.11
 
 # Copyright (c) 2024-2024 Burak Günaydin
 # All Rights Reserved
@@ -16,27 +16,54 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-#########################################################
-#################### START CMD PARSE ####################
-#########################################################
+# From own imports
+import argparse
+import os
+import sys
 
-# Check if there are any arguments
-if [ "$#" -eq 0 ]; then
-    echo
-    echo "This script requires a file-path as an argument. Aborting."
-    echo
-    exit 1
-fi
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../src')))
+from BaseCLI import BaseCLI
 
-#########################################################
-##################### END CMD PARSE #####################
-#########################################################
+class MakeExecutable(BaseCLI):
+    def __init__(self):
+        super().__init__(
+            name="push",
+            description="Pushes files to the remote repository",
+            flags=[
+                {
+                    'short': '-f',
+                    'long': '--force',
+                    'help': 'Force push the changes',
+                    'required': False
+                },
+                {
+                    'short': '-b',
+                    'long': '--branch',
+                    'help': 'Branch to push',
+                    'required': True
+                }
+            ]
+        )
 
-#########################################################
-##################### SCRIPT START ######################
-#########################################################
+    def run(self, args):
+        """Implement the core functionality here."""
+        print(f"Pushing to branch {args.branch} with force={args.force}")
+        
+if __name__ == '__main__':
+    # Initialize the main CLI and run it with parsed arguments
+    make_executable = MakeExecutable()
+    
+    # Create the main parser and add main CLI arguments
+    parser = argparse.ArgumentParser(description=make_executable.description)
+    make_executable.add_arguments(parser)
+    
+    # Parse the arguments passed to the script
+    args = parser.parse_args()
 
-sudo chmod a+x $1
-sudo chmod 755 $1
-git add $1
-git update-index --chmod=+x $1
+    # Run the main CLI logic
+    make_executable.run(args)
+
+# sudo chmod a+x $1
+# sudo chmod 755 $1
+# git add $1
+# git update-index --chmod=+x $1
