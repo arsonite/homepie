@@ -1,0 +1,88 @@
+#!/bin/bash
+
+# Copyright (c) 2024-2024 Burak Günaydin
+# All Rights Reserved
+#
+# This software is the confidential and proprietary information of
+# Burak Günaydin. You may not use, modify, or distribute this
+# software (unless you have the permission of the copyright holder)
+# except in accordance with the terms of any applicable license agreement.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
+#########################################################
+#################### START CMD PARSE ####################
+#########################################################
+
+# Check if there are any arguments
+if [ "$#" -lt 4 ]; then
+    echo
+    echo "This script need 4 arguments. Exiting ..."
+    echo
+    exit 1
+fi
+
+#########################################################
+##################### END CMD PARSE #####################
+#########################################################
+
+#########################################################
+##################### SCRIPT START ######################
+#########################################################
+
+# Cloudflare credentials
+# This script updates a Cloudflare DNS A record with the current public IP address if it has changed.
+# It requires four arguments: Cloudflare API Token, Zone ID, DNS Record ID, and the domain name.
+
+# Usage:
+# ./cloudflare-ddns.sh <CF_API_TOKEN> <CF_ZONE_ID> <CF_RECORD_ID> <CF_DOMAIN>
+
+# Arguments:
+# CF_API_TOKEN - Your Cloudflare API Token for authentication.
+# CF_ZONE_ID - The Zone ID of your Cloudflare domain.
+# CF_RECORD_ID - The DNS Record ID that you want to update.
+# CF_DOMAIN - The domain name (e.g., example.com) for which the DNS record is being updated.
+
+# Steps:
+# 1. Fetch the current public IP address using an external service (ifconfig.co).
+# 2. Retrieve the currently set IP address for the specified DNS record from Cloudflare.
+# 3. Compare the current public IP with the IP address stored in Cloudflare.
+# 4. If the IP addresses differ, update the Cloudflare DNS record with the new IP address.
+# 5. If the IP addresses are the same, no update is performed.
+
+# Dependencies:
+# - curl: Command-line tool for transferring data with URLs.
+# - jq: Command-line JSON processor.
+
+# Note:
+# - Ensure that you have the necessary permissions for the Cloudflare API Token to read and update DNS records.
+# - The script assumes the DNS record type is "A" and sets the TTL to 120 seconds with proxying disabled.
+CF_API_TOKEN="$1" # Replace with your API Token
+CF_ZONE_ID="$2" # Replace with your Cloudflare Zone ID
+CF_RECORD_ID="$3" # Replace with your Cloudflare DNS Record ID
+CF_DOMAIN="$4" # Replace with your domain (example.com)
+
+# Get the current public IP
+CURRENT_IP=$(curl https://dynamicdns.park-your-domain.com/getip) # Guarantees to get the public IPv4 address
+
+# Get the currently set IP in Cloudflare
+CF_CURRENT_IP=$(curl -s -X GET "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/dns_records/$CF_RECORD_ID" \
+    -H "Authorization: Bearer $CF_API_TOKEN" \
+    -H "Content-Type: application/json" | jq -r '.result.content')
+
+# Update the DNS record if the IP has changed
+if [ "$CURRENT_IP" != "$CF_CURRENT_IP" ]; then
+    echo "Updating Cloudflare DNS record for $CF_DOMAIN with new IP: $CURRENT_IP"
+    curl -s -X PUT "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/dns_records/$CF_RECORD_ID" \
+        -H "Authorization: Bearer $CF_API_TOKEN" \
+        -H "Content-Type: application/json" \
+        --data "{\"type\":\"A\",\"name\":\"$CF_DOMAIN\",\"content\":\"$CURRENT_IP\",\"ttl\":120,\"proxied\":true}"
+else
+    echo "IP has not changed. No update needed."
+fi
