@@ -17,53 +17,73 @@
 # SOFTWARE.
 
 # From own imports
-import argparse
 import os
+import subprocess
 import sys
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../src')))
-from BaseCLI import BaseCLI
+# Add the parent directory of 'src' to the system path.
+# This allows the script to import modules from the 'src' directory.
+# Specifically, it inserts the absolute path of the 'src' directory
+# at the beginning of the system path list (sys.path).
+# This is useful when the script is executed from a different directory
+# and needs to access modules located in 'src'.
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+from src.BaseCLI import BaseCLI
+
+CLI_META = {
+    'name': 'make-executable',
+    'shorthand': 'me',
+    'help': 'Make a file executable by setting the executable bit, allowing it to be run as a program, ommiting the interpreter.',
+    'arguments': [
+        {
+            'name': 'filename',
+            'help': 'The name of the file (or directory including files) to make executable'
+        }
+    ],
+    'flags': [
+        {
+            'short': '-d',
+            'long': '--directory',
+            'help': 'Treat the filename as a directory and make all files within it executable',
+            'required': False
+        },
+        {
+            'short': '-g',
+            'long': '--git-support',
+            'help': 'Add the file to the git index and set the executable bit',
+            'help_extension': [
+                '(recommended for version control)'
+            ],
+            'required': False
+        },
+    ]
+}
 
 class MakeExecutable(BaseCLI):
     def __init__(self):
-        super().__init__(
-            name="push",
-            description="Pushes files to the remote repository",
-            flags=[
-                {
-                    'short': '-f',
-                    'long': '--force',
-                    'help': 'Force push the changes',
-                    'required': False
-                },
-                {
-                    'short': '-b',
-                    'long': '--branch',
-                    'help': 'Branch to push',
-                    'required': True
-                }
-            ]
-        )
-
-    def run(self, args):
-        """Implement the core functionality here."""
-        print(f"Pushing to branch {args.branch} with force={args.force}")
+        super().__init__(**CLI_META)
+        
+    def execute(self):
+        self.print(print_meta=False, print_usage=True)
+        
+    # def make_file_executable(self, file):
+    #     subprocess.run(['sudo', 'chmod', 'a+x', file], check=True)
+    #     subprocess.run(['sudo', 'chmod', '755', file], check=True)
+    #     if git_support:
+    #         subprocess.run(['git', 'add', file], check=True)
+    #         subprocess.run(['git', 'update-index', '--chmod=+x', file], check=True)
+        
+    # def execute(self):
+    #     self.print()
+    
+    #     if is_directory:
+    #         for root, _, files in os.walk(filename):
+    #             for file in files:
+    #                 self.make_file_executable(os.path.join(root, file))
+    #     else:
+    #         self.make_file_executable(filename)
         
 if __name__ == '__main__':
-    # Initialize the main CLI and run it with parsed arguments
     make_executable = MakeExecutable()
-    
-    # Create the main parser and add main CLI arguments
-    parser = argparse.ArgumentParser(description=make_executable.description)
-    make_executable.add_arguments(parser)
-    
-    # Parse the arguments passed to the script
-    args = parser.parse_args()
-
-    # Run the main CLI logic
-    make_executable.run(args)
-
-# sudo chmod a+x $1
-# sudo chmod 755 $1
-# git add $1
-# git update-index --chmod=+x $1
+    make_executable.execute()

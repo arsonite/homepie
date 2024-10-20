@@ -35,3 +35,6 @@ fi
 ##################### SCRIPT START ######################
 #########################################################
 
+curl -X GET "https://api.cloudflare.com/client/v4/zones/YOUR_ZONE_ID/dns_records?type=A&name=yourdomain.com" \
+-H "Authorization: Bearer YOUR_CLOUDFLARE_API_TOKEN" \
+-H "Content-Type: application/json"

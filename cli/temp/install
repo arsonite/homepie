@@ -38,4 +38,4 @@ fi
 # This script copies the 'proxy' executable from the source directory to the '/usr/local/bin' directory.
 # The copied file is renamed to 'hp' in the destination directory.
 # This allows the 'hp' command to be used system-wide as it is placed in a directory that is typically included in the system's PATH.
-cp /usr/local/src/homepie/cli/proxy /usr/local/bin/hp
+sudo cp /usr/local/src/homepie/cli/proxy /usr/local/bin/hp
