@@ -37,12 +37,15 @@ class _Argument:
     def __init__(self,
                  name:str,
                  help:str,
-                 help_extension:List[str]=None,
-                 required:bool=True):
+                 position:int,
+                 required:bool,
+                 help_extension:List[str]=None):
         self.name = name
         self.help = help
+        self.position = position
         self.help_extension = help_extension
         self.required = required
+        
         self.value = None  # Initialize the value of the argument to None
 
     def __str__(self):
@@ -77,6 +80,7 @@ class _Flag:
         self.help_extension = help_extension
         self.value_name = value_name
         self.required = required
+        
         self.value = None  # Initialize the value of the flag to None
 
     def __str__(self):
@@ -104,8 +108,10 @@ class BaseCLI(ABC):
                  shorthand:str,
                  help:str,
                  help_extension:str=None,
-                 arguments:List[_Argument]=None,
-                 flags:List[_Flag]=None):
+                 arguments:List[_Argument]=[],
+                 flags:List[_Flag]=[],
+                 auto_pre_execute:bool=True,
+                 auto_execute:bool=True):
         # Initialize the name of the CLI
         self.name = name
         
@@ -120,8 +126,8 @@ class BaseCLI(ABC):
         
         # Initialize the list of _Argument instances representing the CLI arguments
         self.arguments = []
-        for argument in arguments:
-            self.arguments.append(_Argument(**argument))
+        for index, argument in enumerate(arguments):
+            self.arguments.append(_Argument(**argument, position=index))
         
         # Initialize the list of _Flag instances representing the CLI flags
         # If no flags are provided, initialize it to an empty list
@@ -129,8 +135,21 @@ class BaseCLI(ABC):
         for flag in flags:
             self.flags.append(_Flag(**flag))
 
-        # Parse the command-line arguments and flags
-        self.parsed_arguments, self.parsed_flags = self.parse_arguments_and_flags()
+        if auto_pre_execute:
+            parsing_errors = self.pre_execute()
+            amount_of_parsing_errors = len(parsing_errors)
+            if amount_of_parsing_errors == 0:
+                if auto_execute:
+                    self.execute()
+            else:
+                print()
+                print(f'({amount_of_parsing_errors}) Parsing errors occured:')
+                for parsing_error in parsing_errors:
+                    print(parsing_error)
+                print()
+                print('Hint: Use the -h, --help flag for usage information.')
+                print()
+                sys.exit(1)
 
     def __str__(self):
         """
@@ -183,7 +202,7 @@ class BaseCLI(ABC):
             
             # Move to the next argument
             i += 1
-        
+            
         # Return the parsed command name, positional arguments, and flags
         return arguments, flags
     
@@ -219,6 +238,8 @@ class BaseCLI(ABC):
                     
             indented_formatted_string += '\n'
         
+        amount_of_arguments_greater_0 = len(self.arguments)
+        amount_of_flags_greater_0 = len(self.flags)
         # If print_usage is True, include usage information in the formatted string
         if print_usage:
             # Set the name to './<name>' by default
@@ -229,17 +250,18 @@ class BaseCLI(ABC):
                 
             # Add usage information to the formatted string
             indented_formatted_string += '\n'
-            indented_formatted_string += f'Usage:\n{TAB}{name} [arguments] [flags]\n'
+            indented_formatted_string += f'Usage:\n{TAB}{name} {"[arguments]" if amount_of_arguments_greater_0 else ""} {"[flags]" if amount_of_flags_greater_0 else ""}\n'
         
+        # TODO: Make tab-space the maximum of all flags and arguments for consistency
         # If there are arguments, include them in the formatted string
-        if self.arguments:
+        if amount_of_arguments_greater_0:
             indented_formatted_string += '\n'
             indented_formatted_string += 'Arguments:\n'
             
             # Iterate over each argument and add its details to the formatted string
             for argument in self.arguments:
                 # Format the argument line with indentation
-                argument_line = f'{TAB}{argument.name}:'
+                argument_line = f'{TAB}<{argument.name}>:'
                 argument_line_length = (len(argument_line) + 1)
                 argument_line += f' {argument.help}'
                 indented_formatted_string += argument_line + '\n'
@@ -251,7 +273,7 @@ class BaseCLI(ABC):
         
         # TODO: Make tab-space the maximum of all flags and arguments for consistency
         # If there are flags, include them in the formatted string
-        if self.flags:
+        if amount_of_flags_greater_0:
             indented_formatted_string += '\n'
             indented_formatted_string += 'Flags:\n'
             
@@ -270,10 +292,80 @@ class BaseCLI(ABC):
         
         # Print the final formatted string
         print(indented_formatted_string)
-    
+        
+    def pre_execute(self):
+        """
+        Pre-execution checks for required arguments and flags.
+
+        This method ensures that all required arguments and flags have been provided
+        before the main execution of the CLI. If any required argument or flag is missing,
+        it prints an error message and returns False, indicating that the execution should not proceed.
+
+        Returns:
+            bool: True if all required arguments and flags are provided, False otherwise.
+        """
+        
+        # Parse the command-line arguments and flags
+        self.parsed_arguments, self.parsed_flags = self.parse_arguments_and_flags()
+        
+        # Initialize an empty list to store any parsing errors encountered
+        parsing_errors = []
+
+        # Check if the help flag ('-h' or '--help') is present in the parsed flags
+        help_flag_detected = '-h' in self.parsed_flags or '--help' in self.parsed_flags
+        if help_flag_detected:
+            # If the help flag is detected, print the help information and exit
+            self.print()
+        else:
+            # Determine the number of parsed arguments and the total number of expected arguments
+            amount_of_parsed_arguments = len(self.parsed_arguments)
+            amount_of_all_arguments = len(self.arguments)
+            # Check if the number of parsed arguments exceeds the number of expected arguments
+            if amount_of_parsed_arguments > amount_of_all_arguments:
+                parsing_errors.append(
+                    f'Number of possible arguments provided ({amount_of_parsed_arguments}) is greater than expected ({amount_of_all_arguments}).'
+                )
+
+            # Calculate the number of required arguments
+            amount_of_required_arguments = len([argument for argument in self.arguments if argument.required])
+            amount_of_required_additional_arguments = amount_of_required_arguments - amount_of_parsed_arguments
+
+            # Check if the number of parsed arguments is less than the number of required arguments
+            if amount_of_parsed_arguments < amount_of_required_arguments:
+                parsing_errors.append(
+                    f'Script requires ({amount_of_required_additional_arguments}) additional argument{"s" if amount_of_required_additional_arguments > 1 else ""}.'
+                )
+
+            # Check for missing required arguments
+            for argument in self.arguments:
+                if argument.required and amount_of_required_additional_arguments > 0:
+                    parsing_errors.append(f'Missing required argument: <{argument.name}>.')
+
+            # Check for unknown flags in the parsed flags
+            for parsed_flag in self.parsed_flags:
+                search_result = [flag for flag in self.flags if flag.short == parsed_flag or flag.long == parsed_flag]
+                if len(search_result) == 0:
+                    parsing_errors.append(f'Unknown flag: {parsed_flag}.')
+
+            # Check for missing required flags and validate flag values
+            for flag in self.flags:
+                if flag.required:
+                    if flag.short not in self.parsed_flags and flag.long not in self.parsed_flags:
+                        parsing_errors.append(f'Missing required flag: {flag.short}, {flag.long}.')
+
+                if flag.short in self.parsed_flags or flag.long in self.parsed_flags:
+                    parsed_flag_value = self.parsed_flags[flag.short] or self.parsed_flags[flag.long]
+                    if parsed_flag_value and flag.value_name is None and parsed_flag_value is not True:
+                        parsing_errors.append(
+                            f'Flag "{flag.short}, {flag.long}" does not expect a value, but one was given: "{self.parsed_flags[flag.short] or self.parsed_flags[flag.long]}".'
+                        )
+
+        # Return the list of parsing errors encountered
+        return parsing_errors
+                
     @abstractmethod
-    def execute(self, arguments):
+    def execute(self):
         """
         Override this method in the child classes to implement functionality.
         """
-        raise NotImplementedError("Each script must implement the 'run' method.")
+        raise NotImplementedError("Each script must implement the 'execute' method.")

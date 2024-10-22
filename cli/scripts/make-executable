@@ -31,14 +31,36 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 
 from src.BaseCLI import BaseCLI
 
-CLI_META = {
+class MakeExecutable(BaseCLI):
+    def execute(self):
+        pass
+        
+    # def make_file_executable(self, file):
+    #     subprocess.run(['sudo', 'chmod', 'a+x', file], check=True)
+    #     subprocess.run(['sudo', 'chmod', '755', file], check=True)
+    #     if git_support:
+    #         subprocess.run(['git', 'add', file], check=True)
+    #         subprocess.run(['git', 'update-index', '--chmod=+x', file], check=True)
+        
+    # def execute(self):
+    #     self.print()
+    
+    #     if is_directory:
+    #         for root, _, files in os.walk(filename):
+    #             for file in files:
+    #                 self.make_file_executable(os.path.join(root, file))
+    #     else:
+    #         self.make_file_executable(filename)
+    
+META_DATA = {
     'name': 'make-executable',
     'shorthand': 'me',
     'help': 'Make a file executable by setting the executable bit, allowing it to be run as a program, ommiting the interpreter.',
     'arguments': [
         {
             'name': 'filename',
-            'help': 'The name of the file (or directory including files) to make executable'
+            'help': 'The name of the file (or directory including files) to make executable',
+            'required': True
         }
     ],
     'flags': [
@@ -59,31 +81,5 @@ CLI_META = {
         },
     ]
 }
-
-class MakeExecutable(BaseCLI):
-    def __init__(self):
-        super().__init__(**CLI_META)
-        
-    def execute(self):
-        self.print(print_meta=False, print_usage=True)
-        
-    # def make_file_executable(self, file):
-    #     subprocess.run(['sudo', 'chmod', 'a+x', file], check=True)
-    #     subprocess.run(['sudo', 'chmod', '755', file], check=True)
-    #     if git_support:
-    #         subprocess.run(['git', 'add', file], check=True)
-    #         subprocess.run(['git', 'update-index', '--chmod=+x', file], check=True)
-        
-    # def execute(self):
-    #     self.print()
     
-    #     if is_directory:
-    #         for root, _, files in os.walk(filename):
-    #             for file in files:
-    #                 self.make_file_executable(os.path.join(root, file))
-    #     else:
-    #         self.make_file_executable(filename)
-        
-if __name__ == '__main__':
-    make_executable = MakeExecutable()
-    make_executable.execute()
+make_executable = MakeExecutable(**META_DATA)

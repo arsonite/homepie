@@ -26,16 +26,7 @@ from src.BaseCLI import BaseCLI
 CURRENT_DIRECTORY = os.path.dirname(os.path.abspath(__file__))
 SCRIPTS_DIR = f'{CURRENT_DIRECTORY}/scripts'
 
-CLI_META = {
-    'name': 'homepie',
-    'short': 'hp',
-    'help': 'Main CLI that manages and runs available commands from the "scripts" directory.'
-}
-
 class MainCLI(BaseCLI):
-    def __init__(self):
-        super().__init__(**CLI_META)
-        
     def load_scripts(self):
         """
         Discover and import all Python scripts in the `scripts/` directory, skipping __init__.py and non-Python files.
@@ -58,13 +49,12 @@ class MainCLI(BaseCLI):
                 # Convert kebab-case to CamelCase
                 camel_case_name = ''.join(word.capitalize() for word in formatted_module_name.split('_'))
                 script_class = getattr(module, f'{camel_case_name}')
-                script_instance = script_class()
+                script_instance = script_class(auto_pre_execute=False, auto_execute=False)
                 scripts[script_instance.name] = script_instance
         return scripts
 
     def execute(self):
-        print(self.arguments)
-        print(self.flags)
+        pass
         
         """
         Handles the execution of the selected command or lists all commands if no command is provided.
@@ -92,8 +82,13 @@ class MainCLI(BaseCLI):
         #     else:
         #         print(f'Command "{args.command}" not found.')
 
-if __name__ == '__main__':
-    # Initialize the main CLI and run it with parsed arguments
-    main_cli = MainCLI()
-    main_cli.load_scripts()
-    main_cli.execute()
+CLI_META_DATA = {
+    'name': 'homepie',
+    'shorthand': 'hp',
+    'help': 'Main CLI that manages and runs available commands from the "scripts" directory.'
+}
+
+# Initialize the main CLI and run it with parsed arguments
+main_cli = MainCLI(**CLI_META_DATA, auto_execute=False)
+main_cli.load_scripts()
+main_cli.execute()
