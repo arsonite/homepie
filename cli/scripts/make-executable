@@ -35,22 +35,22 @@ class MakeExecutable(BaseCLI):
     def execute(self):
         pass
         
-    # def make_file_executable(self, file):
-    #     subprocess.run(['sudo', 'chmod', 'a+x', file], check=True)
-    #     subprocess.run(['sudo', 'chmod', '755', file], check=True)
-    #     if git_support:
-    #         subprocess.run(['git', 'add', file], check=True)
-    #         subprocess.run(['git', 'update-index', '--chmod=+x', file], check=True)
+    def make_file_executable(self, file, git_support):
+        subprocess.run(['sudo', 'chmod', 'a+x', file], check=True)
+        subprocess.run(['sudo', 'chmod', '755', file], check=True)
+        if git_support:
+            subprocess.run(['git', 'add', file], check=True)
+            subprocess.run(['git', 'update-index', '--chmod=+x', file], check=True)
         
-    # def execute(self):
-    #     self.print()
-    
-    #     if is_directory:
-    #         for root, _, files in os.walk(filename):
-    #             for file in files:
-    #                 self.make_file_executable(os.path.join(root, file))
-    #     else:
-    #         self.make_file_executable(filename)
+    def execute(self):
+        git_support = self.get_flag('--git-support')
+        filename = self.get_argument('filename')
+        if self.get_flag('--directory'):
+            for root, _, files in os.walk(filename):
+                for file in files:
+                    self.make_file_executable(os.path.join(root, file), git_support)
+        else:
+            self.make_file_executable(filename, git_support)
     
 META_DATA = {
     'name': 'make-executable',
@@ -81,5 +81,4 @@ META_DATA = {
         },
     ]
 }
-    
 make_executable = MakeExecutable(**META_DATA)

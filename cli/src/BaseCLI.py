@@ -54,6 +54,38 @@ class _Argument:
         """
         return f'Argument: {self.name}, Help: {self.help}, Required: {self.required}'
 
+class _Command:
+    """
+    Represents a command-line command.
+
+    Attributes:
+        name (str): The name of the command.
+        help (str): A brief description of the command.
+        help_extension (List[str], optional): Additional help information for the command.
+        value (Any): The value of the command, initially set to None.
+    """
+    def __init__(self,
+                 name: str,
+                 help: str,
+                 help_extension: List[str] = None):
+        # Initialize the name of the command
+        self.name = name
+        
+        # Initialize the brief description of the command
+        self.help = help
+        
+        # Initialize additional help information for the command, if provided
+        self.help_extension = help_extension
+        
+        # Initialize the value of the command to None
+        self.value = None
+
+    def __str__(self):
+        """
+        Returns a string representation of the _Command instance.
+        """
+        return f'Command: {self.name}, Help: {self.help}'
+
 class _Flag:
     """
     Represents a command-line flag.
@@ -218,6 +250,37 @@ class BaseCLI(ABC):
             'flags': self.flags,
         }
         
+    def get_command(self):
+        """
+        Returns the value of the command.
+
+        This method retrieves the value associated with the command
+        that has been parsed from the command-line input.
+
+        Returns:
+            Any: The value of the command, initially set to None.
+        """
+        # Access the value attribute of the command instance and return it
+        return self.command.value
+
+    def get_argument(self, name:str):
+        """
+        Returns the argument value with the given name.
+        """
+        for argument in self.arguments:
+            if argument.name == name:
+                return argument.value
+        return None
+        
+    def get_flag(self, name:str):
+        """
+        Returns the flag value with the given name.
+        """
+        for flag in self.flags:
+            if flag.short == name or flag.long == name:
+                return flag.value
+        return None
+            
     def print(self, print_meta:bool=False, print_usage:bool=True, replace_name:bool=False):
         """
         Returns a formatted string representation of the BaseCLI instance.
@@ -352,13 +415,15 @@ class BaseCLI(ABC):
                 if flag.required:
                     if flag.short not in self.parsed_flags and flag.long not in self.parsed_flags:
                         parsing_errors.append(f'Missing required flag: {flag.short}, {flag.long}.')
-
+                        
                 if flag.short in self.parsed_flags or flag.long in self.parsed_flags:
-                    parsed_flag_value = self.parsed_flags[flag.short] or self.parsed_flags[flag.long]
+                    parsed_flag_value = self.parsed_flags.get(flag.short) or self.parsed_flags.get(flag.long)
                     if parsed_flag_value and flag.value_name is None and parsed_flag_value is not True:
                         parsing_errors.append(
-                            f'Flag "{flag.short}, {flag.long}" does not expect a value, but one was given: "{self.parsed_flags[flag.short] or self.parsed_flags[flag.long]}".'
+                            f'Flag "{flag.short}, {flag.long}" does not expect a value, but one was given: "{parsed_flag_value}".'
                         )
+                    else:
+                        flag.value = parsed_flag_value
 
         # Return the list of parsing errors encountered
         return parsing_errors

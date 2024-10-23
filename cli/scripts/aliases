@@ -1,0 +1,82 @@
+#!/usr/bin/env python3.11
+
+# Copyright (c) 2024-2024 Burak Günaydin
+# All Rights Reserved
+#
+# This software is the confidential and proprietary information of
+# Burak Günaydin. You may not use, modify, or distribute this
+# software (unless you have the permission of the copyright holder)
+# except in accordance with the terms of any applicable license agreement.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
+# From own imports
+import os
+import subprocess
+import sys
+
+# Add the parent directory of 'src' to the system path.
+# This allows the script to import modules from the 'src' directory.
+# Specifically, it inserts the absolute path of the 'src' directory
+# at the beginning of the system path list (sys.path).
+# This is useful when the script is executed from a different directory
+# and needs to access modules located in 'src'.
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+from src.BaseCLI import BaseCLI
+
+class Aliases(BaseCLI):
+    def execute(self):
+        pass
+        
+    # def make_file_executable(self, file):
+    #     subprocess.run(['sudo', 'chmod', 'a+x', file], check=True)
+    #     subprocess.run(['sudo', 'chmod', '755', file], check=True)
+    #     if git_support:
+    #         subprocess.run(['git', 'add', file], check=True)
+    #         subprocess.run(['git', 'update-index', '--chmod=+x', file], check=True)
+        
+    # def execute(self):
+    #     self.print()
+    
+    #     if is_directory:
+    #         for root, _, files in os.walk(filename):
+    #             for file in files:
+    #                 self.make_file_executable(os.path.join(root, file))
+    #     else:
+    #         self.make_file_executable(filename)
+    
+META_DATA = {
+    'name': 'aliases',
+    'shorthand': 'al',
+    'help': 'Manage, edit, inject, eject and list aliases for all custom shorthand commands.',
+    'commands': [
+        {
+            'name': 'list',
+            'shorthand': 'ls',
+            'help': 'List all aliases'
+        },
+        {
+            'name': 'edit',
+            'shorthand': 'ed',
+            'help': 'Edit aliases'
+        },
+        {
+            'name': 'inject',
+            'shorthand': 'in',
+            'help': 'Inject all aliases'
+        },
+        {
+            'name': 'eject',
+            'shorthand': 'ej',
+            'help': 'Eject all aliases'
+        },
+    ]
+}
+aliases = Aliases(**META_DATA)
