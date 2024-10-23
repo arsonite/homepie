@@ -169,6 +169,4 @@ dist-ssr
 # Add specific files or patterns here based on your project needs
 *~temp
 *lock*
-*cloudflare-api.token
-*record-id.token
-*zone-id.token
+*bin
