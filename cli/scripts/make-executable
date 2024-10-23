@@ -77,31 +77,31 @@ class MakeExecutable(BaseCLI):
 # This dictionary contains all the necessary information to set up the CLI,
 # including the command name, shorthand, help description, arguments, and flags.
 META_DATA = {
-    'name': 'make-executable',  # The name of the command.
-    'shorthand': 'me',  # A shorthand alias for the command.
-    'help': 'Make a file executable by setting the executable bit, allowing it to be run as a program, omitting the interpreter.',  # Description of what the command does.
+    'name': 'make-executable',
+    'shorthand': 'me',
+    'help': 'Make a file executable by setting the executable bit, allowing it to be run as a program, omitting the interpreter.',
     'arguments': [
         {
-            'name': 'filename',  # The name of the argument.
-            'help': 'The name of the file (or directory including files) to make executable',  # Help description for the argument.
-            'required': True  # Indicates that this argument is required.
+            'name': 'filename',
+            'help': 'The name of the file (or directory including files) to make executable',
+            'required': True
         }
     ],
     'flags': [
         {
-            'short': '-d',  # The short form of the flag.
-            'long': '--directory',  # The long form of the flag.
-            'help': 'Treat the filename as a directory and make all files within it executable',  # Help description for the flag.
-            'required': False  # Indicates that this flag is optional.
+            'short': '-d',
+            'long': '--directory',
+            'help': 'Treat the filename as a directory and make all files within it executable',
+            'required': False
         },
         {
-            'short': '-g',  # The short form of the flag.
-            'long': '--git-support',  # The long form of the flag.
-            'help': 'Add the file to the git index and set the executable bit',  # Help description for the flag.
+            'short': '-g',
+            'long': '--git-support',
+            'help': 'Add the file to the git index and set the executable bit',
             'help_extension': [
-                '(recommended for version control)'  # Additional help information for the flag.
+                '(recommended for version control)'
             ],
-            'required': False  # Indicates that this flag is optional.
+            'required': False
         },
     ]
 }

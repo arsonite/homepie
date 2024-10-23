@@ -403,6 +403,9 @@ class BaseCLI(ABC):
             for argument in self.arguments:
                 if argument.required and amount_of_required_additional_arguments > 0:
                     parsing_errors.append(f'Missing required argument: <{argument.name}>.')
+                    
+                if self.parsed_arguments[argument.position]:
+                    argument.value = self.parsed_arguments[argument.position]
 
             # Check for unknown flags in the parsed flags
             for parsed_flag in self.parsed_flags:
