@@ -1,0 +1,32 @@
+[
+    {
+        "name": "hpd",
+        "help": "Change directory to HomePie data path",
+        "command": "cd $HOMEPIE_DATA_PATH"
+    },
+    {
+        "name": "hps",
+        "help": "Change directory to HomePie source path",
+        "command": "cd $HOMEPIE_SOURCE_PATH"
+    },
+    {
+        "name": "bashrc",
+        "help": "Directly edit the bashrc file with 'vim'",
+        "command": "vim ~/.bashrc"
+    },
+    {
+        "name": "home",
+        "help": "Change directory to home",
+        "command": "cd ~"
+    },
+    {
+        "name": "l",
+        "help": "List all files and directories comprehensively",
+        "command": "ls -la -h --color"
+    },
+    {
+        "name": "root",
+        "help": "Change directory to root",
+        "command": "cd /"
+    }
+]

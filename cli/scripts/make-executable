@@ -16,7 +16,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-# From own imports
+# System imports
 import os
 import subprocess
 import sys
@@ -29,6 +29,7 @@ import sys
 # and needs to access modules located in 'src'.
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
+# From own imports
 from src.BaseCLI import BaseCLI
 
 class MakeExecutable(BaseCLI):

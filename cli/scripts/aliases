@@ -16,10 +16,13 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-# From own imports
+# System imports
+import json
 import os
-import subprocess
 import sys
+
+# From system import
+from typing import List
 
 # Add the parent directory of 'src' to the system path.
 # This allows the script to import modules from the 'src' directory.
@@ -29,29 +32,66 @@ import sys
 # and needs to access modules located in 'src'.
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
+# From own imports
 from src.BaseCLI import BaseCLI
 
+class _Alias:
+    def __init__(self, name, help, command):
+        self.name = name
+        self.help = help
+        self.command = command
+
 class Aliases(BaseCLI):
+    def pre_initialization(self):
+        # TODO: Move this to .env and make dynamically parsed from source path
+        file_path = '/usr/local/src/homepie/cli/files/aliases.json'
+        # Read aliases from a JSON file
+        with open(file_path, 'r') as file:
+            aliases = json.load(file)
+        
+        self.aliases = []
+        for alias in aliases:
+            self.aliases.append(_Alias(**alias))
+    
+    def list_aliases(self):
+        """
+        List all aliases.
+        """
+        print()
+        print('Available aliases:')
+        for alias in self.aliases:
+            print(f'    {alias.name}: {alias.help}')
+        print()
+        
+    def edit_aliases(self):
+        """
+        Edit aliases.
+        """
+        print('Editing aliases...')
+        
+    def inject_aliases(self):
+        """
+        Inject all aliases.
+        """
+        print('Injecting all aliases...')
+        
+    def eject_aliases(self):
+        """
+        Eject all aliases.
+        """
+        print('Ejecting all aliases...')
+    
     def execute(self):
-        pass
+        command = self.get_command()
+        if (command == 'list' or command == 'ls'):
+            self.list_aliases()
+        elif command == 'edit' or command == 'ed':
+            self.edit_aliases()
+        elif command == 'inject' or command == 'in':
+            self.inject_aliases()
+        elif command == 'eject' or command == 'ej':
+            self.eject_aliases()
         
-    # def make_file_executable(self, file):
-    #     subprocess.run(['sudo', 'chmod', 'a+x', file], check=True)
-    #     subprocess.run(['sudo', 'chmod', '755', file], check=True)
-    #     if git_support:
-    #         subprocess.run(['git', 'add', file], check=True)
-    #         subprocess.run(['git', 'update-index', '--chmod=+x', file], check=True)
-        
-    # def execute(self):
-    #     self.print()
-    
-    #     if is_directory:
-    #         for root, _, files in os.walk(filename):
-    #             for file in files:
-    #                 self.make_file_executable(os.path.join(root, file))
-    #     else:
-    #         self.make_file_executable(filename)
-    
 META_DATA = {
     'name': 'aliases',
     'shorthand': 'al',

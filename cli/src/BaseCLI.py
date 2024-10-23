@@ -66,18 +66,14 @@ class _Command:
     """
     def __init__(self,
                  name: str,
+                 shorthand: str,
                  help: str,
                  help_extension: List[str] = None):
-        # Initialize the name of the command
         self.name = name
-        
-        # Initialize the brief description of the command
+        self.shorthand = shorthand
         self.help = help
-        
-        # Initialize additional help information for the command, if provided
         self.help_extension = help_extension
         
-        # Initialize the value of the command to None
         self.value = None
 
     def __str__(self):
@@ -141,9 +137,15 @@ class BaseCLI(ABC):
                  help:str,
                  help_extension:str=None,
                  arguments:List[_Argument]=[],
+                 commands:List[_Command]=[],
                  flags:List[_Flag]=[],
                  auto_pre_execute:bool=True,
                  auto_execute:bool=True):
+
+        # Check if the pre_initialization method is implemented
+        if hasattr(self, 'pre_initialization') and callable(getattr(self, 'pre_initialization')):
+            self.pre_initialization()
+        
         # Initialize the name of the CLI
         self.name = name
         
@@ -156,10 +158,23 @@ class BaseCLI(ABC):
         # Initialize additional help information for the CLI, if provided
         self.help_extension = help_extension
         
+        if len(commands) > 0:
+            if len(arguments) > 0:
+                raise ValueError('You cannot have pre-defined arguments and commands at the same time.')
+            
+        if len(arguments) > 0:
+            if len(commands) > 0:
+                raise ValueError('You cannot have pre-defined arguments and commands at the same time.')
+        
         # Initialize the list of _Argument instances representing the CLI arguments
         self.arguments = []
         for index, argument in enumerate(arguments):
             self.arguments.append(_Argument(**argument, position=index))
+        
+        # Initialize the list of _Argument instances representing the CLI arguments
+        self.commands = []
+        for command in commands:
+            self.commands.append(_Command(**command))
         
         # Initialize the list of _Flag instances representing the CLI flags
         # If no flags are provided, initialize it to an empty list
@@ -189,7 +204,7 @@ class BaseCLI(ABC):
         """
         return f'CLI: {self.name}, Shorthand: {self.shorthand}, Help: {self.help}'
         
-    def parse_arguments_and_flags(self):
+    def parse_arguments_and_command_and_flags(self):
         """
         Custom argument parsing logic to be independent from argparser for custom formatting reasons.
         
@@ -207,6 +222,7 @@ class BaseCLI(ABC):
         
         # Initialize empty lists for positional arguments and a dictionary for flags
         arguments = []
+        command = None
         flags = {}
         
         # Iterate over the remaining command-line arguments
@@ -229,14 +245,20 @@ class BaseCLI(ABC):
                     # If the next argument is another flag or doesn't exist, set the current flag to True
                     flags[arg] = True
             else:
+                if len(self.commands) > 0:
+                    if command is None:
+                        for search_command in self.commands:
+                            if arg == search_command.name or arg == search_command.shorthand:
+                                command = arg
+                                continue
                 # If the argument is not a flag, add it to the positional arguments list
                 arguments.append(arg)
             
             # Move to the next argument
             i += 1
-            
+        
         # Return the parsed command name, positional arguments, and flags
-        return arguments, flags
+        return arguments, command, flags
     
     def get_meta(self):
         """
@@ -261,7 +283,10 @@ class BaseCLI(ABC):
             Any: The value of the command, initially set to None.
         """
         # Access the value attribute of the command instance and return it
-        return self.command.value
+        for command in self.commands:
+            if command.value:
+                return command.value
+        return None
 
     def get_argument(self, name:str):
         """
@@ -302,6 +327,7 @@ class BaseCLI(ABC):
             indented_formatted_string += '\n'
         
         amount_of_arguments_greater_0 = len(self.arguments)
+        amount_of_commands_greater_0 = len(self.commands)
         amount_of_flags_greater_0 = len(self.flags)
         # If print_usage is True, include usage information in the formatted string
         if print_usage:
@@ -313,7 +339,18 @@ class BaseCLI(ABC):
                 
             # Add usage information to the formatted string
             indented_formatted_string += '\n'
-            indented_formatted_string += f'Usage:\n{TAB}{name} {"[arguments]" if amount_of_arguments_greater_0 else ""} {"[flags]" if amount_of_flags_greater_0 else ""}\n'
+            indented_formatted_string += f'Usage:\n{TAB}{name}'
+            
+            if amount_of_arguments_greater_0:
+                indented_formatted_string += ' [arguments]'
+            
+            if amount_of_commands_greater_0:
+                indented_formatted_string += ' [command]'
+            
+            if amount_of_flags_greater_0:
+                indented_formatted_string += ' [flags]'
+            
+            indented_formatted_string += '\n'
         
         # TODO: Make tab-space the maximum of all flags and arguments for consistency
         # If there are arguments, include them in the formatted string
@@ -333,6 +370,24 @@ class BaseCLI(ABC):
                 if argument.help_extension:
                     for extension in argument.help_extension:
                         indented_formatted_string += f'{" " * argument_line_length}{extension}\n'
+                        
+        # If there are commands, include them in the formatted string
+        if amount_of_commands_greater_0:
+            indented_formatted_string += '\n'
+            indented_formatted_string += 'Commands:\n'
+            
+            # Iterate over each argument and add its details to the formatted string
+            for command in self.commands:
+                # Format the command line with indentation
+                command_line = f'{TAB}{command.shorthand}, {command.name}:'
+                command_line_length = (len(command_line) + 1)
+                command_line += f' {command.help}'
+                indented_formatted_string += command_line + '\n'
+                
+                # If help_extension is provided for the command, add each extension to the formatted string
+                if command.help_extension:
+                    for extension in command.help_extension:
+                        indented_formatted_string += f'{" " * command_line_length}{extension}\n'
         
         # TODO: Make tab-space the maximum of all flags and arguments for consistency
         # If there are flags, include them in the formatted string
@@ -369,43 +424,53 @@ class BaseCLI(ABC):
         """
         
         # Parse the command-line arguments and flags
-        self.parsed_arguments, self.parsed_flags = self.parse_arguments_and_flags()
+        self.parsed_arguments, self.parsed_command, self.parsed_flags = self.parse_arguments_and_command_and_flags()
         
         # Initialize an empty list to store any parsing errors encountered
         parsing_errors = []
 
         # Check if the help flag ('-h' or '--help') is present in the parsed flags
         help_flag_detected = '-h' in self.parsed_flags or '--help' in self.parsed_flags
+        # Check if the help flag ('-h' or '--help') is present in the parsed flags
         if help_flag_detected:
-            # If the help flag is detected, print the help information and exit
+            # If the help flag is detected, print the CLI usage information
             self.print()
+            sys.exit(0)
         else:
-            # Determine the number of parsed arguments and the total number of expected arguments
-            amount_of_parsed_arguments = len(self.parsed_arguments)
-            amount_of_all_arguments = len(self.arguments)
-            # Check if the number of parsed arguments exceeds the number of expected arguments
-            if amount_of_parsed_arguments > amount_of_all_arguments:
-                parsing_errors.append(
-                    f'Number of possible arguments provided ({amount_of_parsed_arguments}) is greater than expected ({amount_of_all_arguments}).'
-                )
+            if len(self.commands) > 0:
+                if self.parsed_command:
+                    for command in self.commands:
+                        if self.parsed_command == command.name or self.parsed_command == command.shorthand:
+                            command.value = self.parsed_command
+                else:
+                    parsing_errors.append('No command provided.')
+            else:
+                # Determine the number of parsed arguments and the total number of expected arguments
+                amount_of_parsed_arguments = len(self.parsed_arguments)
+                amount_of_all_arguments = len(self.arguments)
+                # Check if the number of parsed arguments exceeds the number of expected arguments
+                if amount_of_parsed_arguments > amount_of_all_arguments:
+                    parsing_errors.append(
+                        f'Number of possible arguments provided ({amount_of_parsed_arguments}) is greater than expected ({amount_of_all_arguments}).'
+                    )
 
-            # Calculate the number of required arguments
-            amount_of_required_arguments = len([argument for argument in self.arguments if argument.required])
-            amount_of_required_additional_arguments = amount_of_required_arguments - amount_of_parsed_arguments
+                # Calculate the number of required arguments
+                amount_of_required_arguments = len([argument for argument in self.arguments if argument.required])
+                amount_of_required_additional_arguments = amount_of_required_arguments - amount_of_parsed_arguments
 
-            # Check if the number of parsed arguments is less than the number of required arguments
-            if amount_of_parsed_arguments < amount_of_required_arguments:
-                parsing_errors.append(
-                    f'Script requires ({amount_of_required_additional_arguments}) additional argument{"s" if amount_of_required_additional_arguments > 1 else ""}.'
-                )
+                # Check if the number of parsed arguments is less than the number of required arguments
+                if amount_of_parsed_arguments < amount_of_required_arguments:
+                    parsing_errors.append(
+                        f'Script requires ({amount_of_required_additional_arguments}) additional argument{"s" if amount_of_required_additional_arguments > 1 else ""}.'
+                    )
 
-            # Check for missing required arguments
-            for argument in self.arguments:
-                if argument.required and amount_of_required_additional_arguments > 0:
-                    parsing_errors.append(f'Missing required argument: <{argument.name}>.')
-                    
-                if self.parsed_arguments[argument.position]:
-                    argument.value = self.parsed_arguments[argument.position]
+                # Check for missing required arguments
+                for argument in self.arguments:
+                    if argument.required and amount_of_required_additional_arguments > 0:
+                        parsing_errors.append(f'Missing required argument: <{argument.name}>.')
+                        
+                    if self.parsed_arguments[argument.position]:
+                        argument.value = self.parsed_arguments[argument.position]
 
             # Check for unknown flags in the parsed flags
             for parsed_flag in self.parsed_flags:
@@ -430,6 +495,13 @@ class BaseCLI(ABC):
 
         # Return the list of parsing errors encountered
         return parsing_errors
+                
+    @abstractmethod
+    def pre_initialization(self):
+        """
+        Override this method in the child classes to implement functionality.
+        """
+        pass
                 
     @abstractmethod
     def execute(self):

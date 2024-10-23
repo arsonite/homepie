@@ -46,3 +46,4 @@ cd "$script_dir" || exit 1
 sudo apt-get update -y
 sudo apt-get upgrade -y
 
+echo "Hint: You can inject helpful aliases into the .bashrc by running the following command: $ hp aliases inject"
