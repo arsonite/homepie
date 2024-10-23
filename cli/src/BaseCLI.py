@@ -155,7 +155,7 @@ class BaseCLI(ABC):
         for index, argument in enumerate(arguments):
             self.arguments.append(_Argument(**argument, position=index))
         
-        # Initialize the list of _Argument instances representing the CLI arguments
+        # Initialize the list of _Command instances representing the CLI arguments
         self.commands = []
         for command in commands:
             self.commands.append(_Command(**command))
@@ -474,11 +474,11 @@ class BaseCLI(ABC):
             if flag.short == name or flag.long == name:
                 return flag.value
         return None
-                
-    @abstractmethod
+    
     def pre_init(self):
         """
-        Override this method in the child classes to implement functionality.
+        Optional method to be overridden in child classes for post-execution logic.
+        Not making it abstract, to prevent the need to implement it in every child class.
         """
         pass
                 
