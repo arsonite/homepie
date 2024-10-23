@@ -32,53 +32,80 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 from src.BaseCLI import BaseCLI
 
 class MakeExecutable(BaseCLI):
-    def execute(self):
-        pass
-        
+    """
+    A class to handle making files or directories executable.
+    Inherits from BaseCLI to utilize command-line interface functionalities.
+    """
+
     def make_file_executable(self, file, git_support):
+        """
+        Make a single file executable and optionally add it to the git index.
+
+        :param file: The file to make executable.
+        :param git_support: Boolean indicating whether to add the file to the git index.
+        """
+        # Change the file permissions to make it executable by all users.
         subprocess.run(['sudo', 'chmod', 'a+x', file], check=True)
+        # Set the file permissions to 755 (rwxr-xr-x).
         subprocess.run(['sudo', 'chmod', '755', file], check=True)
         if git_support:
+            # Add the file to the git index.
             subprocess.run(['git', 'add', file], check=True)
+            # Update the git index to mark the file as executable.
             subprocess.run(['git', 'update-index', '--chmod=+x', file], check=True)
-        
+
     def execute(self):
+        """
+        Execute the command to make the specified file or directory executable.
+        """
+        # Check if the --git-support flag is set.
         git_support = self.get_flag('--git-support')
+        # Get the filename argument from the command line.
         filename = self.get_argument('filename')
+        # Check if the --directory flag is set.
         if self.get_flag('--directory'):
+            # Walk through the directory and make all files executable.
             for root, _, files in os.walk(filename):
                 for file in files:
+                    # Make each file in the directory executable.
                     self.make_file_executable(os.path.join(root, file), git_support)
         else:
+            # Make the single specified file executable.
             self.make_file_executable(filename, git_support)
     
+# Metadata dictionary for the MakeExecutable command-line interface.
+# This dictionary contains all the necessary information to set up the CLI,
+# including the command name, shorthand, help description, arguments, and flags.
 META_DATA = {
-    'name': 'make-executable',
-    'shorthand': 'me',
-    'help': 'Make a file executable by setting the executable bit, allowing it to be run as a program, ommiting the interpreter.',
+    'name': 'make-executable',  # The name of the command.
+    'shorthand': 'me',  # A shorthand alias for the command.
+    'help': 'Make a file executable by setting the executable bit, allowing it to be run as a program, omitting the interpreter.',  # Description of what the command does.
     'arguments': [
         {
-            'name': 'filename',
-            'help': 'The name of the file (or directory including files) to make executable',
-            'required': True
+            'name': 'filename',  # The name of the argument.
+            'help': 'The name of the file (or directory including files) to make executable',  # Help description for the argument.
+            'required': True  # Indicates that this argument is required.
         }
     ],
     'flags': [
         {
-            'short': '-d',
-            'long': '--directory',
-            'help': 'Treat the filename as a directory and make all files within it executable',
-            'required': False
+            'short': '-d',  # The short form of the flag.
+            'long': '--directory',  # The long form of the flag.
+            'help': 'Treat the filename as a directory and make all files within it executable',  # Help description for the flag.
+            'required': False  # Indicates that this flag is optional.
         },
         {
-            'short': '-g',
-            'long': '--git-support',
-            'help': 'Add the file to the git index and set the executable bit',
+            'short': '-g',  # The short form of the flag.
+            'long': '--git-support',  # The long form of the flag.
+            'help': 'Add the file to the git index and set the executable bit',  # Help description for the flag.
             'help_extension': [
-                '(recommended for version control)'
+                '(recommended for version control)'  # Additional help information for the flag.
             ],
-            'required': False
+            'required': False  # Indicates that this flag is optional.
         },
     ]
 }
+# Instantiate the MakeExecutable class with the provided metadata.
+# The metadata includes the name, shorthand, help description, arguments, and flags
+# for the command-line interface.
 make_executable = MakeExecutable(**META_DATA)
