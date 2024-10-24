@@ -1,0 +1,96 @@
+#!/usr/bin/env python3.11
+
+# Copyright (c) 2024-2024 Burak Günaydin
+# All Rights Reserved
+#
+# This software is the confidential and proprietary information of
+# Burak Günaydin. You may not use, modify, or distribute this
+# software (unless you have the permission of the copyright holder)
+# except in accordance with the terms of any applicable license agreement.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
+# System imports
+import json
+import os
+import shutil
+import subprocess
+import sys
+import traceback
+
+# Add the parent directory of 'src' to the system path.
+# This allows the script to import modules from the 'src' directory.
+# Specifically, it inserts the absolute path of the 'src' directory
+# at the beginning of the system path list (sys.path).
+# This is useful when the script is executed from a different directory
+# and needs to access modules located in 'src'.
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+# From own imports
+from src.BaseCLI import BaseCLI
+        
+class System(BaseCLI):
+    def meta(self):
+        return {
+            'name': 'system',
+            'shorthand': 'sys',
+            'help': 'Useful system command shortcuts',
+            'commands': [
+                {
+                    'name': 'monitor',
+                    'shorthand': 'mt',
+                    'help': 'Monitor system resources'
+                },
+                {
+                    'name': 'reboot',
+                    'shorthand': 'rb',
+                    'help': 'Reboot the system'
+                },
+                {
+                    'name': 'shutdown',
+                    'shorthand': 'sh',
+                    'help': 'Shutdown the system'
+                },
+                {
+                    'name': 'stress',
+                    'shorthand': 'st',
+                    'help': 'Stress test the system'
+                }
+            ]
+        }
+        
+    def monitor(self):
+        self.execute_command('htop')
+        
+    def reboot(self):
+        self.execute_command('sudo reboot -h now')
+        
+    def shutdown(self):
+        self.execute_command('sudo shutdown -h now')
+        
+    def stress(self):
+        self.execute_command('stress-ng --cpu 8 --io 4 --vm 2 --vm-bytes 128M --timeout 10s')
+
+    def execute(self):
+        command = self.get_command()
+        
+        try:
+            if (command == 'monitor' or command == 'mt'):
+                self.monitor()
+            elif command == 'reboot' or command == 'rb':
+                self.reboot()
+            elif command == 'shutdown' or command == 'sh':
+                self.shutdown()
+            elif command == 'stress' or command == 'st':
+                self.stress()
+        except:
+            traceback.print_exc()
+        
+if __name__ == '__main__':
+    system = System()
