@@ -117,6 +117,8 @@ class BaseCLI(ABC):
         if auto_execute:
             self.execute()
 
+    # TODO: Make positioning of arguments optional
+    # TODO: Make flag assignment work with "="
     def parse_args(self):
         """
         Custom argument parsing logic to be independent from argparser for custom formatting reasons.

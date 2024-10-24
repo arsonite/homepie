@@ -118,8 +118,7 @@ class MainCLI(BaseCLI):
                               help=script.help)
             self.commands.append(command)
             
-        # Parse the command-line arguments
-        self.parse_args()
+        self.parse_args() # Parse the command-line arguments
         
         # If no command or flags are provided, print the available commands
         if len(self.parsed_arguments) == 0 and len(self.parsed_flags) == 0:
@@ -127,7 +126,10 @@ class MainCLI(BaseCLI):
             return
         
         try:
+            # Retrieve the script name from the parsed command
             script_name = self.parsed_command
+            
+            # Iterate over the scripts to find the one matching the shorthand command
             for script_key in self.scripts:
                 script = self.scripts[script_key]
                 if script.shorthand == self.parsed_command:
@@ -135,13 +137,17 @@ class MainCLI(BaseCLI):
             
             # Retrieve the selected script based on the parsed command
             selected_script = self.scripts[script_name]
-            
-            # Parse, validate, and execute the selected script's arguments
+            # Parse the arguments for the selected script
             selected_script.parse_args()
+            # Remove the script name from the arguments list
+            del selected_script.parsed_arguments[0]
+            # Validate the arguments for the selected script
             selected_script.validate_args()
+            
+            # Execute the selected script
             selected_script.execute()
         except SystemExit:
-            # Handle the case where the script calls sys.exit()
+            # Handle the SystemExit exception to prevent the program from exiting
             pass
         except:
             # Validate arguments if an exception occurs

@@ -34,9 +34,9 @@ class Flag:
                 short: str,
                 long: str,
                 help: str,
+                required:bool,
                 help_extension:List[str]=None,
-                value_name:str=None,
-                required:bool=True):
+                value_name:str=None):
         self.short = short
         self.long = long
         self.help = help
