@@ -392,7 +392,7 @@ class BaseCLI(ABC):
             
     def print(self, include_args:bool=True, include_meta:bool=False, minify_usage:bool=False, tab_padding:int=0):
         """
-        Prints the formatted CLI usage and meta information.
+        Prints the formatted CLI usage and meta information to the console.
 
         This method generates a formatted string containing the CLI's usage information,
         including arguments, commands, and flags. It can also include meta information
@@ -400,12 +400,14 @@ class BaseCLI(ABC):
         is then printed to the console.
 
         Args:
-            include_meta (bool): Whether to include meta information in the printed output.
-            minify_usage (bool): Whether to include minified usage information in the printed output.
+            include_args (bool): Whether to include arguments, commands, and flags in the formatted string.
+            include_meta (bool): Whether to include meta information in the formatted string.
+            minify_usage (bool): Whether to include minified usage information in the formatted string.
             tab_padding (int): The number of spaces to use for indentation.
         """
+        
         # Generate the formatted string using the format_str method
-        # The format_str method takes include_meta, minify_usage, and tab_padding as arguments
+        # The format_str method takes include_args, include_meta, minify_usage, and tab_padding as arguments
         indented_formatted_string = self.format_str(include_args, include_meta, minify_usage, tab_padding)
         
         # Print the final formatted string to the console
