@@ -18,7 +18,11 @@
 
 # System imports
 import importlib
+import inspect
 import os
+import shutil
+import sys
+import tempfile
 
 # From own imports
 from src.Command import Command
@@ -43,28 +47,55 @@ class MainCLI(BaseCLI):
         Discover and import all Python scripts in the `scripts/` directory, skipping __init__.py and non-Python files.
         """
         scripts = {}
-        for filename in os.listdir(SCRIPTS_DIR):
-            # TODO: Skip files that are not of class BaseCLI
-            if filename != '__init__.py' and filename != '__pycache__':
-                # TODO: Make this lazy and only if needed
-                formatted_module_name = filename.replace('-', '_')
-                formatted_filename = formatted_module_name + '.py' # Convert filename from kebab-case to snake_case for import
-                os.rename(os.path.join(SCRIPTS_DIR, filename), os.path.join(SCRIPTS_DIR, formatted_filename))
-                
-                try:
-                    module = importlib.import_module(f'scripts.{formatted_module_name}')
-                finally:
-                    # Revert the filename back to its original form
-                    os.rename(os.path.join(SCRIPTS_DIR, formatted_filename), os.path.join(SCRIPTS_DIR, filename).replace('.py', ''))
-                    
-                # Convert kebab-case to CamelCase
-                camel_case_name = ''.join(word.capitalize() for word in formatted_module_name.split('_'))
-                script_class = getattr(module, f'{camel_case_name}')
-                script_instance = script_class(auto_preinit=False,
-                                               auto_parse=False,
-                                               auto_validate=False,
-                                               auto_execute=False)
-                scripts[script_instance.name] = script_instance
+
+        # Create a temporary directory for renaming and importing
+        with tempfile.TemporaryDirectory() as temp_dir:
+            # Temporarily add the temp_dir to sys.path
+            sys.path.insert(0, temp_dir)
+
+            try:
+                # List all files in the scripts directory
+                for filename in os.listdir(SCRIPTS_DIR):
+                    # Skip non-Python files and __init__.py
+                    if filename != '__init__.py' and filename != '__pycache__':
+                        # Convert filename from kebab-case to snake_case for temporary renaming
+                        formatted_module_name = filename.replace('-', '_').replace('.py', '')
+                        formatted_filename = formatted_module_name + '.py'
+
+                        # Full path to the original and the temporary file
+                        original_filepath = os.path.join(SCRIPTS_DIR, filename)
+                        temp_filepath = os.path.join(temp_dir, formatted_filename)
+
+                        try:
+                            # Copy the file to the temp directory with the new snake_case name
+                            shutil.copy2(original_filepath, temp_filepath)
+
+                            # Import the module from the temp directory
+                            module = importlib.import_module(formatted_module_name)
+
+                            # Convert kebab-case to CamelCase for the class name
+                            camel_case_name = ''.join(word.capitalize() for word in formatted_module_name.split('_'))
+
+                            # Get the class from the module
+                            script_class = getattr(module, camel_case_name, None)
+
+                            # Ensure the class is derived from BaseCLI
+                            if script_class and inspect.isclass(script_class) and issubclass(script_class, BaseCLI):
+                                # Instantiate the class
+                                script_instance = script_class(auto_preinit=False,
+                                                            auto_parse=False,
+                                                            auto_validate=False,
+                                                            auto_execute=False)
+                                scripts[script_instance.name] = script_instance
+
+                        except Exception as e:
+                            # Handle exceptions (optional logging can be added here)
+                            print(f"Error loading script {filename}: {e}")
+
+            finally:
+                # Remove the temp directory from sys.path after import
+                sys.path.pop(0)
+
         return scripts
     
     def print(self):

@@ -32,33 +32,30 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 # From own imports
 from src.BaseCLI import BaseCLI
 
-CLI_META = {
-    'name': '',
-    'short': '',
-    'help': '',
-    'arguments': {
-        '': {
-            'help': '',
-            'required': True
-        }
-    },
-    'flags': [
-        {
-            'short': '',
-            'long': '',
-            'help': '',
-            'required': False
-        },
-    ]
-}
-
 class Template(BaseCLI):
-    def __init__(self):
-        super().__init__(**CLI_META)
+    def meta(self):
+        return {
+            'name': 'template_name',
+            'shorthand': 'template_shorthand',
+            'help': '',
+            'arguments': {
+                'template_argument': {
+                    'help': '',
+                    'required': True
+                }
+            },
+            'flags': [
+                {
+                    'short': '',
+                    'long': '',
+                    'help': '',
+                    'required': False
+                },
+            ],
+        }
 
     def execute(self):
         raise NotImplementedError('This method must be implemented in the child class.')
 
 if __name__ == '__main__':
     template_cli = Template()
-    template_cli.execute()

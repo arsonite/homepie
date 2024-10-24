@@ -65,8 +65,11 @@ class System(BaseCLI):
             ]
         }
         
+    def execute_command(self, command):
+        subprocess.run(command.split(' '))
+        
     def monitor(self):
-        self.execute_command('htop')
+        self.execute_command('htop -d 7 -H -t -U')
         
     def reboot(self):
         self.execute_command('sudo reboot -h now')
@@ -75,7 +78,7 @@ class System(BaseCLI):
         self.execute_command('sudo shutdown -h now')
         
     def stress(self):
-        self.execute_command('stress-ng --cpu 8 --io 4 --vm 2 --vm-bytes 128M --timeout 10s')
+        self.execute_command('stress --cpu 8 --io 4 --vm 2 --vm-bytes 128M --timeout 10s')
 
     def execute(self):
         command = self.get_command()
