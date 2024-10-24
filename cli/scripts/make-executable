@@ -33,10 +33,36 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 from src.BaseCLI import BaseCLI
 
 class MakeExecutable(BaseCLI):
-    """
-    A class to handle making files or directories executable.
-    Inherits from BaseCLI to utilize command-line interface functionalities.
-    """
+    def meta(self):
+        return {
+            'name': 'make-executable',
+            'shorthand': 'me',
+            'help': 'Make a file executable by setting the executable bit, allowing it to be run as a program, omitting the interpreter.',
+            'arguments': [
+                {
+                    'name': 'filename',
+                    'help': 'The name of the file (or directory including files) to make executable',
+                    'required': True
+                }
+            ],
+            'flags': [
+                {
+                    'short': '-d',
+                    'long': '--directory',
+                    'help': 'Treat the filename as a directory and make all files within it executable',
+                    'required': False
+                },
+                {
+                    'short': '-g',
+                    'long': '--git-support',
+                    'help': 'Add the file to the git index and set the executable bit',
+                    'help_extension': [
+                        '(recommended for version control)'
+                    ],
+                    'required': False
+                },
+            ]
+        }
 
     def make_file_executable(self, file, git_support):
         """
@@ -74,39 +100,5 @@ class MakeExecutable(BaseCLI):
             # Make the single specified file executable.
             self.make_file_executable(filename, git_support)
     
-# Metadata dictionary for the MakeExecutable command-line interface.
-# This dictionary contains all the necessary information to set up the CLI,
-# including the command name, shorthand, help description, arguments, and flags.
-META_DATA = {
-    'name': 'make-executable',
-    'shorthand': 'me',
-    'help': 'Make a file executable by setting the executable bit, allowing it to be run as a program, omitting the interpreter.',
-    'arguments': [
-        {
-            'name': 'filename',
-            'help': 'The name of the file (or directory including files) to make executable',
-            'required': True
-        }
-    ],
-    'flags': [
-        {
-            'short': '-d',
-            'long': '--directory',
-            'help': 'Treat the filename as a directory and make all files within it executable',
-            'required': False
-        },
-        {
-            'short': '-g',
-            'long': '--git-support',
-            'help': 'Add the file to the git index and set the executable bit',
-            'help_extension': [
-                '(recommended for version control)'
-            ],
-            'required': False
-        },
-    ]
-}
-# Instantiate the MakeExecutable class with the provided metadata.
-# The metadata includes the name, shorthand, help description, arguments, and flags
-# for the command-line interface.
-make_executable = MakeExecutable(**META_DATA)
+if __name__ == '__main__':
+    make_executable = MakeExecutable()

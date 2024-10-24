@@ -21,18 +21,23 @@ import importlib
 import os
 
 # From own imports
+from src.Command import Command
 from src.BaseCLI import BaseCLI
 
 CURRENT_DIRECTORY = os.path.dirname(os.path.abspath(__file__))
 SCRIPTS_DIR = f'{CURRENT_DIRECTORY}/scripts'
 
+# TODO: Replace with package constant
+TAB='    '
+
 class MainCLI(BaseCLI):
-    def pre_init(self):
-        """
-        Initializes the MainCLI class.
-        """
-        self.scripts = self.load_scripts()  
-    
+    def meta(self):
+        return {
+            'name': 'homepie',
+            'shorthand': 'hp',
+            'help': 'Main CLI that manages and runs available commands from the "scripts" directory.'
+        }
+        
     def load_scripts(self):
         """
         Discover and import all Python scripts in the `scripts/` directory, skipping __init__.py and non-Python files.
@@ -55,44 +60,92 @@ class MainCLI(BaseCLI):
                 # Convert kebab-case to CamelCase
                 camel_case_name = ''.join(word.capitalize() for word in formatted_module_name.split('_'))
                 script_class = getattr(module, f'{camel_case_name}')
-                script_instance = script_class(auto_preinit=False, auto_parse=False, auto_validate=False, auto_execute=False)
+                script_instance = script_class(auto_preinit=False,
+                                               auto_parse=False,
+                                               auto_validate=False,
+                                               auto_execute=False)
                 scripts[script_instance.name] = script_instance
         return scripts
-
+    
+    def print(self):
+        indented_formatted_string = '\n'
+        
+        # Add usage information to the formatted string
+        indented_formatted_string += 'Usage:\n'
+        indented_formatted_string += f'{TAB}hp <script> [args]'
+        indented_formatted_string += '\n'
+        indented_formatted_string += '\n'
+        indented_formatted_string += f'Scripts:\n'
+        
+        # Iterate over each script and add its details to the formatted string
+        for index, script_key in enumerate(self.scripts):
+            script = self.scripts[script_key]
+            script_str = script.format_str(include_args=False, include_meta=True, minify_usage=True, tab_padding=1)
+            
+            if index > 0:
+                indented_formatted_string += '\n'
+                
+            indented_formatted_string += f'{script_str}'
+            indented_formatted_string += '\n'
+                
+        indented_formatted_string += '\n'
+        indented_formatted_string += 'Hint: Use <script> -h, --help flag for usage information.'
+        indented_formatted_string += '\n'
+            
+        print(indented_formatted_string)
+    
     def execute(self):
         """
         Handles the execution of the selected command or lists all commands if no command is provided.
+        
+        This method first loads all available scripts from the `scripts/` directory and initializes them.
+        It then creates a list of `Command` objects for each script.
+        After parsing the command-line arguments, it either prints the available commands if no specific command is provided,
+        or it executes the selected command.
         """
         
-        print(self.__dict__)
+        # Load all available scripts from the `scripts/` directory
+        self.scripts = self.load_scripts()
         
-        pass
-        # if not args.command:
-        #     # List all available commands if no command is given
-        #     print()
-        #     print('Usage:')
-        #     print('    hp <command> [args]')
-        #     print()
-        #     print('Available commands:')
-        #     scripts = self.load_scripts()
-        #     for name, script in scripts.items():
-        #         print(f'    {name}: {script.description}')
-        #     print()
-        # else:
-        #     # Run the provided command
-        #     scripts = self.discover_clis()
-        #     if args.command in scripts:
-        #         script = scripts[args.command]
-        #         command_parser = argparse.ArgumentParser(description=script.description)
-        #         script.add_arguments(command_parser)
-        #         command_args = command_parser.parse_args(args.command_args)
-        #         script.run(command_args)
-        #     else:
-        #         print(f'Command "{args.command}" not found.')
+        # Initialize an empty list to store command objects
+        self.commands = []
+        
+        # Iterate over each script and create a Command object for it
+        for script_key in self.scripts:
+            script = self.scripts[script_key]
+            command = Command(name=script.name,
+                              shorthand=script.shorthand,
+                              help=script.help)
+            self.commands.append(command)
+            
+        # Parse the command-line arguments
+        self.parse_args()
+        
+        # If no command or flags are provided, print the available commands
+        if len(self.parsed_arguments) == 0 and len(self.parsed_flags) == 0:
+            self.print()
+            return
+        
+        try:
+            script_name = self.parsed_command
+            for script_key in self.scripts:
+                script = self.scripts[script_key]
+                if script.shorthand == self.parsed_command:
+                    script_name = script.name
+            
+            # Retrieve the selected script based on the parsed command
+            selected_script = self.scripts[script_name]
+            
+            # Parse, validate, and execute the selected script's arguments
+            selected_script.parse_args()
+            selected_script.validate_args()
+            selected_script.execute()
+        except SystemExit:
+            # Handle the case where the script calls sys.exit()
+            pass
+        except:
+            # Validate arguments if an exception occurs
+            self.validate_args()
 
-CLI_META_DATA = {
-    'name': 'homepie',
-    'shorthand': 'hp',
-    'help': 'Main CLI that manages and runs available commands from the "scripts" directory.'
-}
-main_cli = MainCLI(**CLI_META_DATA)
+if __name__ == '__main__':
+    main_cli = MainCLI(auto_parse=False, auto_validate=False)
