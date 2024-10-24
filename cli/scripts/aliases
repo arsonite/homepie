@@ -155,7 +155,8 @@ class Aliases(BaseCLI):
             
         # Open the edited file with vim for the user to edit
         subprocess.run(['vim', edited_file_path])
-        
+    
+    # TODO: Print that aliases exist already and are being ejected first
     def inject_aliases(self, aliases):
         """
         Inject all aliases.
@@ -209,6 +210,7 @@ class Aliases(BaseCLI):
         print('Run "exec bash" to apply the changes.')
         print()
     
+    # TODO: Print that no aliases exist to be ejected
     def eject_aliases(self, aliases, silent_mode=False):
         """
         Eject all aliases.

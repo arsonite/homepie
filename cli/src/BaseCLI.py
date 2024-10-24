@@ -270,6 +270,7 @@ class BaseCLI(ABC):
             print()
             sys.exit(1)
     
+    # TODO: Restore replace name functionality directly to streamline function header
     def format_str(self, include_args:bool, include_meta:bool, minify_usage:bool, tab_padding:int):
         """
         Formats the CLI usage and meta information into a string.
