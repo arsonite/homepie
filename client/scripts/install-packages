@@ -23,7 +23,7 @@
 # Check if there are any arguments
 if [ "$#" -gt 0 ]; then
     echo
-    echo "This script does not accept any arguments. Proceeding ..."
+    echo "Hint: This script does not accept any arguments. Proceeding anyways ..."
     echo
 fi
 

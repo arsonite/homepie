@@ -17,6 +17,7 @@
 # From system imports
 from typing import List
 
+# TODO: Implement as package class
 class Flag:
     """
     Represents a command-line flag.

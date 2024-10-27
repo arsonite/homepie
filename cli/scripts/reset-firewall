@@ -32,30 +32,39 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 # From own imports
 from src.BaseCLI import BaseCLI
 
-class Template(BaseCLI):
+# This is a test if double chatter occurs at 8Hz, but that doesnt seems to be the case which is really fucking awesome because this means I can type as fast as I can
+
+class ResetFirewall(BaseCLI):
     def meta(self):
         return {
-            'name': 'template_name',
-            'shorthand': 'template_shorthand',
-            'help': '',
-            'arguments': {
-                'template_argument': {
-                    'help': '',
-                    'required': True
-                }
-            },
-            'flags': [
-                {
-                    'short': '',
-                    'long': '',
-                    'help': '',
-                    'required': False
-                },
-            ],
+            'name': 'reset-firewall',
+            'shorthand': 'rf',
+            'help': 'Resets the firewall rules to the default settings.'
         }
 
     def execute(self):
-        raise NotImplementedError('This method must be implemented in the child class.')
+        # Disable ufw to preserve existing ssh connection
+        self.shell('ufw disable', sudo=True)
+
+        # Resetting firewall rules
+        self.shell('ufw reset -y', sudo=True)
+
+        # Enable ufw
+        self.shell('ufw enable', sudo=True)
+
+        # Allow SSH (port 22)
+        self.shell('ufw allow 22/tcp', sudo=True)
+
+        # Allow HTTP (port 80)
+        self.shell('ufw allow 80/tcp', sudo=True)
+        self.shell('ufw allow out 80/tcp', sudo=True)
+
+        # Allow HTTPS (port 443)
+        self.shell('ufw allow 443/tcp', sudo=True)
+        self.shell('ufw allow out 443/tcp', sudo=True)
+
+        # Deny all other incoming connections
+        self.shell('ufw default deny incoming', sudo=True)
 
 if __name__ == '__main__':
-    template_cli = Template()
+    reset_firewall = ResetFirewall()

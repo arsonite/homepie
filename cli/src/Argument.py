@@ -17,6 +17,7 @@
 # From system imports
 from typing import List
     
+# TODO: Implement as package class
 class Argument:
     """
     Represents a command-line argument.

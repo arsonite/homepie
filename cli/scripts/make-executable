@@ -18,7 +18,6 @@
 
 # System imports
 import os
-import subprocess
 import sys
 
 # Add the parent directory of 'src' to the system path.
@@ -47,24 +46,18 @@ class MakeExecutable(BaseCLI):
             ],
             'flags': [
                 {
-                    'short': '-d',
-                    'long': '--directory',
-                    'help': 'Treat the filename as a directory and make all files within it executable',
-                    'required': False
-                },
-                {
-                    'short': '-g',
-                    'long': '--git-support',
-                    'help': 'Add the file to the git index and set the executable bit',
+                    'short': '-ng',
+                    'long': '--no-git',
+                    'help': 'Disables adding the file to the git index and setting the executable bit',
                     'help_extension': [
-                        '(recommended for version control)'
+                        '(not recommended for version control)'
                     ],
                     'required': False
                 },
             ]
         }
 
-    def make_file_executable(self, file, git_support):
+    def make_file_executable(self, file:str, git_support:bool):
         """
         Make a single file executable and optionally add it to the git index.
 
@@ -72,33 +65,37 @@ class MakeExecutable(BaseCLI):
         :param git_support: Boolean indicating whether to add the file to the git index.
         """
         # Change the file permissions to make it executable by all users.
-        subprocess.run(['sudo', 'chmod', 'a+x', file], check=True)
+        self.shell(f'chmod a+x {file}', sudo=True)
         # Set the file permissions to 755 (rwxr-xr-x).
-        subprocess.run(['sudo', 'chmod', '755', file], check=True)
+        self.shell(f'chmod 755 {file}', sudo=True)
         if git_support:
             # Add the file to the git index.
-            subprocess.run(['git', 'add', file], check=True)
+            self.shell(f'git add {file}')
             # Update the git index to mark the file as executable.
-            subprocess.run(['git', 'update-index', '--chmod=+x', file], check=True)
+            self.shell(f'git update-index --chmod=+x {file}')
 
     def execute(self):
         """
         Execute the command to make the specified file or directory executable.
         """
-        # Check if the --git-support flag is set.
-        git_support = self.get_flag('--git-support')
+        # Check if the --no-git flag is set.
+        git_support = not self.get_flag('--no-git')
         # Get the filename argument from the command line.
         filename = self.get_argument('filename')
-        # Check if the --directory flag is set.
-        if self.get_flag('--directory'):
+        
+        # Check if the provided filename is a directory or a file.
+        if os.path.isdir(filename):
             # Walk through the directory and make all files executable.
             for root, _, files in os.walk(filename):
                 for file in files:
                     # Make each file in the directory executable.
                     self.make_file_executable(os.path.join(root, file), git_support)
-        else:
+        elif os.path.isfile(filename):
             # Make the single specified file executable.
             self.make_file_executable(filename, git_support)
+        else:
+            # If the path is neither a file nor a directory, raise an error.
+            raise ValueError(f"The path '{filename}' is neither a file nor a directory.")
     
 if __name__ == '__main__':
     make_executable = MakeExecutable()

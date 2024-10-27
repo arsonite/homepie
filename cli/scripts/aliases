@@ -20,7 +20,6 @@
 import json
 import os
 import shutil
-import subprocess
 import sys
 import traceback
 
@@ -142,31 +141,27 @@ class Aliases(BaseCLI):
         """
         
         # TODO: Move this to .env and make dynamically parsed from source path
-        edited_file_path = '/usr/local/src/homepie/cli/dist/aliases-edited.json'
+        edited_alises_directory_path = '/usr/local/src/homepie/cli/dist'
+        edited_aliases_file_path = f'{edited_alises_directory_path}/aliases-edited.json'
         
         # Check if the file exists, if not create it
-        if not os.path.exists(edited_file_path):
-            with open(edited_file_path, 'w') as file:
-                json.dump([], file)
+        # Create parent directories if they do not exist
+        os.makedirs(edited_alises_directory_path, exist_ok=True)
         
         # Save a prettified JSON of aliases to the file
-        with open(edited_file_path, 'w') as file:
+        with open(edited_aliases_file_path, 'w') as file:
             json.dump([alias.__dict__ for alias in aliases], file, indent=4)
             
         # Open the edited file with vim for the user to edit
-        subprocess.run(['vim', edited_file_path])
+        self.shell(f'vim {edited_aliases_file_path}')
     
-    # TODO: Print that aliases exist already and are being ejected first
-    def inject_aliases(self, aliases):
+    def inject_aliases(self, aliases, skip_refresh:bool=False):
         """
         Inject all aliases.
         """
         print()
         print('Injecting all aliases...')
 
-        # Remove existing aliases block if present
-        self.eject_aliases(aliases, silent_mode=True)
-        
         # TODO: Move this to .env and make dynamically parsed
         env_path = '/usr/local/src/homepie/.env'
         # Load environment variables from .env file
@@ -185,11 +180,25 @@ class Aliases(BaseCLI):
         formatted_aliases = [f'alias {alias.name}="{alias.command}"' for alias in aliases]
 
         # Read the current .bashrc content
-        if os.path.exists(bashrc_path):
-            with open(bashrc_path, 'r') as file:
-                bashrc_content = file.readlines()
-        else:
-            bashrc_content = []
+        with open(bashrc_path, 'r') as file:
+            bashrc_content = file.readlines()
+            
+        # Check if the aliases block already exists
+        start_index = None
+        end_index = None
+        for i, line in enumerate(bashrc_content):
+            if start_marker in line:
+                start_index = i
+            if end_marker in line:
+                end_index = i
+        # Remove existing aliases block if present
+        if start_index is not None and end_index is not None:
+            print('Aliases already exist. Ejecting existing aliases first...')
+            self.eject_aliases(aliases, silent_mode=True, skip_refresh=True)
+
+        # Read the current .bashrc content again
+        with open(bashrc_path, 'r') as file:
+            bashrc_content = file.readlines()
 
         # Insert the new aliases block
         new_aliases_block = [start_marker + '\n'] + [alias + '\n' for alias in formatted_aliases] + [end_marker + '\n']
@@ -202,16 +211,19 @@ class Aliases(BaseCLI):
         for alias in formatted_aliases:
             print(f'Injected alias: {alias}')
             
-        # Refresh the current shell to load the new .bashrc
-        subprocess.run(['.', bashrc_path], shell=True)
-        subprocess.run(['exec', 'bash'], shell=True)
-            
         print('Injected.')
-        print('Run "exec bash" to apply the changes.')
-        print()
-    
+        
+        if skip_refresh:
+            print('Hint: Run "exec bash" to apply the changes.')
+            print()
+        else:
+            print()
+            # Refresh the current shell to load the new .bashrc
+            self.shell(f'. {bashrc_path}')
+            self.shell('exec bash')
+        
     # TODO: Print that no aliases exist to be ejected
-    def eject_aliases(self, aliases, silent_mode=False):
+    def eject_aliases(self, aliases, silent_mode:bool=False, skip_refresh:bool=False):
         """
         Eject all aliases.
         """
@@ -250,14 +262,17 @@ class Aliases(BaseCLI):
             for alias in aliases:
                 print(f'Ejected alias: {alias.name}="{alias.command}"')
             
-        # Refresh the current shell to load the new .bashrc
-        subprocess.run(['.', bashrc_path], shell=True)
-        subprocess.run(['exec', 'bash'], shell=True)
-            
-        if not silent_mode:
-            print('Ejected.')
-            print('Run "exec bash" to apply the changes.')
+        print('Ejected.')
+        
+        if skip_refresh:
+            if not silent_mode:
+                print('Hint: Run "exec bash" to apply the changes.')
+                print()
+        else:
             print()
+            # Refresh the current shell to load the new .bashrc
+            self.shell(f'. {bashrc_path}')
+            self.shell('exec bash')
             
     def reset_edited_aliases_file(self):
         """

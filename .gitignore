@@ -167,7 +167,7 @@ dist-ssr
 
 # Custom project-specific ignores
 # Add specific files or patterns here based on your project needs
-*~temp
+*~temp*
 *-lock*
 *.lock*
 */bin/

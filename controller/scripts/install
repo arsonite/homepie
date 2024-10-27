@@ -23,33 +23,17 @@
 # Check if there are any arguments
 if [ "$#" -gt 0 ]; then
     echo
-    echo "This script does not accept any arguments. Proceeding ..."
+    echo "Hint: This script does not accept any arguments. Proceeding anyways ..."
     echo
 fi
 
-#########################################################
-##################### END CMD PARSE #####################
-#########################################################
+#######################################################
+#################### END CMD PARSE ####################
+#######################################################
 
-#########################################################
-##################### SCRIPT START ######################
-#########################################################
+#######################################################
+#################### SCRIPT START #####################
+#######################################################
 
-# Asking for sudo permissions before script executes any further and surpresses usage information
-sudo 2>/dev/null
-
-# Install Certbot and the Certbot Nginx plugin using apt-get
-sudo apt-get install -y certbot python3-certbot-nginx
-
-# Obtain SSL certificates for homepie.net and www.homepie.net using Certbot
-sudo certbot -d homepie.net -d www.homepie.net
-
-# Check the status of the Certbot timer to ensure it is running
-sudo systemctl status certbot.timer
-
-# Perform a dry run of the certificate renewal process to verify it works correctly
-sudo certbot renew --dry-run
-
-# Stop and disable the Nginx service
-sudo systemctl stop nginx
-sudo systemctl disable nginx
+# TODO: Specify version
+sudo apt-get install -y golang-go

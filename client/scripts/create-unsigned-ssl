@@ -16,15 +16,15 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-This is a test if double chatter occurs at 8Hz, but that doesnt seems to be the case which is really fucking awesome because this means I can type as fast as I can
-
 #########################################################
 #################### START CMD PARSE ####################
 #########################################################
 
 # Check if there are any arguments
 if [ "$#" -gt 0 ]; then
-    echo "This script does not accept any arguments. Proceeding ..."
+    echo
+    echo "Hint: This script does not accept any arguments. Proceeding anyways ..."
+    echo
 fi
 
 #######################################################
@@ -38,25 +38,38 @@ fi
 # Asking for sudo permissions before script executes any further and surpresses usage information
 sudo 2>/dev/null
 
-# Disable ufw to preserve existing ssh connection
-sudo ufw disable
+# Get the directory of the script and navigate to it.
+# Necessary code-repetition to ensure being able to execute script from anywhere
+script_directory=$(dirname "$(readlink -f "$0")")
+cd "$script_directory" || exit 1
+cd ../files
 
-# Resetting firewall rules
-sudo ufw reset -y
+mkdir --parents ~temp/ssl
+cd ssl
 
-# Enable ufw
-sudo ufw enable
+sudo apt install -y openssl
 
-# Allow SSH (port 22)
-sudo ufw allow 22/tcp
+# Become a Certificate Authority
+# Generate private key
+openssl genrsa -des3 -out CA.key 2048
+# Generate root certificate
+openssl req -x509 -new -nodes -key CA.key -sha256 -days 825 -out CA.pem
 
-# Allow HTTP (port 80)
-sudo ufw allow 80/tcp
-sudo ufw allow out 80/tcp
-
-# Allow HTTPS (port 443)
-sudo ufw allow 443/tcp
-sudo ufw allow out 443/tcp
-
-# Deny all other incoming connections
-sudo ufw default deny incoming
+# Create CA-signed certs
+# Generate a private key
+openssl genrsa -out private.key 2048
+# Create a certificate-signing request
+openssl req -new -key private.key -out certificate-request.csr
+# Create a config file for the extensions
+>config.ext cat <<-EOF
+authorityKeyIdentifier=keyid,issuer
+basicConstraints=CA:FALSE
+keyUsage = digitalSignature, nonRepudiation, keyEncipherment, dataEncipherment
+subjectAltName = @alt_names
+[alt_names]
+DNS.1 = localhost # Be sure to include the domain name here because Common Name is not so commonly honoured by itself
+EOF
+# Create the signed certificate
+openssl x509 -req -in certificate-request.csr -CA CA.pem -CAkey CA.key -CAcreateserial -out certificate.crt -days 825 -sha256 -extfile config.ext
+# Generate a windows-compatible CA-file
+openssl pkcs12 -export -out CA.pfx -inkey CA.key -in CA.pem

@@ -1,0 +1,99 @@
+#!/usr/bin/env python3.11
+
+# Copyright (c) 2024-2024 Burak Günaydin
+# All Rights Reserved
+#
+# This software is the confidential and proprietary information of
+# Burak Günaydin. You may not use, modify, or distribute this
+# software (unless you have the permission of the copyright holder)
+# except in accordance with the terms of any applicable license agreement.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
+# System imports
+import os
+import sys
+
+# Add the parent directory of 'src' to the system path.
+# This allows the script to import modules from the 'src' directory.
+# Specifically, it inserts the absolute path of the 'src' directory
+# at the beginning of the system path list (sys.path).
+# This is useful when the script is executed from a different directory
+# and needs to access modules located in 'src'.
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+# From own imports
+from src.BaseCLI import BaseCLI
+
+class LineConversion(BaseCLI):
+    def meta(self):
+        return {
+            'name': 'line-conversion',
+            'shorthand': 'lc',
+            'help': 'Convert the line endings of all files in the current directory to Unix format (LF)',
+            'arguments': [
+                {
+                    'name': 'filename',
+                    'help': 'The name of the file (or directory including files) to convert',
+                    'required': True
+                }
+            ],
+            'flags': [
+                {
+                    'short': '-win',
+                    'long': '--windows',
+                    'help': 'Convert line endings to Windows format instead (CRLF)',
+                    'required': False
+                },
+            ],
+        }
+        
+    def convert_line_endings(self, file:str, format:str):
+        """
+        Convert the line endings of a given file to the specified format.
+
+        Args:
+            file (str): The path to the file whose line endings are to be converted.
+            format (str): The target line ending format. 'LF' for Unix (default), 'CRLF' for Windows.
+
+        Raises:
+            ValueError: If an unsupported format is specified.
+        """
+        # Check if the desired format is Unix (LF)
+        if format == 'LF':
+            # Use the 'dos2unix' command to convert Windows line endings (CRLF) to Unix line endings (LF)
+            self.shell(f'dos2unix {file}')
+        # Check if the desired format is Windows (CRLF)
+        elif format == 'CRLF':
+            # Use the 'unix2dos' command to convert Unix line endings (LF) to Windows line endings (CRLF)
+            self.shell(f'unix2dos {file}')
+        else:
+            # Raise an error if an unsupported format is specified
+            raise ValueError(f"Unsupported format: {format}")
+
+    def execute(self):
+        format = 'CRLF' if self.get_flag('-win') or self.get_flag('--windows') else 'LF'
+        filename = self.get_argument('filename')
+        # Check if the provided filename is a directory or a file
+        if os.path.isdir(filename):
+            # Walk through the directory and convert all files to the specified line ending format
+            # (excluding .git, node_modules, and venv)
+            for root, dirs, files in os.walk('.'):
+                # Exclude .git, node_modules, and venv directories
+                dirs[:] = [d for d in dirs if d not in {'.git', 'node_modules', 'venv'}]
+                for file in files:
+                    file_path = os.path.join(root, file)
+                    self.convert_line_endings(file_path, format)
+                    
+        elif os.path.isfile(filename):
+            # Convert the single specified file
+            self.convert_line_endings(filename, format)
+
+if __name__ == '__main__':
+    LineConversion()

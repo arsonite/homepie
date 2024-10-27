@@ -17,9 +17,9 @@
 # SOFTWARE.
 
 # System imports
+import json
 import os
 import sys
-import traceback
 
 # Add the parent directory of 'src' to the system path.
 # This allows the script to import modules from the 'src' directory.
@@ -31,64 +31,43 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 
 # From own imports
 from src.BaseCLI import BaseCLI
-        
-class System(BaseCLI):
+
+class Template(BaseCLI):
     def meta(self):
         return {
-            'name': 'system',
-            'shorthand': 'sys',
-            'help': 'Useful system command shortcuts',
+            'name': '',
+            'shorthand': '',
+            'help': '',
             'commands': [
                 {
-                    'name': 'monitor',
-                    'shorthand': 'mt',
-                    'help': 'Monitor system resources'
+                    'name': '',
+                    'shorthand': '',
+                    'help': '',
                 },
+            ],
+            'arguments': {
                 {
-                    'name': 'reboot',
-                    'shorthand': 'rb',
-                    'help': 'Reboot the system'
-                },
-                {
-                    'name': 'shutdown',
-                    'shorthand': 'sh',
-                    'help': 'Shutdown the system'
-                },
-                {
-                    'name': 'stress',
-                    'shorthand': 'st',
-                    'help': 'Stress test the system'
+                    'name': '',
+                    'help': '',
+                    'required': True
                 }
-            ]
+            },
+            'flags': [
+                {
+                    'short': '',
+                    'long': '',
+                    'help': '',
+                    'help_extension': [
+                        '',
+                        ''
+                    ],
+                    'required': False
+                },
+            ],
         }
-        
-        
-    def monitor(self):
-        self.shell('htop -d 7 -H -t -U')
-        
-    def reboot(self):
-        self.shell('reboot -h now', sudo=True)
-        
-    def shutdown(self):
-        self.shell('shutdown -h now', sudo=True)
-        
-    def stress(self):
-        self.shell('stress --cpu 8 --io 4 --vm 2 --vm-bytes 128M --timeout 10s')
 
     def execute(self):
-        command = self.get_command()
-        
-        try:
-            if (command == 'monitor' or command == 'mt'):
-                self.monitor()
-            elif command == 'reboot' or command == 'rb':
-                self.reboot()
-            elif command == 'shutdown' or command == 'sh':
-                self.shutdown()
-            elif command == 'stress' or command == 'st':
-                self.stress()
-        except:
-            traceback.print_exc()
-        
+        raise NotImplementedError('This method must be implemented.')
+
 if __name__ == '__main__':
-    System()
+    Template()

@@ -22,11 +22,13 @@ import inspect
 import os
 import shutil
 import sys
-import tempfile
 
 # From own imports
-from src.Command import Command
 from src.BaseCLI import BaseCLI
+from src.Command import Command
+
+# From as-own imports
+from src.TemporaryDirectory import TemporaryDirectory as TempDir
 
 CURRENT_DIRECTORY = os.path.dirname(os.path.abspath(__file__))
 SCRIPTS_DIR = f'{CURRENT_DIRECTORY}/scripts'
@@ -49,10 +51,7 @@ class MainCLI(BaseCLI):
         scripts = {}
 
         # Create a temporary directory for renaming and importing
-        with tempfile.TemporaryDirectory() as temp_dir:
-            # Temporarily add the temp_dir to sys.path
-            sys.path.insert(0, temp_dir)
-
+        with TempDir(directory_path=CURRENT_DIRECTORY) as temp_dir:
             try:
                 # List all files in the scripts directory
                 for filename in os.listdir(SCRIPTS_DIR):
@@ -67,11 +66,16 @@ class MainCLI(BaseCLI):
                         temp_filepath = os.path.join(temp_dir, formatted_filename)
 
                         try:
-                            # Copy the file to the temp directory with the new snake_case name
-                            shutil.copy2(original_filepath, temp_filepath)
+                            try:
+                                # Copy the file to the temp directory with the new snake_case name
+                                shutil.copy2(original_filepath, temp_filepath)
+                            except Exception as e:
+                                print("An error occurred during file copy:", e)
 
-                            # Import the module from the temp directory
-                            module = importlib.import_module(formatted_module_name)
+                            # Load the module from the temp directory file directly without modifying sys.path
+                            spec = importlib.util.spec_from_file_location(formatted_module_name, temp_filepath)
+                            module = importlib.util.module_from_spec(spec)
+                            spec.loader.exec_module(module)
 
                             # Convert kebab-case to CamelCase for the class name
                             camel_case_name = ''.join(word.capitalize() for word in formatted_module_name.split('_'))
@@ -83,19 +87,21 @@ class MainCLI(BaseCLI):
                             if script_class and inspect.isclass(script_class) and issubclass(script_class, BaseCLI):
                                 # Instantiate the class
                                 script_instance = script_class(auto_preinit=False,
-                                                            auto_parse=False,
-                                                            auto_validate=False,
-                                                            auto_execute=False)
+                                                               auto_parse=False,
+                                                               auto_validate=False,
+                                                               auto_execute=False)
                                 scripts[script_instance.name] = script_instance
 
                         except Exception as e:
                             # Handle exceptions (optional logging can be added here)
-                            print(f"Error loading script {filename}: {e}")
+                            print(f'Error loading script "{filename}": {e}')
 
             finally:
                 # Remove the temp directory from sys.path after import
                 sys.path.pop(0)
 
+        # Sort the scripts dictionary by keys
+        scripts = dict(sorted(scripts.items()))
         return scripts
     
     def print(self):
@@ -118,9 +124,9 @@ class MainCLI(BaseCLI):
                 
             indented_formatted_string += f'{script_str}'
             indented_formatted_string += '\n'
-                
+        
         indented_formatted_string += '\n'
-        indented_formatted_string += 'Hint: Use <script> -h, --help flag for usage information.'
+        indented_formatted_string += 'Hint: Use "<script> -h, --help" flag for usage information.'
         indented_formatted_string += '\n'
             
         print(indented_formatted_string)

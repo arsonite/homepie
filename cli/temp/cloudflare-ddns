@@ -21,9 +21,11 @@
 #########################################################
 
 # Check if there are any arguments
-if [ "$#" -lt 4 ]; then
+if [ "$#" -lt 2 ]; then
     echo
-    echo "This script need 4 arguments. Exiting ..."
+    echo "This script needs 2 arguments:"
+    echo "./cloudflare-ddns <CF_API_TOKEN> <CF_DOMAIN>"
+    echo "Exiting ..."
     echo
     exit 1
 fi
@@ -62,14 +64,34 @@ fi
 
 # Note:
 # - Ensure that you have the necessary permissions for the Cloudflare API Token to read and update DNS records.
-# - The script assumes the DNS record type is "A" and sets the TTL to 120 seconds with proxying disabled.
+# - The script assumes the DNS record type is "A" and sets the TTL to 120 seconds with proxying enabled.
 CF_API_TOKEN="$1" # Replace with your API Token
-CF_ZONE_ID="$2" # Replace with your Cloudflare Zone ID
-CF_RECORD_ID="$3" # Replace with your Cloudflare DNS Record ID
-CF_DOMAIN="$4" # Replace with your domain (example.com)
+CF_DOMAIN="$2" # Replace with your domain (example.com)
+
+# Get the Zone ID for the domain
+CF_ZONE_ID=$(curl -s -X GET "https://api.cloudflare.com/client/v4/zones?name=$CF_DOMAIN" \
+    -H "Authorization: Bearer $CF_API_TOKEN" \
+    -H "Content-Type: application/json" | jq -r '.result[0].id')
+
+# Check if Zone ID was successfully retrieved
+if [ -z "$CF_ZONE_ID" ] || [ "$CF_ZONE_ID" == "null" ]; then
+    echo "Failed to retrieve Zone ID. Please check your API token and domain."
+    exit 1
+fi
+
+# Get the Record ID for the A record of the domain
+CF_RECORD_ID=$(curl -s -X GET "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/dns_records?type=A&name=$CF_DOMAIN" \
+    -H "Authorization: Bearer $CF_API_TOKEN" \
+    -H "Content-Type: application/json" | jq -r '.result[0].id')
+
+# Check if Record ID was successfully retrieved
+if [ -z "$CF_RECORD_ID" ] || [ "$CF_RECORD_ID" == "null" ]; then
+    echo "Failed to retrieve Record ID for domain $CF_DOMAIN. Please ensure an A record exists for this domain."
+    exit 1
+fi
 
 # Get the current public IP
-CURRENT_IP=$(curl https://dynamicdns.park-your-domain.com/getip) # Guarantees to get the public IPv4 address
+CURRENT_IP=$(curl -s https://dynamicdns.park-your-domain.com/getip)
 
 # Get the currently set IP in Cloudflare
 CF_CURRENT_IP=$(curl -s -X GET "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/dns_records/$CF_RECORD_ID" \

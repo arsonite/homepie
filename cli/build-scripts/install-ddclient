@@ -23,7 +23,7 @@
 # Check if there are any arguments
 if [ "$#" -gt 0 ]; then
     echo
-    echo "This script does not accept any arguments. Proceeding ..."
+    echo "Hint: This script does not accept any arguments. Proceeding anyways ..."
     echo
 fi
 
@@ -38,12 +38,37 @@ fi
 # Asking for sudo permissions before script executes any further and surpresses usage information
 sudo 2>/dev/null
 
-# Get the directory of the script and navigate to it.
-# Necessary code-repetition to ensure being able to execute script from anywhere
-script_dir=$(dirname "$(readlink -f "$0")")
-cd "$script_dir" || exit 1
+# Install ddclient package using apt-get
+sudo apt-get install -y ddclient
 
-sudo apt-get update -y
-sudo apt-get upgrade -y
+# This script configures ddclient, a client for updating dynamic DNS entries.
+# It writes the configuration to /etc/ddclient.conf using sudo privileges.
+# The configuration specifies:
+# - The method to obtain the external IP address (use=web, web=dynamicdns.park-your-domain.com/getip)
+# - The protocol to use (protocol=namecheap)
+# - The server to connect to (server=dynamicdns.park-your-domain.com)
+# - The login credentials (login=<yourdomain.com>, password=<yourpassword>)
+# - The hostname to update (www)
+sudo echo "use=web, web=dynamicdns.park-your-domain.com/getip
+protocol=namecheap
+server=dynamicdns.park-your-domain.com
+login=<yourdomain.com>
+password=<yourpassword>
+www" > /etc/ddclient.conf
 
-echo "Hint: You can inject helpful aliases into the .bashrc by running the following command: $ hp aliases inject"
+# # Open the ddclient configuration file in vim for manual editing
+sudo vim /etc/ddclient.conf
+
+# Run ddclient in the foreground for debugging purposes
+# Options:
+# -daemon=0: Do not run as a daemon
+# -debug: Enable debugging output
+# -verbose: Enable verbose output
+# -noquiet: Do not suppress non-error messages
+sudo ddclient -daemon=0 -debug -verbose -noquiet
+
+# Enable ddclient to start on boot
+sudo systemctl enable ddclient
+
+# Start the ddclient service
+sudo systemctl start ddclient

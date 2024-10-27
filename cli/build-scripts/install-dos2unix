@@ -23,7 +23,7 @@
 # Check if there are any arguments
 if [ "$#" -gt 0 ]; then
     echo
-    echo "This script does not accept any arguments. Proceeding ..."
+    echo "Hint: This script does not accept any arguments. Proceeding anyways ..."
     echo
 fi
 
@@ -35,6 +35,7 @@ fi
 ##################### SCRIPT START ######################
 #########################################################
 
-curl -X GET "https://api.cloudflare.com/client/v4/zones/YOUR_ZONE_ID/dns_records?type=A&name=yourdomain.com" \
--H "Authorization: Bearer YOUR_CLOUDFLARE_API_TOKEN" \
--H "Content-Type: application/json"
+# Asking for sudo permissions before script executes any further and surpresses usage information
+sudo 2>/dev/null
+
+sudo apt-get install -y dos2unix
