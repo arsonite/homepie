@@ -1,0 +1,87 @@
+/**
+ * Copyright (c) 2024-2024 Burak Günaydin
+ * All Rights Reserved
+ * 
+ * This software is the confidential and proprietary information of
+ * Burak Günaydin. You may not use, modify, or distribute this
+ * software (unless you have the permission of the copyright holder)
+ * except in accordance with the terms of any applicable license agreement.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+*/
+
+// Global reset
+*,
+p,
+a,
+input,
+button {
+    margin: 0;
+    padding: 0;
+
+    border: 0;
+    box-sizing: border-box;
+    outline: 0;
+
+    -webkit-font-smoothing: antialiased;
+    -webkit-text-size-adjust: 100%;
+    -moz-osx-font-smoothing: grayscale;
+    font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+    font-size: $global_font_base;
+    font-synthesis: none;
+    font-weight: 400;
+    line-height: 1.5;
+    text-decoration: none;
+    text-rendering: optimizeLegibility;
+}
+
+.disabled {
+    user-select: none !important;
+
+    color: #aaa;
+    background-color: #999;
+}
+
+.hidden {
+    display: none !important;
+}
+
+body {
+    overflow: hidden;
+
+    // Using dvh and dvw instead of vh and vw to avoid content being pushed down by the adress bar on mobile browsers
+    height: 100dvh !important;
+    width: 100dvw !important;
+
+    background-color: $global_black;
+
+    #root {
+        overflow: inherit;
+
+        height: inherit;
+        width: inherit;
+    }
+
+    &.spinning {
+        * {
+            @keyframes rotate {
+                0% {
+                    transform: rotate(0deg);
+                }
+                100% {
+                    transform: rotate(360deg);
+                }
+            }
+
+            animation: rotate 15s linear infinite;
+        }
+    }
+}
+
+// TODO: Media query tests

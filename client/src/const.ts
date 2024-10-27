@@ -35,7 +35,7 @@ const DEBUG_FLAG: boolean = import.meta.env.DEV;
  * 
  * @property {string} sub - Subdomain, e.g. 'api.', 'services.', etc.
  * @property {string} protocol - Internet-protocol used (either HTTP or HTTPS). Uses 'http://' if `DEBUG_FLAG` is true, otherwise uses the current window's protocol.
- * @property {string} url - Host URL. Uses '127.0.0.1' if `DEBUG_FLAG` is true, otherwise uses the current window's host.
+ * @property {string} url - Host URL. Uses '0.0.0.0' if `DEBUG_FLAG` is true, otherwise uses the current window's host.
  * @property {string} tld - Top-level domain, e.g. '.de', '.com', '.org', '.net'.
  * @property {number} port - Exposed port of the API server for access through the internet. Uses port 8888 if `DEBUG_FLAG` is true, otherwise uses port 443.
  * @property {string} root - Root path of the API.
@@ -43,7 +43,7 @@ const DEBUG_FLAG: boolean = import.meta.env.DEV;
 const API_ROUTE = {
     sub: '', // Subdomain, e.g. 'api.', 'services.', etc.
     protocol: DEBUG_FLAG ? 'http://' : window.location.protocol + '//', // Internet-protocol used (either HTTP or HTTPS)
-    url: DEBUG_FLAG ? '127.0.0.1' : window.location.host, // Host-url
+    url: DEBUG_FLAG ? '0.0.0.0' : window.location.host, // Host-url
     tld: '', // Top-level-domain, e.g. '.de', '.com', '.org', '.net'
     port: DEBUG_FLAG ? 8888 : 443, // Exposed port of API-server for access through internet
     root: 'api',
@@ -80,7 +80,7 @@ const HTTP_ENCODING = {
     TAB: '+'
 };
 
-// Future kiosk mode variable
+// TODO: Future kiosk mode implementation
 /**
  * @constant {boolean} KIOSK_FLAG
  * @description A flag indicating whether the application is running in kiosk mode.
@@ -104,7 +104,21 @@ const KIOSK_FLAG: boolean = false;
  * Hardcoding secret keys in the source code is not recommended for production environments.
  * Consider using environment variables or secure vaults to manage sensitive information.
  */
-const SECRET_KEY: string = 'Nvdz3Qntxm8mMHkWl2ETEiJcQ5e4tEMg';
+const SECRET_KEY: string = 'secret-debug-key';
+
+/**
+ * @constant {boolean} STRICT_MODE
+ * @description
+ * This constant is used to enable or disable strict mode throughout the application.
+ * When set to `true`, the application will enforce stricter rules and validations,
+ * potentially catching more errors and enforcing best practices.
+ * 
+ * @example
+ * if (STRICT_MODE) {
+ *   // Perform strict mode specific operations
+ * }
+ */
+const STRICT_MODE: boolean = true;
 
 /**
  * A constant boolean flag used to enable or disable verbose logging throughout the application.
@@ -135,5 +149,6 @@ export {
     HTTP_ENCODING,
     KIOSK_FLAG,
     SECRET_KEY,
+    STRICT_MODE,
     VERBOSE_FLAG,
 }

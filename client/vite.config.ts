@@ -48,8 +48,8 @@ export default defineConfig({
     preprocessorOptions: {
       scss: {
         additionalData: `
-          @import "./src/_style/global-mixins.scss";
           @import "./src/_style/global-variables.scss";
+          @import "./src/_style/global-z-indices.scss";
         `,
       },
     },

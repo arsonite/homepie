@@ -15,7 +15,26 @@
 * SOFTWARE.
 */
 
-// Declare custom package types here
+/**
+ * Declares a module 'require-context' which provides a function to require 
+ * modules within a specified directory.
+ * 
+ * @module 'require-context'
+ */
+
+/**
+ * Function to require modules within a specified directory.
+ * 
+ * @param directory - The path to the directory containing the modules.
+ * @param useSubdirectories - A boolean indicating whether to include subdirectories.
+ * @param regExp - A regular expression to match files against.
+ * 
+ * @returns An object with the following properties:
+ * - `keys`: A function that returns an array of matched file paths.
+ * - `resolve`: A function that takes a key (file path) and returns the resolved path.
+ * - `id`: A string identifier for the context.
+ * - `<T>`: A generic function that takes a key (file path) and returns the required module.
+ */
 declare module 'require-context' {
     function requireContext(
         directory: string,

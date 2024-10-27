@@ -1,13 +1,69 @@
-<!doctype html>
-<html lang="en">
+<!--
+Copyright (c) 2024-2024 Burak Günaydin
+All Rights Reserved
+
+This software is the confidential and proprietary information of
+Burak Günaydin. You may not use, modify, or distribute this
+software (unless you have the permission of the copyright holder)
+except in accordance with the terms of any applicable license agreement.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+-->
+
+<!DOCTYPE html>
+<!-- The document type declaration defines the document to be HTML5 -->
+
+<html>
   <head>
+    <!-- The head element contains meta-information about the document -->
+
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite + React + TS</title>
+    <!-- Specifies the character encoding for the HTML document -->
+
+    <meta
+      name="viewport"
+      content="width=device-width,
+           height=device-height,
+           initial-scale=1.0,
+           maximum-scale=1.0,
+           user-scalable=no,
+           viewport-fit=cover,
+           interactive-widget=resizes-content"
+    />
+    <!-- Sets the viewport to make the website look good on all devices -->
+    <!-- width=device-width: Sets the width of the page to follow the screen-width of the device -->
+    <!-- height=device-height: Sets the height of the page to follow the screen-height of the device -->
+    <!-- initial-scale=1.0: Sets the initial zoom level when the page is first loaded -->
+    <!-- maximum-scale=1.0: Prevents users from zooming in -->
+    <!-- user-scalable=no: Disables the user's ability to zoom -->
+    <!-- viewport-fit=cover: Ensures the content covers the entire viewport -->
+    <!-- interactive-widget=resizes-content: Ensures interactive widgets resize the content -->
+
+    <link rel="icon" type="image/png" href="/favicon.ico" />
+    <!-- Links to the favicon for the webpage, which appears in the browser tab -->
+
+    <title>HomePie</title>
+    <!-- The title of the document, shown in the browser's title bar or tab -->
   </head>
+
   <body>
+    <!-- The body element contains the content of the document -->
+
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <!-- This message will be displayed if JavaScript is disabled in the user's browser -->
+
     <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
+    <!-- A div element with the id "root" where the React app will be mounted -->
+
+    <script type="module" src="/src/index.tsx"></script>
+    <!-- The script element to include the main JavaScript file for the React app -->
+    <!-- type="module": Indicates that the script should be treated as a JavaScript module -->
+    <!-- src="/src/index.tsx": Specifies the path to the main TypeScript file for the React app -->
   </body>
 </html>

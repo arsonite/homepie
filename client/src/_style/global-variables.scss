@@ -1,0 +1,56 @@
+/**
+ * Copyright (c) 2024-2024 Burak Günaydin
+ * All Rights Reserved
+ * 
+ * This software is the confidential and proprietary information of
+ * Burak Günaydin. You may not use, modify, or distribute this
+ * software (unless you have the permission of the copyright holder)
+ * except in accordance with the terms of any applicable license agreement.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+*/
+
+// TODO: Media query sizes
+
+// Color-codes
+$global_anthrazit: #353535;
+$global_anthrazit_dark: #222;
+$global_black: #111;
+$global_black_pure: #000;
+$global_brick: #FF8800;
+$global_homepie_accent: #2FE08E;
+$global_blue: #7A91F5;
+$global_gray: #999;
+$global_gray_light: #AFAFAF;
+$global_green: #66DA74;
+$global_green_dark: #5bbE67;
+$global_green_light: #86DF91;
+$global_red: #FF5566;
+$global_red_dark: #FF4455;
+$global_red_light: #FF6677;
+$global_white: #eee;
+$global_white_pure: #FFF;
+
+// TODO: Gradients
+
+// TODO: Box-Shadow
+// offset-x | offset-y | blur-radius | spread-radius | color
+
+// Transition-data
+$global_transition_very_fast: 50ms all;
+$global_transition_fast: 100ms all;
+$global_transition_default: 250ms all;
+$global_transition_slow: 500ms all;
+$global_transition_very_slow: 1s all;
+
+// Font-sizes
+$global_font_small: 12px;
+$global_font_base: 16px;
+$global_font_big: 20px;
+$global_font_huge: 24px;
