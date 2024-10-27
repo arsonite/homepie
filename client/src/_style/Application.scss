@@ -14,13 +14,59 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
-*/
+ */
 
 #homepie-application {
     overflow: hidden;
-
     display: flex;
-
     height: 100%;
     width: 100%;
+    align-items: center;
+    justify-content: center; /* Center the text */
+
+    #display-text-container {
+        position: absolute;
+
+        height: fit-content;
+        width: fit-content;
+
+        // background-color: transparentize($global_black_pure, 0.75);
+        // backdrop-filter: blur(0.5rem);
+        // border-radius: 5rem;
+
+        #display-text {
+            user-select: none;
+
+            height: fit-content;
+            width: 100%;
+
+            /* Initial text color animation */
+            background: linear-gradient(90deg, red, orange, yellow, green, blue, indigo, violet);
+            background-clip: text;
+            color: transparent;
+            animation: rainbow-fade 1s forwards;
+
+            /* White color after the animation */
+            font-size: 20rem; /* Adjust size dynamically */
+            text-align: center;
+
+            /* Transition effect to fade into white */
+            animation-fill-mode: forwards;
+        }
+    }
+
+    @keyframes rainbow-fade {
+        0% {
+            background-position: 0%;
+            color: transparent;
+        }
+        80% {
+            background-position: 100%;
+            color: transparent;
+        }
+        100% {
+            background-position: 100%;
+            color: white;
+        }
+    }
 }

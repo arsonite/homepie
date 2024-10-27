@@ -2,12 +2,12 @@
  * @license
  * Copyright (c) 2024-2024 Burak Günaydin
  * All Rights Reserved
- * 
+ *
  * This software is the confidential and proprietary information of
  * Burak Günaydin. You may not use, modify, or distribute this
  * software (unless you have the permission of the copyright holder)
  * except in accordance with the terms of any applicable license agreement.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -15,7 +15,7 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
-*/
+ */
 
 // React imports
 import React, { useState } from 'react';
@@ -46,7 +46,7 @@ interface IconProps {
 
 /**
  * Icon component to render SVG icons with optional animation and error handling.
- * 
+ *
  * @param {IconProps} props - Properties passed to the component
  * @returns {JSX.Element} The rendered Icon component
  */
@@ -61,7 +61,7 @@ const Icon: React.FC<IconProps> = (props) => {
     // TODO: Find a way to surpress the 404 not found svg spam
     /**
      * Default error handler to manage SVG loading errors.
-     * 
+     *
      * This function attempts to load alternative sources if the primary source fails.
      */
     const defaultErrorHandler = () => {

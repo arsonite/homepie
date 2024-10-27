@@ -2,12 +2,12 @@
  * @license
  * Copyright (c) 2024-2024 Burak Günaydin
  * All Rights Reserved
- * 
+ *
  * This software is the confidential and proprietary information of
  * Burak Günaydin. You may not use, modify, or distribute this
  * software (unless you have the permission of the copyright holder)
  * except in accordance with the terms of any applicable license agreement.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -15,7 +15,7 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
-*/
+ */
 
 // React imports
 import React, { useEffect, useRef } from 'react';
@@ -90,7 +90,7 @@ class Particle {
         this.dx = this.effect.mouse.x - this.x; // Distance in the x-direction
         this.dy = this.effect.mouse.y - this.y; // Distance in the y-direction
         this.distance = this.dx * this.dx + this.dy * this.dy; // Squared distance from the mouse
-        this.force = -this.effect.mouse.radius / this.distance * 8; // Calculate the force applied to the particle
+        this.force = (-this.effect.mouse.radius / this.distance) * 8; // Calculate the force applied to the particle
 
         // If the particle is within the mouse radius, apply forces
         if (this.distance < this.effect.mouse.radius) {
@@ -184,8 +184,10 @@ class Effect {
      * Initializes the particles by creating Particle instances at regular intervals.
      */
     init() {
-        for (let x = 0; x < this.width; x += this.gap) { // Loop through the width with a step of gap
-            for (let y = 0; y < this.height; y += this.gap) { // Loop through the height with a step of gap
+        for (let x = 0; x < this.width; x += this.gap) {
+            // Loop through the width with a step of gap
+            for (let y = 0; y < this.height; y += this.gap) {
+                // Loop through the height with a step of gap
                 this.particlesArray.push(new Particle(x, y, this)); // Create a new particle and add it to the array
             }
         }
@@ -252,9 +254,11 @@ const CollisionParticles: React.FC = () => {
     }, []); // Empty dependency array ensures this effect runs only once
 
     // Render the canvas element inside a div
-    return <div id='collision-particles'>
-        <canvas ref={canvasRef} />
-    </div>;
+    return (
+        <div id='collision-particles'>
+            <canvas ref={canvasRef} />
+        </div>
+    );
 };
 
 export default CollisionParticles;
