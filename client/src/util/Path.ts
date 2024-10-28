@@ -85,6 +85,18 @@ class Path {
     };
 
     /**
+     * Generates the path for a sound effect (SFX) file.
+     * @param file_extension The file extension for the SFX file (default is 'mp3').
+     * @param args An array of arguments for the SFX path.
+     * @returns The SFX path.
+     */
+    public static readonly getSFXPath = (file_extension: string = 'mp3', ...args: string[]): string => {
+        // Use the parsePath method to generate the path for the SFX
+        // and append the specified file extension
+        return `${Path.parsePath('@/assets/sfx', args)}.${file_extension}`;
+    }
+
+    /**
      * Generates the path for an animation.
      * @param args An array of arguments for the animation path.
      * @returns The animation path.

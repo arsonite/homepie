@@ -46,6 +46,6 @@ all_pids=$(pgrep -f "pnpm|vite|nginx")
 
 # Loop through each PID and send SIGTERM
 for pid in $all_pids; do
-    sudo kill -15 "$pid"
+    sudo kill -2 "$pid"
     echo "Process (PID: $pid) has been stopped."
 done

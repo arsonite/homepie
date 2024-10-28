@@ -47,4 +47,4 @@ if [ -f .env ]; then
 fi
 
 # TODO: Logs, detached mode, env/prod mode, check-if-running, stop
-pnpm start
+eval "pnpm start 2>&1" &

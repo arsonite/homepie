@@ -25,9 +25,11 @@ import CollisionParticles from '@/components/Particles/CollisionParticles.tsx';
 import Icon from '@/components/Icon.tsx';
 
 // Media imports TODO: Make util function
-import creamyClick1 from '@/assets/sfx/creamy-keyboard-click-1.mp3';
-import creamyClick2 from '@/assets/sfx/creamy-keyboard-click-2.mp3';
-import creamyClick3 from '@/assets/sfx/creamy-keyboard-click-3.mp3';
+import clickyKey1Loud from '@/assets/sfx/clicks/loud/clicky-key-1-loud.mp3';
+import clickyKey2Loud from '@/assets/sfx/clicks/loud/clicky-key-2-loud.mp3';
+import clickyKey3Loud from '@/assets/sfx/clicks/loud/clicky-key-3-loud.mp3';
+import clickyKey4Loud from '@/assets/sfx/clicks/loud/clicky-key-4-loud.mp3';
+import softClick from '@/assets/sfx/clicks/loud/soft-click-loud.mp3';
 
 // Style
 import './_style/LoginPage.scss';
@@ -37,10 +39,59 @@ const LoginPage = () => {
     const [input, setInput] = useState('');
     const [isError, setIsError] = useState(false);
 
-    // TODO: Sounds are REALLY quiet, make much louder also better clickier button sfx
-    const sounds = [new Audio(creamyClick1), new Audio(creamyClick2), new Audio(creamyClick3)];
+    const keyboard_sounds = [
+        new Audio(clickyKey1Loud),
+        new Audio(clickyKey2Loud),
+        new Audio(clickyKey3Loud),
+        new Audio(clickyKey4Loud),
+    ];
+    const soft_click_sound = new Audio(softClick);
 
     const handleKeyPress = (event: KeyboardEvent) => {
+        // TODO: Make keys constants
+        if (
+            event.key === 'Alt' ||
+            event.key === 'AltGraph' ||
+            event.key === 'AltRight' ||
+            event.key === 'ArrowDown' ||
+            event.key === 'ArrowLeft' ||
+            event.key === 'ArrowRight' ||
+            event.key === 'ArrowUp' ||
+            event.key === 'AudioVolumeDown' ||
+            event.key === 'AudioVolumeUp' ||
+            event.key === 'CapsLock' ||
+            event.key === 'Control' ||
+            event.key === 'Delete' ||
+            event.key === 'End' ||
+            event.key === 'Escape' ||
+            event.key === 'F1' ||
+            event.key === 'F2' ||
+            event.key === 'F3' ||
+            event.key === 'F4' ||
+            event.key === 'F5' ||
+            event.key === 'F6' ||
+            event.key === 'F7' ||
+            event.key === 'F8' ||
+            event.key === 'F9' ||
+            event.key === 'F10' ||
+            event.key === 'F11' ||
+            event.key === 'F12' ||
+            event.key === 'Home' ||
+            event.key === 'MediaPlayPause' ||
+            event.key === 'MediaTrackNext' ||
+            event.key === 'MediaTrackPrevious' ||
+            event.key === 'Meta' ||
+            event.key === 'PageDown' ||
+            event.key === 'PageUp' ||
+            event.key === 'Pause' ||
+            event.key === 'PrintScreen' ||
+            event.key === 'ScrollLock' ||
+            event.key === 'Shift' ||
+            event.key === 'Tab'
+        ) {
+            return;
+        }
+
         if (event.key === 'Enter') {
             if (input !== 'correct_password') {
                 setIsError(true);
@@ -49,13 +100,14 @@ const LoginPage = () => {
                 // Handle successful login
             }
         } else if (event.key === 'Backspace') {
-            setInput((prev) => prev.slice(0, -1));
             setDisplayText((prev) => prev.slice(0, -1));
+            setInput((prev) => prev.slice(0, -1));
+            soft_click_sound.play();
         } else {
-            const randomSound = sounds[Math.floor(Math.random() * sounds.length)];
+            const randomSound = keyboard_sounds[Math.floor(Math.random() * keyboard_sounds.length)];
             randomSound.play();
+            setDisplayText((prev) => [...prev, '*']);
             setInput((prev) => prev + event.key);
-            setDisplayText((prev) => prev + '*');
         }
     };
 
@@ -70,7 +122,7 @@ const LoginPage = () => {
 
     return (
         <div id='login-page' className={isError ? 'error' : ''}>
-            <CollisionParticles />
+            <CollisionParticles effectGap={20} effectRadius={3000} particleEase={0.2} particleFriction={0.95} />
 
             <div id='display-text-container'>
                 <div id='display-text'>{displayText}</div>
