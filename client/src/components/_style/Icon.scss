@@ -16,24 +16,50 @@
  * SOFTWARE.
 */
 
+/**
+ * Styles for the .icon class and its nested svg elements.
+ * 
+ * The .icon class is designed to ensure that any SVG elements it contains
+ * will inherit its dimensions and styling properties, such as fill and stroke.
+ * This approach helps maintain consistent styling across different parts of the application
+ * without needing to set these properties individually in various .scss files.
+ */
+
 .icon {
-    display: block;
+    display: block; // Ensures the icon is treated as a block-level element.
 
-    height: 100%;
-    width: 100%;
+    height: 100%; // Sets the height of the icon to 100% of its container.
+    width: 100%; // Sets the width of the icon to 100% of its container.
 
-    // Necessary to avoid having to set fill of svg in different .scss files, inherint parents fill instead
-    fill: inherit;
-    stroke: inherit;
+    // Necessary to avoid having to set fill of svg in different .scss files, inheriting parent's fill instead
+    fill: inherit; // Inherits the fill property from its parent element.
+    stroke: inherit; // Inherits the stroke property from its parent element.
+
+    &.absolute {
+        position: absolute; // Positions the icon absolutely within its nearest positioned ancestor.
+    }
+
+    &.relative {
+        position: relative; // Positions the icon relative to its normal position.
+    }
+
+    img {
+        position: relative; // Positions the image element relative to its normal position.
+
+        height: 100%; // Sets the height of the image to 100% of its container.
+        width: 100%; // Sets the width of the image to 100% of its container.
+    }
 
     svg {
-        display: inherit;
+        position: relative; // Positions the SVG element relative to its normal position.
 
-        height: 100%;
-        width: 100%;
+        display: inherit; // Inherits the display property from the .icon class.
+
+        height: 100%; // Sets the height of the SVG to 100% of its container.
+        width: 100%; // Sets the width of the SVG to 100% of its container.
 
         // ^^ Same as above
-        fill: inherit;
-        stroke: inherit;
+        fill: inherit; // Inherits the fill property from the .icon class.
+        stroke: inherit; // Inherits the stroke property from the .icon class.
     }
 }

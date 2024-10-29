@@ -26,9 +26,11 @@ import LoginPage from '@/pages/LoginPage/LoginPage.tsx';
 // Style
 import './_style/Application.scss';
 
-const Application: React.FC = () => {
+const Application: React.FC = (): JSX.Element => {
     return (
         <div id='homepie-application'>
+            {/* <SoundControl /> */}
+
             <LoginPage />
         </div>
     );

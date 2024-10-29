@@ -77,10 +77,13 @@ const CollisionParticles: React.FC<CollisionParticlesProps> = (props) => {
 
         // Cleanup function to remove event listeners when the component unmounts
         return () => {
+            window.removeEventListener('click', effect.handleMouseClick);
+            window.removeEventListener('mouseleave', effect.handleMouseLeave);
             window.removeEventListener('mousemove', effect.handleMouseMove);
             window.removeEventListener('resize', effect.handleResize);
-            window.removeEventListener('mouseleave', effect.handleMouseLeave);
         };
+        // Intended behaviour
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []); // Empty dependency array ensures this effect runs only once
 
     // Render the canvas element inside a div

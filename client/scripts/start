@@ -41,10 +41,13 @@ script_dir=$(dirname "$(readlink -f "$0")")
 cd "$script_dir"
 cd ..
 
+# ./scripts/stop
+
 # Load environment variables from .env file if it exists
 if [ -f .env ]; then
     export $(grep -v '^#' .env | xargs)
 fi
 
 # TODO: Logs, detached mode, env/prod mode, check-if-running, stop
-eval "pnpm start 2>&1" &
+# eval "pnpm start 2>&1" &
+eval "pnpm start 2>&1"

@@ -34,7 +34,7 @@ import softClick from '@/assets/sfx/clicks/loud/soft-click-loud.mp3';
 // Style
 import './_style/LoginPage.scss';
 
-const LoginPage = () => {
+const LoginPage: React.FC = (): JSX.Element => {
     const [displayText, setDisplayText] = useState<string[]>([]);
     const [input, setInput] = useState('');
     const [isError, setIsError] = useState(false);
@@ -50,6 +50,7 @@ const LoginPage = () => {
     const handleKeyPress = (event: KeyboardEvent) => {
         // TODO: Make keys constants
         if (
+            event.key === ' ' ||
             event.key === 'Alt' ||
             event.key === 'AltGraph' ||
             event.key === 'AltRight' ||
@@ -122,11 +123,13 @@ const LoginPage = () => {
 
     return (
         <div id='login-page' className={isError ? 'error' : ''}>
-            <CollisionParticles effectGap={20} effectRadius={3000} particleEase={0.2} particleFriction={0.95} />
+            <Icon is_image positioning='absolute' src={['homepie-logo']} />
 
             <div id='display-text-container'>
                 <div id='display-text'>{displayText}</div>
             </div>
+
+            <CollisionParticles effectGap={20} effectRadius={3000} particleEase={0.2} particleFriction={0.95} />
         </div>
     );
 };

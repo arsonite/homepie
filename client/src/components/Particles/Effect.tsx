@@ -64,9 +64,10 @@ class Effect {
         this.particleFriction = particleFriction; // Set the particle friction factor
 
         // Add event listeners for mouse movement, window resize, and mouse leave
+        window.addEventListener('click', this.handleMouseClick);
+        window.addEventListener('mouseleave', this.handleMouseLeave);
         window.addEventListener('mousemove', this.handleMouseMove);
         window.addEventListener('resize', this.handleResize);
-        window.addEventListener('mouseleave', this.handleMouseLeave);
 
         this.init(); // Initialize the particles
     }
@@ -84,8 +85,10 @@ class Effect {
      * Handles mouse leave events.
      */
     handleMouseLeave = () => {
+        console.log('leave');
         this.mouse.x = -Infinity; // Move mouse x-coordinate out of bounds
         this.mouse.y = -Infinity; // Move mouse y-coordinate out of bounds
+        this.mouse.radius = 0; // Set mouse interaction radius to zero
     };
 
     /**
@@ -102,6 +105,35 @@ class Effect {
 
         this.particlesArray = []; // Clear the particles array
         this.init(); // Reinitialize the particles
+    };
+
+    /**
+     * Handles mouse click events.
+     * @param event - The mouse event.
+     */
+    handleMouseClick = (event: MouseEvent) => {
+        const clickX = event.clientX * window.devicePixelRatio;
+        const clickY = event.clientY * window.devicePixelRatio;
+        const waveRadius = 100; // Radius of the wave effect
+        const waveDuration = 500; // Duration of the wave effect in milliseconds
+
+        // Loop through each particle in the particles array
+        for (let i = 0; i < this.particlesArray.length; i++) {
+            const particle = this.particlesArray[i];
+            const dx = particle.x - clickX;
+            const dy = particle.y - clickY;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+
+            if (distance < waveRadius) {
+                const opacityIncrement = 1 - distance / waveRadius;
+                particle.opacity = 1; // Set particle opacity to 1
+
+                // Gradually decrease the opacity back to its original value
+                setTimeout(() => {
+                    particle.opacity -= opacityIncrement;
+                }, waveDuration);
+            }
+        }
     };
 
     /**

@@ -24,12 +24,15 @@ class Path {
      * @param args An array of path arguments.
      * @returns The assembled path.
      */
-    public static readonly parsePath = (root: string, args: string[]): string => {
+    public static readonly parsePath = (args: string[]): string => {
         // Initialize the URI with the root path prefixed by a slash
-        let uri = '/' + root;
+        let uri = '';
         // Iterate over each argument and append it to the URI, prefixed by a slash
-        args.forEach((arg) => {
-            uri += '/' + arg;
+        args.forEach((arg, index) => {
+            uri += arg;
+            if (index > 0) {
+                uri += '/';
+            }
         });
         // Return the assembled URI
         return uri;
@@ -85,15 +88,17 @@ class Path {
     };
 
     /**
-     * Generates the path for a sound effect (SFX) file.
-     * @param file_extension The file extension for the SFX file (default is 'mp3').
-     * @param args An array of arguments for the SFX path.
-     * @returns The SFX path.
+     * Returns the root path for assets.
+     *
+     * This method provides a consistent way to reference the root directory
+     * for assets within the application. It helps in maintaining a single
+     * point of truth for asset paths, making it easier to manage and update
+     * asset locations if needed.
+     *
+     * @returns {string} The root path for assets, which is '@/assets'.
      */
-    public static readonly getSFXPath = (file_extension: string = 'mp3', ...args: string[]): string => {
-        // Use the parsePath method to generate the path for the SFX
-        // and append the specified file extension
-        return `${Path.parsePath('@/assets/sfx', args)}.${file_extension}`;
+    public static readonly getAssetRootPath = (): string => {
+        return '/src/assets';
     }
 
     /**
@@ -104,7 +109,7 @@ class Path {
     public static readonly getAnimationPath = (...args: string[]): string => {
         // Use the parsePath method to generate the path for the animation
         // and append the '.svg' extension
-        return `${Path.parsePath('anim', args)}.svg`;
+        return `${Path.getAssetRootPath()}/anim/${Path.parsePath(args)}.svg`;
     };
 
     /**
@@ -115,19 +120,29 @@ class Path {
     public static readonly getIconPath = (...args: string[]): string => {
         // Use the parsePath method to generate the path for the icon
         // and append the '.svg' extension
-        return `${Path.parsePath('icon', args)}.svg`;
+        return `${Path.getAssetRootPath()}/icon/${Path.parsePath(args)}.svg`;
     };
 
     /**
      * Generates the path for an image.
-     * @param file_extension The file extension for the image (default is 'png').
      * @param args An array of arguments for the image path.
      * @returns The image path.
      */
-    public static readonly getImagePath = (file_extension: string = 'png', ...args: string[]): string => {
+    public static readonly getImagePath = (...args: string[]): string => {
         // Use the parsePath method to generate the path for the image
         // and append the specified file extension
-        return `${Path.parsePath('img', args)}.${file_extension}`;
+        return `${Path.getAssetRootPath()}/img/${Path.parsePath(args)}.png`;
+    };
+
+    /**
+     * Generates the path for a sound effect (SFX) file.
+     * @param args An array of arguments for the SFX path.
+     * @returns The SFX path.
+     */
+    public static readonly getSFXPath = (...args: string[]): string => {
+        // Use the parsePath method to generate the path for the SFX
+        // and append the specified file extension
+        return `${Path.getAssetRootPath()}/sfx/${Path.parsePath(args)}.mp3`;
     };
 }
 

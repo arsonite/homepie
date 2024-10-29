@@ -46,8 +46,8 @@ class LineConversion(BaseCLI):
             ],
             'flags': [
                 {
-                    'short': '-win',
-                    'long': '--windows',
+                    'short': 'win',
+                    'long': 'windows',
                     'help': 'Convert line endings to Windows format instead (CRLF)',
                     'required': False
                 },

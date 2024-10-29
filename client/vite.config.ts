@@ -21,6 +21,7 @@
 import { defineConfig } from 'vite';
 import fs from 'fs';
 import react from '@vitejs/plugin-react';
+import Terminal from 'vite-plugin-terminal'
 
 // Read environment variables
 const VITE_SSL_CERT_PATH = process.env.VITE_SSL_CERT_PATH;
@@ -69,7 +70,10 @@ export default defineConfig({
    * 
    * Not using mkcert() anymore, because it overwrites the SSL certificate served by the development server.
    */
-  plugins: [react()],
+  plugins: [react(), Terminal({
+    console: 'terminal',
+    output: ['terminal', 'console']
+  })],
 
   /**
    * Module resolution configuration.

@@ -18,7 +18,7 @@
  */
 
 // React imports
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 // Package imports
 import SVG, { LoadCallback, ErrorCallback } from 'react-inlinesvg';
@@ -36,9 +36,10 @@ interface IconProps {
     alternative_src?: string[]; // Alternative sources for the SVG
     className?: string; // CSS class for the icon
     id?: string; // ID for the icon element
-    is_animation?: true | false; // Flag to determine if the icon is an animation
+    is_animation?: true; // Flag to determine if the icon is an animation
+    is_image?: true; // Flag to determine if the icon is an animation
+    positioning?: 'absolute' | 'relative';
     src: string[]; // Source paths for the SVG
-    style?: React.CSSProperties; // Inline styles for the icon
     onClick?: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void; // Click event handler
     onError?: () => ErrorCallback | undefined; // Error event handler
     onLoad?: () => LoadCallback | undefined; // Load event handler
@@ -50,11 +51,12 @@ interface IconProps {
  * @param {IconProps} props - Properties passed to the component
  * @returns {JSX.Element} The rendered Icon component
  */
-const Icon: React.FC<IconProps> = (props) => {
+const Icon: React.FC<IconProps> = (props: IconProps): JSX.Element => {
     // State to manage alternative sources for the SVG
     const [alternative_src, setAlternativeSrc] = useState<string[]>([]);
     // State to track the error loop count
     const [error_loop, setErrorLoop] = useState<number>(0);
+    const [src, setSrc] = useState<string>('');
     // State to determine if alternative sources should be used
     const [use_alternative_src, setUseAlternativeSrc] = useState<boolean>(false);
 
@@ -80,21 +82,40 @@ const Icon: React.FC<IconProps> = (props) => {
         return () => {};
     };
 
+    useEffect(() => {
+        let temp_src;
+        if (props.is_image) {
+            temp_src = Path.getImagePath(...props.src);
+        } else if (props.is_animation) {
+            temp_src = Path.getAnimationPath(...props.src);
+        } else if (use_alternative_src) {
+            temp_src = Path.getIconPath(...alternative_src); // Use alternative source if set
+        } else {
+            temp_src = Path.getIconPath(...props.src); // Use primary source
+        }
+        setSrc(temp_src);
+        // Intended behaviour
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [alternative_src, src]);
+
+    let class_name = 'icon';
+    class_name += props.className ? ' ' + props.className : '';
+    class_name += props.positioning ? ' ' + props.positioning : ' relative';
+
     return (
-        <picture id={props.id} className={`icon ${props.className ? props.className : ''}`} onClick={props.onClick}>
-            <SVG
-                cacheRequests
-                src={
-                    props.is_animation
-                        ? Path.getAnimationPath(...props.src) // Use animation path if is_animation is true
-                        : use_alternative_src
-                        ? Path.getIconPath(...alternative_src) // Use alternative source if set
-                        : Path.getIconPath(...props.src) // Use primary source
-                }
-                style={props.style}
-                onError={props.onError ? props.onError : defaultErrorHandler} // Use custom error handler if provided, otherwise use default
-                onLoad={props.onLoad} // Use custom load handler if provided
-            />
+        <picture id={props.id} className={class_name} onClick={props.onClick}>
+            {props.is_image ? (
+                <img src={src} />
+            ) : (
+                <SVG
+                    cacheRequests
+                    uniquifyIDs
+                    // loader={<div>Loading...</div>}
+                    src={src}
+                    onError={props.onError ? props.onError : defaultErrorHandler} // Use custom error handler if provided, otherwise use default
+                    onLoad={props.onLoad} // Use custom load handler if provided
+                />
+            )}
         </picture>
     );
 };

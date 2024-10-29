@@ -39,7 +39,15 @@ class ResetFirewall(BaseCLI):
         return {
             'name': 'reset-firewall',
             'shorthand': 'rf',
-            'help': 'Resets the firewall rules to the default settings.'
+            'help': 'Resets the firewall rules to the custom default settings',
+            'flags': [
+                {
+                    'short': 'd',
+                    'long': 'default',
+                    'help': 'Reset to system default instead',
+                    'required': False
+                },
+            ],
         }
 
     def execute(self):
@@ -51,20 +59,21 @@ class ResetFirewall(BaseCLI):
 
         # Enable ufw
         self.shell('ufw enable', sudo=True)
+        
+        if not self.get_flag('--default'):
+            # Allow SSH (port 22)
+            self.shell('ufw allow 22/tcp', sudo=True)
 
-        # Allow SSH (port 22)
-        self.shell('ufw allow 22/tcp', sudo=True)
+            # Allow HTTP (port 80)
+            self.shell('ufw allow 80/tcp', sudo=True)
+            self.shell('ufw allow out 80/tcp', sudo=True)
 
-        # Allow HTTP (port 80)
-        self.shell('ufw allow 80/tcp', sudo=True)
-        self.shell('ufw allow out 80/tcp', sudo=True)
+            # Allow HTTPS (port 443)
+            self.shell('ufw allow 443/tcp', sudo=True)
+            self.shell('ufw allow out 443/tcp', sudo=True)
 
-        # Allow HTTPS (port 443)
-        self.shell('ufw allow 443/tcp', sudo=True)
-        self.shell('ufw allow out 443/tcp', sudo=True)
-
-        # Deny all other incoming connections
-        self.shell('ufw default deny incoming', sudo=True)
+            # Deny all other incoming connections
+            self.shell('ufw default deny incoming', sudo=True)
 
 if __name__ == '__main__':
     reset_firewall = ResetFirewall()

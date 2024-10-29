@@ -45,7 +45,7 @@ class Aliases(BaseCLI):
         return {
             'name': 'aliases',
             'shorthand': 'al',
-            'help': 'Manage, edit, inject, eject and list aliases for all custom shorthand commands.',
+            'help': 'Manage, edit, inject, eject and list aliases for all custom shorthand commands',
             'commands': [
                 {
                     'name': 'list',

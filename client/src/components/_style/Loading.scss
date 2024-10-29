@@ -1,0 +1,50 @@
+/**
+ * Copyright (c) 2024-2024 Burak Günaydin
+ * All Rights Reserved
+ * 
+ * This software is the confidential and proprietary information of
+ * Burak Günaydin. You may not use, modify, or distribute this
+ * software (unless you have the permission of the copyright holder)
+ * except in accordance with the terms of any applicable license agreement.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+*/
+
+/**
+ * The .loading class is used to style loading indicators.
+ * It ensures that the loading element takes up the full width and height of its container,
+ * and centers itself within the container.
+ */
+.loading {
+    display: block; // Ensures the element is a block-level element.
+    height: 100%; // Sets the height to 100% of the parent container.
+    margin: auto; // Centers the element horizontally within its container.
+    width: 100%; // Sets the width to 100% of the parent container.
+
+    /**
+     * The .absolute modifier class positions the loading element absolutely
+     * within its nearest positioned ancestor. It centers the element both
+     * horizontally and vertically using CSS transforms.
+     */
+    &.absolute {
+        position: absolute; // Positions the element absolutely within its nearest positioned ancestor.
+        left: 50%; // Moves the element 50% from the left edge of its container.
+        top: 50%; // Moves the element 50% from the top edge of its container.
+        transform: translate(-50%, -50%); // Offsets the element by 50% of its own width and height to center it.
+    }
+
+    /**
+     * The .relative modifier class positions the loading element relatively
+     * to its normal position. This allows for further positioning adjustments
+     * relative to its original position.
+     */
+    &.relative {
+        position: relative; // Positions the element relative to its normal position.
+    }
+}

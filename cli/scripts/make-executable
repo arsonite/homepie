@@ -36,7 +36,7 @@ class MakeExecutable(BaseCLI):
         return {
             'name': 'make-executable',
             'shorthand': 'me',
-            'help': 'Make a file executable by setting the executable bit, allowing it to be run as a program, omitting the interpreter.',
+            'help': 'Make a file executable by setting the executable bit, allowing it to be run as a program, omitting the interpreter',
             'arguments': [
                 {
                     'name': 'filename',
@@ -46,12 +46,10 @@ class MakeExecutable(BaseCLI):
             ],
             'flags': [
                 {
-                    'short': '-ng',
-                    'long': '--no-git',
-                    'help': 'Disables adding the file to the git index and setting the executable bit',
-                    'help_extension': [
-                        '(not recommended for version control)'
-                    ],
+                    'short': 'ng',
+                    'long': 'no-git',
+                    'help': ['Disables adding the file to the git index and setting the executable bit',
+                             '(This flag is not recommended for version control)'],
                     'required': False
                 },
             ]
@@ -98,4 +96,4 @@ class MakeExecutable(BaseCLI):
             raise ValueError(f"The path '{filename}' is neither a file nor a directory.")
     
 if __name__ == '__main__':
-    make_executable = MakeExecutable()
+    MakeExecutable()
