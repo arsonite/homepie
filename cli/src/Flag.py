@@ -36,14 +36,12 @@ class Flag:
                 long: str,
                 help: str|List[str],
                 required:bool,
-                options:List[str]=None,
-                value_name:str=None):
+                options:List[str]=None):
         self.short = f'-{short}'
         self.long = f'--{long}'
         self.help = help
         self.required = required
         
         self.options = options
-        self.value_name = value_name
         
         self.value = None # Initialize the value of the flag to None

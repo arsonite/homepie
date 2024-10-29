@@ -251,7 +251,7 @@ class BaseCLI(ABC):
                         
                 if flag.short in self.parsed_flags or flag.long in self.parsed_flags:
                     parsed_flag_value = self.parsed_flags.get(flag.short) or self.parsed_flags.get(flag.long)
-                    if parsed_flag_value and flag.value_name is None and parsed_flag_value is not True:
+                    if parsed_flag_value and flag.options is None and parsed_flag_value is not True:
                         parsing_errors.append(
                             f'Flag "{flag.short}, {flag.long}" does not expect a value, but one was given: "{parsed_flag_value}".'
                         )
@@ -522,7 +522,7 @@ class BaseCLI(ABC):
         Returns the flag value with the given name.
         """
         for flag in self.flags:
-            if flag.short == name or flag.long == name:
+            if flag.short == f'-{name}' or flag.long == f'--{name}':
                 return flag.value
         return None
     
