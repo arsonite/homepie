@@ -70,9 +70,9 @@ class Install(BaseCLI):
         This allows the 'hp' command to be used system-wide as it is placed in a directory that is typically included in the system's PATH.
         '''
         if self.get_command() == 'all':
-            self.shell('l')
+            self.shell('sh /usr/local/src/homepie/cli/build-scripts/install-cli', sudo=True)
         elif self.get_command() == 'cli':
-            self.shell('l')
+            self.shell('sh /usr/local/src/homepie/cli/build-scripts/install-cli', sudo=True)
 
 if __name__ == '__main__':
     Install()
