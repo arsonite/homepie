@@ -83,17 +83,17 @@ const Icon: React.FC<IconProps> = (props: IconProps): JSX.Element => {
     };
 
     useEffect(() => {
-        let temp_src;
+        let path_src;
         if (props.is_image) {
-            temp_src = Path.getImagePath(...props.src);
+            path_src = Path.getImagePath(...props.src);
         } else if (props.is_animation) {
-            temp_src = Path.getAnimationPath(...props.src);
+            path_src = Path.getAnimationPath(...props.src);
         } else if (use_alternative_src) {
-            temp_src = Path.getIconPath(...alternative_src); // Use alternative source if set
+            path_src = Path.getIconPath(...alternative_src); // Use alternative source if set
         } else {
-            temp_src = Path.getIconPath(...props.src); // Use primary source
+            path_src = Path.getIconPath(...props.src); // Use primary source
         }
-        setSrc(temp_src);
+        setSrc(path_src);
         // Intended behaviour
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [alternative_src, src]);
