@@ -34,15 +34,16 @@ class Flag:
     def __init__(self,
                 short: str,
                 long: str,
-                help: str,
+                help: str|List[str],
                 required:bool,
-                help_extension:List[str]=None,
+                options:List[str]=None,
                 value_name:str=None):
-        self.short = short
-        self.long = long
+        self.short = f'-{short}'
+        self.long = f'--{long}'
         self.help = help
-        self.help_extension = help_extension
-        self.value_name = value_name
         self.required = required
         
-        self.value = None  # Initialize the value of the flag to None
+        self.options = options
+        self.value_name = value_name
+        
+        self.value = None # Initialize the value of the flag to None

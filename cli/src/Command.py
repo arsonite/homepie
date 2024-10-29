@@ -29,13 +29,11 @@ class Command:
         value (Any): The value of the command, initially set to None.
     """
     def __init__(self,
-                name: str,
-                shorthand: str,
-                help: str,
-                help_extension: List[str] = None):
+                name:str,
+                shorthand:str,
+                help:str|List[str]):
         self.name = name
         self.shorthand = shorthand
         self.help = help
-        self.help_extension = help_extension
         
         self.value = None

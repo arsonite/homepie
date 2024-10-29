@@ -39,7 +39,6 @@ class BaseCLI(ABC):
         name (str): The name of the CLI.
         shorthand (str): The shorthand notation for the CLI.
         help (str): A brief description of the CLI.
-        help_extension (str): Additional help information for the CLI.
         arguments (list): A list of Argument instances representing the CLI arguments.
         commands (list): A list of Command instances representing the CLI commands.
         flags (list): A list of Flag instances representing the CLI flags.
@@ -75,8 +74,6 @@ class BaseCLI(ABC):
         self.shorthand = meta['shorthand'] if 'shorthand' in meta else None
         # Initialize the brief description of the CLI
         self.help = meta['help'] if 'help' in meta else None
-        # Initialize additional help information for the CLI, if provided
-        self.help_extension = meta['help_extension'] if 'help_extension' in meta else None
         
         arguments = meta['arguments'] if 'arguments' in meta else []
         commands = meta['commands'] if 'commands' in meta else []
@@ -178,7 +175,8 @@ class BaseCLI(ABC):
         self.parsed_arguments = arguments
         self.parsed_command = command
         self.parsed_flags = flags
-        
+    
+    # TODO: Reduce repetition and amount of loops, more efficient algorithm
     def validate_args(self):
         """
         Pre-execution checks for required arguments and flags.
@@ -289,7 +287,22 @@ class BaseCLI(ABC):
         Returns:
             str: The formatted string containing the CLI's usage and meta information.
         """
-        def pad(indented_formatted_string):
+        def pad(indented_formatted_string:str):
+            """
+            Pads the given string with a specified number of tab characters.
+
+            Args:
+                indented_formatted_string (str): The string to be padded with tabs.
+
+            Returns:
+                str: The input string prefixed with the specified number of tab characters.
+
+            Detailed Comments:
+            - tabs = '': Initialize an empty string to accumulate tab characters.
+            - for _ in range(tab_padding): Loop over the range of tab_padding to determine the number of tabs to add.
+            - tabs += TAB: Append a tab character to the tabs string in each iteration.
+            - return f'{tabs}{indented_formatted_string}': Concatenate the accumulated tabs with the input string and return the result.
+            """
             tabs = ''
             for _ in range(tab_padding):
                 tabs += TAB
@@ -297,17 +310,6 @@ class BaseCLI(ABC):
         
         # Initialize an empty string to store the formatted output
         indented_formatted_string = ''
-        
-        # If include_meta is True, include meta information in the formatted string
-        if include_meta:
-            # If help_extension is provided, add each extension to the formatted string
-            if self.help_extension:
-                indented_formatted_string += '\n'
-                for extension in self.help_extension:
-                    indented_formatted_string += pad(f'\t{extension}')
-                    indented_formatted_string += '\n'
-                    
-            indented_formatted_string += '\n'
         
         # Set the name to './<name>' by default
         name = f'./{self.name}'
@@ -319,17 +321,18 @@ class BaseCLI(ABC):
             indented_formatted_string += '\n'
             indented_formatted_string += f'Usage:\n{TAB}{name}'
         
+        # TODO: Reduce repetition
         amount_of_arguments_greater_0 = len(self.arguments)
         if amount_of_arguments_greater_0:
-            indented_formatted_string += ' [arguments]'
+            indented_formatted_string += ' [ARGUMENTS]'
         
         amount_of_commands_greater_0 = len(self.commands)
         if amount_of_commands_greater_0:
-            indented_formatted_string += ' [command]'
+            indented_formatted_string += ' [COMMAND]'
         
         amount_of_flags_greater_0 = len(self.flags)
         if amount_of_flags_greater_0:
-            indented_formatted_string += ' [flags]'
+            indented_formatted_string += ' [FLAGS]'
             
         if include_meta:
             indented_formatted_string += pad(f'\n\t{self.help}')
@@ -337,7 +340,82 @@ class BaseCLI(ABC):
         if include_args:
             indented_formatted_string += '\n'
             
-            # TODO: Make tab-space the maximum of all flags and arguments for consistency
+            # This variable will be used to keep track of the maximum width of the formatted lines
+            line_width = 0
+            # TODO: Refactor to prevent unncessay loops
+            # Check if there are any arguments and calculate the maximum line width for formatting
+            if amount_of_arguments_greater_0:
+                for argument in self.arguments:
+                    # Format the argument line with indentation and argument name
+                    argument_line = f'{TAB}<{argument.name}>'
+                    # Update the maximum line width based on the length of the argument line
+                    line_width = max(line_width, len(argument_line))
+                            
+            # Check if there are any commands and calculate the maximum line width for formatting
+            if amount_of_commands_greater_0:
+                for command in self.commands:
+                    # Format the command line with indentation, shorthand, and command name
+                    command_line = f'{TAB}{command.shorthand}, {command.name}'
+                    # Update the maximum line width based on the length of the command line
+                    line_width = max(line_width, len(command_line))              
+            
+            # Check if there are any flags and calculate the maximum line width for formatting
+            if amount_of_flags_greater_0:
+                for flag in self.flags:
+                    # Format the flag line with indentation, short flag, and long flag
+                    flag_line = f'{TAB}{flag.short}, {flag.long}'
+                    # If the flag has options, include them in the flag line
+                    if flag.options:
+                        flag_line += f' <{flag.long.replace("-", "")}>'
+                    # Update the maximum line width based on the length of the flag line
+                    line_width = max(line_width, len(flag_line))
+                    
+            def pad_arg_line(arg_line:str, arg_help:str|List[str], arg_options:List[str]=None):
+                """
+                Pads the argument line with the appropriate amount of spaces for alignment and adds help text.
+
+                Args:
+                    arg_line (str): The formatted argument/command/flag line.
+                    arg_help (str or list): The help text associated with the argument/command/flag.
+
+                Returns:
+                    str: The formatted string with the argument/command/flag line and help text.
+                """
+                # Initialize an empty string to store the formatted output
+                formatted_string = ''
+                # Add the argument/command/flag line to the formatted string
+                formatted_string += arg_line
+                # Calculate the remaining width after the argument/command/flag line
+                arg_line_rest_width = len(arg_line) - line_width
+                # Check if the help text is a list (multiple lines of help text)
+                if isinstance(arg_help, list):
+                    # Iterate over each line of help text
+                    for index, help_line in enumerate(arg_help):
+                        if index == 0:
+                            # For the first line of help text, add it with indentation
+                            formatted_string += f'{TAB}{help_line}\n'
+                            continue
+                        # For subsequent lines of help text, add them with indentation and alignment
+                        formatted_string += f'{TAB}{" " * line_width}{help_line}'
+                else:
+                    # If the help text is a single string
+                    if arg_line_rest_width > 0:
+                        # If there is remaining width, add the help text with indentation
+                        help_line = f'{TAB}{arg_help}'
+                    else:
+                        # If there is no remaining width, add the help text with alignment
+                        help_line = f'{TAB}{" " * (arg_line_rest_width * -1)}{arg_help}'
+                    # Add the help text to the formatted string
+                    formatted_string += help_line
+                
+                if arg_options:
+                    formatted_string += '\n'
+                    formatted_string += f'{TAB}{" " * line_width}Options: {arg_options}'
+                    
+                # Return the final formatted string
+                return formatted_string
+            
+            # TODO: Reduce even more repetition
             # If there are arguments, include them in the formatted string
             if amount_of_arguments_greater_0:
                 indented_formatted_string += '\n'
@@ -345,18 +423,12 @@ class BaseCLI(ABC):
                 
                 # Iterate over each argument and add its details to the formatted string
                 for argument in self.arguments:
-                    # Format the argument line with indentation
-                    argument_line = f'{TAB}<{argument.name}>:'
-                    argument_line_length = (len(argument_line) + 1)
-                    argument_line += f' {argument.help}'
-                    indented_formatted_string += argument_line + '\n'
-                    
-                    # If help_extension is provided for the argument, add each extension to the formatted string
-                    if argument.help_extension:
-                        for extension in argument.help_extension:
-                            indented_formatted_string += f'{" " * argument_line_length}{extension}\n'
+                    argument_line = f'{TAB}<{argument.name}>'
+                    # Add the formatted argument line to the indented formatted string with a newline
+                    indented_formatted_string += pad_arg_line(argument_line, argument.help)
+                    indented_formatted_string += '\n' 
                             
-            # If there are commands, include them in the formatted string
+            # # If there are commands, include them in the formatted string
             if amount_of_commands_greater_0:
                 indented_formatted_string += '\n'
                 indented_formatted_string += 'Commands:\n'
@@ -364,34 +436,24 @@ class BaseCLI(ABC):
                 # Iterate over each argument and add its details to the formatted string
                 for command in self.commands:
                     # Format the command line with indentation
-                    command_line = f'{TAB}{command.shorthand}, {command.name}:'
-                    command_line_length = (len(command_line) + 1)
-                    command_line += f' {command.help}'
-                    indented_formatted_string += command_line + '\n'
-                    
-                    # If help_extension is provided for the command, add each extension to the formatted string
-                    if command.help_extension:
-                        for extension in command.help_extension:
-                            indented_formatted_string += f'{" " * command_line_length}{extension}\n'
+                    command_line = f'{TAB}{command.shorthand}, {command.name}'
+                    # Add the formatted command line to the indented formatted string with a newline
+                    indented_formatted_string += pad_arg_line(command_line, command.help)
+                    indented_formatted_string += '\n'
             
-            # TODO: Make tab-space the maximum of all flags and arguments for consistency
             # If there are flags, include them in the formatted string
             if amount_of_flags_greater_0:
                 indented_formatted_string += '\n'
                 indented_formatted_string += 'Flags:\n'
-                
                 # Iterate over each flag and add its details to the formatted string
                 for flag in self.flags:
                     # Format the flag line with indentation
-                    flag_line = f'{TAB}{flag.short}, {flag.long}:'
-                    flag_line_length = (len(flag_line) + 1)
-                    flag_line += f' {flag.help}'
-                    indented_formatted_string += flag_line + '\n'
-                    
-                    # If help_extension is provided for the flag, add each extension to the formatted string
-                    if flag.help_extension:
-                        for extension in flag.help_extension:
-                            indented_formatted_string += f'{" " * flag_line_length}{extension}\n'
+                    flag_line = f'{TAB}{flag.short}, {flag.long}'
+                    if flag.options:
+                        flag_line += f' <{flag.long.replace("-", "")}>'
+                    # Add the formatted flag line to the indented formatted string with a newline
+                    indented_formatted_string += pad_arg_line(flag_line, flag.help, flag.options)
+                    indented_formatted_string += '\n'
         
         return indented_formatted_string
             
@@ -528,7 +590,6 @@ class BaseCLI(ABC):
         'name':str,
         'shorthand':str,
         'help':str,
-        'help_extension':str,
         'arguments':List[Argument],
         'commands':List[Command],
         'flags':List[Flag]]:

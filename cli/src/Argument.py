@@ -31,14 +31,12 @@ class Argument:
     """
     def __init__(self,
                 name:str,
-                help:str,
+                help:str|List[str],
                 position:int,
-                required:bool,
-                help_extension:List[str]=None):
+                required:bool):
         self.name = name
         self.help = help
         self.position = position
-        self.help_extension = help_extension
         self.required = required
         
         self.value = None  # Initialize the value of the argument to None
