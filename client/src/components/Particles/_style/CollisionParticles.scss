@@ -16,16 +16,24 @@
  * SOFTWARE.
 */
 
+/**
+ * Styles for the collision particles component.
+ * This component is responsible for rendering particles that collide with each other.
+ * The particles are rendered on a canvas element that covers the entire component area.
+ */
+
 #collision-particles {
-    height: 100%;
-    width: 100%;
+    height: 100%; // Set the height of the collision particles container to 100% of its parent.
+    width: 100%; // Set the width of the collision particles container to 100% of its parent.
+
+    z-index: $global_z_login_page_particles; // Ensure the particles are rendered above other elements by setting the z-index.
 
     canvas {
-        position: absolute;
-        top: 0;
-        left: 0;
+        position: absolute; // Position the canvas absolutely within the container.
+        top: 0; // Align the top of the canvas with the top of the container.
+        left: 0; // Align the left of the canvas with the left of the container.
 
-        height: 100%;
-        width: 100%;
+        height: 100%; // Set the height of the canvas to 100% of the container.
+        width: 100%; // Set the width of the canvas to 100% of the container.
     }
 }

@@ -18,96 +18,60 @@
  */
 
 // React imports
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 // Components
 import CollisionParticles from '@/components/Particles/CollisionParticles.tsx';
 import Icon from '@/components/Icon.tsx';
 
-// Media imports TODO: Make util function
-import clickyKey1Loud from '@/assets/sfx/clicks/loud/clicky-key-1-loud.mp3';
-import clickyKey2Loud from '@/assets/sfx/clicks/loud/clicky-key-2-loud.mp3';
-import clickyKey3Loud from '@/assets/sfx/clicks/loud/clicky-key-3-loud.mp3';
-import clickyKey4Loud from '@/assets/sfx/clicks/loud/clicky-key-4-loud.mp3';
-import softClick from '@/assets/sfx/clicks/loud/soft-click-loud.mp3';
+// Utility
+import Keys from '@/util/Keys.ts';
+import Pixel from '@/util/Pixel.ts';
+import Sound from '@/util/Sound.ts';
 
 // Style
 import './_style/LoginPage.scss';
+
+// TODO: Temporary
+const DEBUG_MODE = false;
 
 const LoginPage: React.FC = (): JSX.Element => {
     const [displayText, setDisplayText] = useState<string[]>([]);
     const [input, setInput] = useState('');
     const [isError, setIsError] = useState(false);
 
+    const error_sound = new Sound('error');
     const keyboard_sounds = [
-        new Audio(clickyKey1Loud),
-        new Audio(clickyKey2Loud),
-        new Audio(clickyKey3Loud),
-        new Audio(clickyKey4Loud),
+        new Sound('clicks/creamy-click-1'),
+        new Sound('clicks/creamy-click-2'),
+        new Sound('clicks/creamy-click-3'),
     ];
-    const soft_click_sound = new Audio(softClick);
+
+    const displayTextContainerRef = useRef<HTMLDivElement>(null);
+    const letterRefs = useRef<(HTMLDivElement | null)[]>([]);
 
     const handleKeyPress = (event: KeyboardEvent) => {
-        // TODO: Make keys constants
-        if (
-            event.key === ' ' ||
-            event.key === 'Alt' ||
-            event.key === 'AltGraph' ||
-            event.key === 'AltRight' ||
-            event.key === 'ArrowDown' ||
-            event.key === 'ArrowLeft' ||
-            event.key === 'ArrowRight' ||
-            event.key === 'ArrowUp' ||
-            event.key === 'AudioVolumeDown' ||
-            event.key === 'AudioVolumeUp' ||
-            event.key === 'CapsLock' ||
-            event.key === 'Control' ||
-            event.key === 'Delete' ||
-            event.key === 'End' ||
-            event.key === 'Escape' ||
-            event.key === 'F1' ||
-            event.key === 'F2' ||
-            event.key === 'F3' ||
-            event.key === 'F4' ||
-            event.key === 'F5' ||
-            event.key === 'F6' ||
-            event.key === 'F7' ||
-            event.key === 'F8' ||
-            event.key === 'F9' ||
-            event.key === 'F10' ||
-            event.key === 'F11' ||
-            event.key === 'F12' ||
-            event.key === 'Home' ||
-            event.key === 'MediaPlayPause' ||
-            event.key === 'MediaTrackNext' ||
-            event.key === 'MediaTrackPrevious' ||
-            event.key === 'Meta' ||
-            event.key === 'PageDown' ||
-            event.key === 'PageUp' ||
-            event.key === 'Pause' ||
-            event.key === 'PrintScreen' ||
-            event.key === 'ScrollLock' ||
-            event.key === 'Shift' ||
-            event.key === 'Tab'
-        ) {
+        if (Keys.pressed(event.key, null, true, true, true)) {
             return;
         }
 
-        if (event.key === 'Enter') {
+        if (Keys.pressed(event.key, 'Enter')) {
             if (input !== 'correct_password') {
                 setIsError(true);
                 setTimeout(() => setIsError(false), 1000);
+                error_sound.play();
             } else {
                 // Handle successful login
             }
-        } else if (event.key === 'Backspace') {
+        } else if (Keys.pressed(event.key, 'Backspace')) {
             setDisplayText((prev) => prev.slice(0, -1));
             setInput((prev) => prev.slice(0, -1));
-            soft_click_sound.play();
+            const randomSound = keyboard_sounds[Math.floor(Math.random() * keyboard_sounds.length)];
+            randomSound.play();
         } else {
             const randomSound = keyboard_sounds[Math.floor(Math.random() * keyboard_sounds.length)];
             randomSound.play();
-            setDisplayText((prev) => [...prev, '*']);
+            setDisplayText((prev) => [...prev, event.key]);
             setInput((prev) => prev + event.key);
         }
     };
@@ -121,15 +85,70 @@ const LoginPage: React.FC = (): JSX.Element => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [input]);
 
+    useEffect(() => {
+        const container = displayTextContainerRef.current;
+        if (container) {
+            const MAX_FONT_SIZE_IN_REM = 20;
+            const MAX_FONT_SIZE_IN_PX = Pixel.fromREM(MAX_FONT_SIZE_IN_REM);
+
+            const containerWidth = container.offsetWidth * 2;
+            const totalLetters = displayText.length;
+            const letterWidthInPX = containerWidth / totalLetters;
+            let letterWidthInREM = Pixel.toREM(letterWidthInPX);
+            if (letterWidthInPX > MAX_FONT_SIZE_IN_PX) {
+                letterWidthInREM = MAX_FONT_SIZE_IN_REM;
+            }
+
+            letterRefs.current.forEach((letterRef) => {
+                if (letterRef) {
+                    letterRef.style.fontSize = `${letterWidthInREM}rem`;
+                    container.style.height = `${letterRef.offsetHeight}px`;
+                }
+            });
+        }
+    }, [displayText]);
+
+    const activeInput = displayText.length > 0;
+
     return (
         <div id='login-page' className={isError ? 'error' : ''}>
-            <Icon is_image positioning='absolute' src={['homepie-logo']} />
-
-            <div id='display-text-container'>
-                <div id='display-text'>{displayText}</div>
+            <div
+                id='display-text-container'
+                ref={displayTextContainerRef}
+                style={{ display: 'flex', flexWrap: 'wrap' }}
+            >
+                {displayText.map((letter, index) => (
+                    <div
+                        className='display-text-letter'
+                        key={index}
+                        ref={(element) => (letterRefs.current[index] = element)}
+                    >
+                        {DEBUG_MODE ? letter : '*'}
+                    </div>
+                ))}
             </div>
 
-            <CollisionParticles effectGap={20} effectRadius={3000} particleEase={0.2} particleFriction={0.95} />
+            <CollisionParticles
+                activeInput={activeInput}
+                effectGap={20}
+                effectRadius={3000}
+                particleEase={0.2}
+                particleFriction={0.95}
+            />
+
+            <Icon
+                className={`${activeInput ? 'active-input' : ''}`}
+                is_image
+                id='homepie-logo'
+                positioning='absolute'
+                src={['homepie-logo']}
+            />
+
+            <div id='health' className={`${activeInput ? 'active-input' : ''}`}>
+                <Icon className='heart' src={['common', 'heart']} />
+                <Icon className='heart' src={['common', 'heart']} />
+                <Icon className='heart' src={['common', 'heart']} />
+            </div>
         </div>
     );
 };

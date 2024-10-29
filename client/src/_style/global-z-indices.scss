@@ -16,6 +16,18 @@
  * SOFTWARE.
 */
 
-$global_z_screensaver: 10;
+// z: 0
+$global_z_login_page_logo: 0; // z-index for the login page logo, ensuring it is at the base layer
+$global_z_root: 0; // z-index for the root element, also at the base layer
 
-$global_z_debugging_console: 9999;
+// z: 1
+$global_z_login_page_particles: 1; // z-index for the particles on the login page, slightly above the base layer
+
+// z: 2
+$global_z_login_page_display_text: 2; // z-index for the display text on the login page, above particles and base layer
+
+// z: 10
+$global_z_screen_saver: 10; // z-index for the screen saver, significantly above the login page elements
+
+// z: 9999
+$global_z_debugging_console: 9999; // z-index for the debugging console, ensuring it is always on top of all other elements

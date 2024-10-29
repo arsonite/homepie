@@ -16,7 +16,7 @@
  * SOFTWARE.
 */
 
- #login-page {
+#login-page {
     overflow: hidden;
 
     position: fixed;
@@ -28,4 +28,138 @@
     align-items: center;
     height: 100%;
     width: 100%;
+
+    #homepie-logo {
+        position: absolute;
+
+        height: 10rem;
+        width: 10rem;
+
+        transition: $global_transition_slow;
+        z-index: $global_z_login_page_logo;
+
+        img {
+            height: 100%;
+            width: 100%;
+
+            opacity: 0.25;
+
+            transition: inherit;
+        }
+
+        &.active-input {
+            margin-bottom: 25rem;
+            padding: 1rem;
+
+            background-color: rgba(0, 0, 0, 0.25);
+            border-radius: 2rem;
+            backdrop-filter: blur(0.35rem);
+
+            z-index: $global_z_login_page_logo + 1;
+
+            img {
+                opacity: 0.65;
+            }
+        }
+    }
+
+    #display-text-container {
+        overflow: hidden;
+
+        position: absolute;
+
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        margin-top: 5rem; // Stupid fucking bitch ass shit hack that shouldn't be necessary, but I can't be fucking bothered to fix this annoying crap
+        width: 100%;
+
+        z-index: $global_z_login_page_display_text;
+
+        .display-text-letter {
+            user-select: none;
+
+            margin: auto 0;
+
+            animation-fill-mode: forwards;
+            animation: rainbow-fade 1s forwards;
+            background: linear-gradient(90deg, cyan, violet);
+            background-clip: text;
+            color: transparent;
+            text-align: center;
+
+            @keyframes rainbow-fade {
+                0% {
+                    color: transparent;
+                    opacity: 0;
+                }
+                50% {
+                    background: linear-gradient(90deg, cyan, violet);
+                    background-clip: text;
+                    color: transparent;
+                    opacity: 1;
+                }
+                100% {
+                    background: linear-gradient(90deg, cyan, violet);
+                    background-clip: text;
+                    background: transparent;
+                    color: $global_anthrazit;
+                    opacity: 0.35;
+                }
+            }
+        }
+    }
+
+    #health {
+        position: absolute;
+        display: flex;
+        gap: 2rem;
+        justify-content: center;
+        padding: 2rem;
+        height: fit-content;
+        width: fit-content;
+
+        margin-top: 15rem;
+        opacity: 0;
+
+        background-color: rgba(0, 0, 0, 0.25);
+        border-radius: 2rem;
+        backdrop-filter: blur(0.35rem);
+
+        transition: $global_transition_very_slow;
+        z-index: $global_z_login_page_display_text;
+
+        .heart {
+            position: relative;
+
+            height: fit-content;
+            width: 3.5rem;
+
+            animation: pulsate 1.5s infinite;
+            fill: #6d3030;
+
+            @keyframes pulsate {
+                0% {
+                    transform: scale(1);
+                    opacity: 0.5;
+                }
+                50% {
+                    transform: scale(1.1);
+                    opacity: 0.85;
+                }
+                100% {
+                    transform: scale(1);
+                    opacity: 0.5;
+                }
+            }
+        }
+
+        &.active-input {
+            margin-top: 25rem;
+
+            opacity: 1;
+        }
+    }
 }

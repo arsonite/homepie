@@ -26,6 +26,8 @@
  */
 
 .icon {
+    user-select: none;
+
     display: block; // Ensures the icon is treated as a block-level element.
 
     height: 100%; // Sets the height of the icon to 100% of its container.

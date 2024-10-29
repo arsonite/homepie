@@ -24,14 +24,16 @@ import Particle from '@/components/Particles/Particle.tsx';
  * Represents the effect that manages and updates the particles.
  */
 class Effect {
-    width: number; // Width of the canvas
-    height: number; // Height of the canvas
+    activeInput: boolean; // Flag to indicate if the input is active
     ctx: CanvasRenderingContext2D; // Canvas rendering context
-    particlesArray: Particle[]; // Array to hold all particles
     gap: number; // Gap between particles
-    mouse: { radius: number; x: number; y: number }; // Mouse properties
+    height: number; // Height of the canvas
+    mouse1: { radius: number; x: number; y: number }; // Mouse properties
+    mouse2: { radius: number; x: number; y: number }; // Second mouse properties
     particleEase: number; // Particle ease factor
     particleFriction: number; // Particle friction factor
+    particlesArray: Particle[]; // Array to hold all particles
+    width: number; // Width of the canvas
 
     /**
      * Creates an instance of the Effect.
@@ -55,19 +57,53 @@ class Effect {
         this.ctx = context; // Set the canvas rendering context
         this.particlesArray = []; // Initialize the particles array
         this.gap = gap; // Set the gap between particles
-        this.mouse = {
+        this.mouse1 = {
             radius: mouseRadius, // Set the mouse interaction radius
             x: 0, // Initialize the mouse x-coordinate
             y: 0, // Initialize the mouse y-coordinate
         };
+        this.mouse2 = {
+            radius: mouseRadius, // Set the second mouse interaction radius
+            x: 0, // Initialize the second mouse x-coordinate
+            y: 0, // Initialize the second mouse y-coordinate
+        };
         this.particleEase = particleEase; // Set the particle ease factor
         this.particleFriction = particleFriction; // Set the particle friction factor
 
+        this.activeInput = false; // Initialize the active input flag
+
+        // Initialize the angle for automatic mouse rotation
+        let angle = 0;
+
+        // Function to update the mouse position in a circular path
+        const updateMousePosition = () => {
+            const radius = this.activeInput ? 500 : 15; // Radius of the circular path
+            const centerX = this.width / 2; // Center x-coordinate of the circular path
+            const centerY = this.height / 2; // Center y-coordinate of the circular path
+
+            // Calculate the new mouse position based on the angle
+            this.mouse1.x = centerX + radius * Math.cos(-angle);
+            this.mouse1.y = centerY + radius * Math.sin(-angle);
+
+            // Calculate the new second mouse position based on the angle
+            this.mouse2.x = centerX + radius * Math.cos(-angle + Math.PI);
+            this.mouse2.y = centerY + radius * Math.sin(-angle + Math.PI);
+
+            // Increment the angle for the next frame
+            angle += 0.01;
+
+            // Request the next frame to keep the animation going
+            requestAnimationFrame(updateMousePosition);
+        };
+
+        // Start the automatic mouse rotation
+        updateMousePosition();
+
         // Add event listeners for mouse movement, window resize, and mouse leave
-        window.addEventListener('click', this.handleMouseClick);
-        window.addEventListener('mouseleave', this.handleMouseLeave);
-        window.addEventListener('mousemove', this.handleMouseMove);
-        window.addEventListener('resize', this.handleResize);
+        // window.addEventListener('click', this.handleMouseClick);
+        // window.addEventListener('mouseleave', this.handleMouseLeave);
+        // window.addEventListener('mousemove', this.handleMouseMove);
+        // window.addEventListener('resize', this.handleResize);
 
         this.init(); // Initialize the particles
     }
@@ -77,8 +113,8 @@ class Effect {
      * @param event - The mouse event.
      */
     handleMouseMove = (event: MouseEvent) => {
-        this.mouse.x = event.clientX * window.devicePixelRatio; // Update mouse x-coordinate
-        this.mouse.y = event.pageY * window.devicePixelRatio; // Update mouse y-coordinate
+        this.mouse1.x = event.clientX * window.devicePixelRatio; // Update mouse x-coordinate
+        this.mouse1.y = event.pageY * window.devicePixelRatio; // Update mouse y-coordinate
     };
 
     /**
@@ -86,9 +122,9 @@ class Effect {
      */
     handleMouseLeave = () => {
         console.log('leave');
-        this.mouse.x = -Infinity; // Move mouse x-coordinate out of bounds
-        this.mouse.y = -Infinity; // Move mouse y-coordinate out of bounds
-        this.mouse.radius = 0; // Set mouse interaction radius to zero
+        this.mouse1.x = -Infinity; // Move mouse x-coordinate out of bounds
+        this.mouse1.y = -Infinity; // Move mouse y-coordinate out of bounds
+        this.mouse1.radius = 0; // Set mouse interaction radius to zero
     };
 
     /**

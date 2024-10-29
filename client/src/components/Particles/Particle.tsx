@@ -30,10 +30,15 @@ class Particle {
     distance: number; // Squared distance from the mouse
     dx: number; // Distance in the x-direction from the mouse
     dy: number; // Distance in the y-direction from the mouse
-    effect: { ctx: CanvasRenderingContext2D; mouse: { x: number; y: number; radius: number } }; // Reference to the parent effect
+    effect: {
+        ctx: CanvasRenderingContext2D;
+        mouse1: { x: number; y: number; radius: number };
+        mouse2: { x: number; y: number; radius: number };
+    }; // Reference to the parent effect
     ease: number; // Ease factor for smooth movement
     force: number; // Force applied to the particle
     friction: number; // Friction factor to slow down the particle
+    opacity: number; // Opacity of the particle
     originX: number; // The original x-coordinate of the particle
     originY: number; // The original y-coordinate of the particle
     size: number; // Size of the particle
@@ -51,7 +56,11 @@ class Particle {
     constructor(
         x: number,
         y: number,
-        effect: { ctx: CanvasRenderingContext2D; mouse: { x: number; y: number; radius: number } },
+        effect: {
+            ctx: CanvasRenderingContext2D;
+            mouse1: { x: number; y: number; radius: number };
+            mouse2: { x: number; y: number; radius: number };
+        },
         ease: number = 0.2,
         friction: number = 0.95
     ) {
@@ -61,7 +70,7 @@ class Particle {
         this.ease = ease; // Set the ease factor
         this.friction = friction; // Set the friction factor
 
-        this.alpha = 1; // Set the default alpha transparency of the particle
+        this.alpha = 0.25; // Set the default alpha transparency of the particle
         this.angle = 0; // Initialize angle between the particle and the mouse
         this.color = 'white'; // Set the default color of the particle
         this.colorHoldCounter = 0; // Initialize the counter to zero
@@ -73,6 +82,7 @@ class Particle {
         this.force = 0; // Initialize force applied to the particle
         this.originX = x; // Set the original x-coordinate
         this.originY = y; // Set the original y-coordinate
+        this.opacity = 1; // Set the default opacity of the particle
         this.size = Math.floor(Math.random() * 5); // Randomize the size of the particle
         this.vx = 0; // Initialize velocity in the x-direction
         this.vy = 0; // Initialize velocity in the y-direction
@@ -95,14 +105,31 @@ class Particle {
      * Updates the particle's position and appearance based on interactions with the mouse.
      */
     update() {
+        // Update based on the first mouse
+        this.updateMouseInteraction(this.effect.mouse1);
+
+        // Update based on the second mouse
+        this.updateMouseInteraction(this.effect.mouse2);
+
+        // Apply friction and ease to the particle's velocity and position
+        this.x += (this.vx *= this.friction) + (this.originX - this.x) * this.ease;
+        this.y += (this.vy *= this.friction) + (this.originY - this.y) * this.ease;
+        this.draw(); // Draw the updated particle
+    }
+
+    /**
+     * Updates the particle's position and appearance based on interactions with a given mouse.
+     * @param mouse - The mouse object containing x, y, and radius properties.
+     */
+    updateMouseInteraction(mouse: { x: number; y: number; radius: number }) {
         // Calculate the distance between the particle and the mouse pointer
-        this.dx = this.effect.mouse.x - this.x;
-        this.dy = this.effect.mouse.y - this.y;
+        this.dx = mouse.x - this.x;
+        this.dy = mouse.y - this.y;
         this.distance = this.dx * this.dx + this.dy * this.dy;
-        this.force = (-this.effect.mouse.radius / this.distance) * 8;
+        this.force = (-mouse.radius / this.distance) * 8;
 
         // If the particle is within the mouse radius, apply forces
-        if (this.distance < this.effect.mouse.radius) {
+        if (this.distance < mouse.radius) {
             this.angle = Math.atan2(this.dy, this.dx);
             this.vx += this.force * Math.cos(this.angle);
             this.vy += this.force * Math.sin(this.angle);
@@ -118,11 +145,6 @@ class Particle {
             if (this.alpha < 0.25) this.alpha = 0.25;
             this.color = 'white';
         }
-
-        // Apply friction and ease to the particle's velocity and position
-        this.x += (this.vx *= this.friction) + (this.originX - this.x) * this.ease;
-        this.y += (this.vy *= this.friction) + (this.originY - this.y) * this.ease;
-        this.draw(); // Draw the updated particle
     }
 }
 

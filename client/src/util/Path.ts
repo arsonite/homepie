@@ -28,11 +28,8 @@ class Path {
         // Initialize the URI with the root path prefixed by a slash
         let uri = '';
         // Iterate over each argument and append it to the URI, prefixed by a slash
-        args.forEach((arg, index) => {
-            uri += arg;
-            if (index > 0) {
-                uri += '/';
-            }
+        args.forEach((arg) => {
+            uri += '/' + arg;
         });
         // Return the assembled URI
         return uri;
@@ -109,7 +106,7 @@ class Path {
     public static readonly getAnimationPath = (...args: string[]): string => {
         // Use the parsePath method to generate the path for the animation
         // and append the '.svg' extension
-        return `${Path.getAssetRootPath()}/anim/${Path.parsePath(args)}.svg`;
+        return `${Path.getAssetRootPath()}/anim${Path.parsePath(args)}.svg`;
     };
 
     /**
@@ -120,7 +117,7 @@ class Path {
     public static readonly getIconPath = (...args: string[]): string => {
         // Use the parsePath method to generate the path for the icon
         // and append the '.svg' extension
-        return `${Path.getAssetRootPath()}/icon/${Path.parsePath(args)}.svg`;
+        return `${Path.getAssetRootPath()}/icon${Path.parsePath(args)}.svg`;
     };
 
     /**
@@ -131,7 +128,7 @@ class Path {
     public static readonly getImagePath = (...args: string[]): string => {
         // Use the parsePath method to generate the path for the image
         // and append the specified file extension
-        return `${Path.getAssetRootPath()}/img/${Path.parsePath(args)}.png`;
+        return `${Path.getAssetRootPath()}/img${Path.parsePath(args)}.png`;
     };
 
     /**
@@ -142,7 +139,7 @@ class Path {
     public static readonly getSFXPath = (...args: string[]): string => {
         // Use the parsePath method to generate the path for the SFX
         // and append the specified file extension
-        return `${Path.getAssetRootPath()}/sfx/${Path.parsePath(args)}.mp3`;
+        return `${Path.getAssetRootPath()}/sfx${Path.parsePath(args)}.mp3`;
     };
 }
 

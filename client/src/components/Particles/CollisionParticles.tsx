@@ -23,7 +23,11 @@ import React, { useEffect, useRef } from 'react';
 // Components
 import Effect from '@/components/Particles/Effect.tsx';
 
+// Style
+import './_style/CollisionParticles.scss';
+
 interface CollisionParticlesProps {
+    activeInput: boolean;
     effectGap?: number;
     effectRadius?: number;
     particleEase?: number;
@@ -36,6 +40,8 @@ interface CollisionParticlesProps {
 const CollisionParticles: React.FC<CollisionParticlesProps> = (props) => {
     // Create a reference to the canvas element
     const canvasRef = useRef<HTMLCanvasElement>(null);
+    // Create a new Effect instance with the canvas dimensions and context
+    const effectRef = useRef<Effect | null>(null);
 
     useEffect(() => {
         // Get the canvas element from the reference
@@ -54,8 +60,7 @@ const CollisionParticles: React.FC<CollisionParticlesProps> = (props) => {
         canvas.style.width = `${window.innerWidth}px`;
         canvas.style.height = `${window.innerHeight}px`;
 
-        // Create a new Effect instance with the canvas dimensions and context
-        const effect = new Effect(
+        effectRef.current = new Effect(
             canvas.width,
             canvas.height,
             ctx,
@@ -65,6 +70,7 @@ const CollisionParticles: React.FC<CollisionParticlesProps> = (props) => {
             props.particleEase,
             props.particleFriction
         );
+        const effect = effectRef.current;
 
         // Define the animation function to update the effect
         const animate = () => {
@@ -85,6 +91,10 @@ const CollisionParticles: React.FC<CollisionParticlesProps> = (props) => {
         // Intended behaviour
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []); // Empty dependency array ensures this effect runs only once
+
+    useEffect(() => {
+        effectRef.current.activeInput = props.activeInput;
+    }, [props.activeInput]); // Update the canvas size when activeInput changes
 
     // Render the canvas element inside a div
     return (

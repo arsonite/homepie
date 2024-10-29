@@ -43,6 +43,10 @@ interface IconProps {
     onClick?: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void; // Click event handler
     onError?: () => ErrorCallback | undefined; // Error event handler
     onLoad?: () => LoadCallback | undefined; // Load event handler
+    onMouseEnter?: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void; // Mouse enter event handler
+    onMouseLeave?: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void; // Mouse leave event handler
+    onTouchStart?: (event: React.TouchEvent<HTMLButtonElement>) => void; // Touch start event handler
+    onTouchEnd?: (event: React.TouchEvent<HTMLButtonElement>) => void; // Touch end event handler
 }
 
 /**
@@ -56,7 +60,7 @@ const Icon: React.FC<IconProps> = (props: IconProps): JSX.Element => {
     const [alternative_src, setAlternativeSrc] = useState<string[]>([]);
     // State to track the error loop count
     const [error_loop, setErrorLoop] = useState<number>(0);
-    const [src, setSrc] = useState<string>('');
+    const [src, setSrc] = useState<string>(Path.getIconPath(...props.src));
     // State to determine if alternative sources should be used
     const [use_alternative_src, setUseAlternativeSrc] = useState<boolean>(false);
 
@@ -103,7 +107,15 @@ const Icon: React.FC<IconProps> = (props: IconProps): JSX.Element => {
     class_name += props.positioning ? ' ' + props.positioning : ' relative';
 
     return (
-        <picture id={props.id} className={class_name} onClick={props.onClick}>
+        <picture
+            className={class_name}
+            id={props.id}
+            onClick={props.onClick}
+            onMouseEnter={props.onMouseEnter}
+            onMouseLeave={props.onMouseLeave}
+            onTouchStart={props.onTouchStart}
+            onTouchEnd={props.onTouchEnd}
+        >
             {props.is_image ? (
                 <img src={src} />
             ) : (
