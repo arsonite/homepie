@@ -109,7 +109,7 @@ class Particle {
         this.updateMouseInteraction(this.effect.mouse1);
 
         // Update based on the second mouse
-        this.updateMouseInteraction(this.effect.mouse2);
+        // this.updateMouseInteraction(this.effect.mouse2);
 
         // Apply friction and ease to the particle's velocity and position
         this.x += (this.vx *= this.friction) + (this.originX - this.x) * this.ease;

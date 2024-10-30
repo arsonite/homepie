@@ -24,6 +24,9 @@ import { useState, useEffect, useRef } from 'react';
 import CollisionParticles from '@/components/Particles/CollisionParticles.tsx';
 import Icon from '@/components/Icon.tsx';
 
+// Types
+import Color from '@/util/Color.ts';
+
 // Utility
 import Keys from '@/util/Keys.ts';
 import Pixel from '@/util/Pixel.ts';
@@ -31,14 +34,13 @@ import Sound from '@/util/Sound.ts';
 
 // Style
 import './_style/LoginPage.scss';
-
-// TODO: Temporary
-const DEBUG_MODE = false;
+import { error } from 'console';
 
 const LoginPage: React.FC = (): JSX.Element => {
     const [displayText, setDisplayText] = useState<string[]>([]);
-    const [input, setInput] = useState('');
-    const [isError, setIsError] = useState(false);
+    const [errorCount, setErrorCount] = useState<number>(0);
+    const [input, setInput] = useState<string>('');
+    const [isError, setIsError] = useState<boolean>(false);
 
     const error_sound = new Sound('error');
     const keyboard_sounds = [
@@ -46,6 +48,18 @@ const LoginPage: React.FC = (): JSX.Element => {
         new Sound('clicks/creamy-click-2'),
         new Sound('clicks/creamy-click-3'),
     ];
+
+    // Ahh, yes, I know you
+    // You again, welcome back
+    // I awaited your return
+
+    // And what is your secret?
+    // Tell me your secret
+    // I am going to keep your secret
+
+    // I am going to need the master key for that
+    // I won't let you in without the master key
+    // Sorry, come back with the master key
 
     const displayTextContainerRef = useRef<HTMLDivElement>(null);
     const letterRefs = useRef<(HTMLDivElement | null)[]>([]);
@@ -56,13 +70,10 @@ const LoginPage: React.FC = (): JSX.Element => {
         }
 
         if (Keys.pressed(event.key, 'Enter')) {
-            if (input !== 'correct_password') {
-                setIsError(true);
-                setTimeout(() => setIsError(false), 1000);
-                error_sound.play();
-            } else {
-                // Handle successful login
-            }
+            setIsError(true);
+            setErrorCount((prev) => prev + 1); // Necessary to prevent asynchronicity during state batching
+            setTimeout(() => setIsError(false), 250);
+            error_sound.play();
         } else if (Keys.pressed(event.key, 'Backspace')) {
             setDisplayText((prev) => prev.slice(0, -1));
             setInput((prev) => prev.slice(0, -1));
@@ -83,17 +94,20 @@ const LoginPage: React.FC = (): JSX.Element => {
         };
         // Intended behaviour
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [input]);
+    }, []);
 
     useEffect(() => {
         const container = displayTextContainerRef.current;
         if (container) {
-            const MAX_FONT_SIZE_IN_REM = 20;
+            const MAX_FONT_SIZE_IN_REM = 7;
             const MAX_FONT_SIZE_IN_PX = Pixel.fromREM(MAX_FONT_SIZE_IN_REM);
 
-            const containerWidth = container.offsetWidth * 2;
+            const containerWidth = container.offsetWidth;
+            console.log('containerWidth: ', containerWidth);
             const totalLetters = displayText.length;
+            console.log('totalLetters: ', totalLetters);
             const letterWidthInPX = containerWidth / totalLetters;
+            console.log('letterWidthInPX: ', letterWidthInPX);
             let letterWidthInREM = Pixel.toREM(letterWidthInPX);
             if (letterWidthInPX > MAX_FONT_SIZE_IN_PX) {
                 letterWidthInREM = MAX_FONT_SIZE_IN_REM;
@@ -101,8 +115,10 @@ const LoginPage: React.FC = (): JSX.Element => {
 
             letterRefs.current.forEach((letterRef) => {
                 if (letterRef) {
-                    letterRef.style.fontSize = `${letterWidthInREM}rem`;
-                    container.style.height = `${letterRef.offsetHeight}px`;
+                    if (!letterRef.style.fill) {
+                        letterRef.style.fill = Color.HEX.random();
+                    }
+                    letterRef.style.width = `${letterWidthInREM}rem`;
                 }
             });
         }
@@ -110,20 +126,31 @@ const LoginPage: React.FC = (): JSX.Element => {
 
     const activeInput = displayText.length > 0;
 
+    console.log(errorCount);
+
     return (
         <div id='login-page' className={isError ? 'error' : ''}>
+            <Icon
+                className={`${activeInput ? 'active-input' : ''}`}
+                is_image
+                id='homepie-logo'
+                positioning='absolute'
+                src={['homepie-logo']}
+            />
+
             <div
                 id='display-text-container'
+                className={isError ? 'error' : ''}
                 ref={displayTextContainerRef}
                 style={{ display: 'flex', flexWrap: 'wrap' }}
             >
-                {displayText.map((letter, index) => (
+                {displayText.map((_, index) => (
                     <div
-                        className='display-text-letter'
+                        className={`display-text-letter unintialized${isError ? ' error' : ''}`}
                         key={index}
                         ref={(element) => (letterRefs.current[index] = element)}
                     >
-                        {DEBUG_MODE ? letter : '*'}
+                        <Icon src={['common', 'asterisk']} />
                     </div>
                 ))}
             </div>
@@ -136,18 +163,22 @@ const LoginPage: React.FC = (): JSX.Element => {
                 particleFriction={0.95}
             />
 
-            <Icon
-                className={`${activeInput ? 'active-input' : ''}`}
-                is_image
-                id='homepie-logo'
-                positioning='absolute'
-                src={['homepie-logo']}
-            />
-
             <div id='health' className={`${activeInput ? 'active-input' : ''}`}>
-                <Icon className='heart' src={['common', 'heart']} />
-                <Icon className='heart' src={['common', 'heart']} />
-                <Icon className='heart' src={['common', 'heart']} />
+                {errorCount >= 3 ? (
+                    <Icon key={`heart-3-${errorCount}`} className='heart broken' src={['common', 'heart-broken']} />
+                ) : (
+                    <Icon key={`heart-3-${errorCount}`} className='heart' src={['common', 'heart']} />
+                )}
+                {errorCount >= 2 ? (
+                    <Icon key={`heart-2-${errorCount}`} className='heart broken' src={['common', 'heart-broken']} />
+                ) : (
+                    <Icon key={`heart-2-${errorCount}`} className='heart' src={['common', 'heart']} />
+                )}
+                {errorCount >= 1 ? (
+                    <Icon key={`heart-1-${errorCount}`} className='heart broken' src={['common', 'heart-broken']} />
+                ) : (
+                    <Icon key={`heart-1-${errorCount}`} className='heart' src={['common', 'heart']} />
+                )}
             </div>
         </div>
     );

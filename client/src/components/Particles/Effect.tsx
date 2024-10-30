@@ -34,6 +34,7 @@ class Effect {
     particleFriction: number; // Particle friction factor
     particlesArray: Particle[]; // Array to hold all particles
     width: number; // Width of the canvas
+    angle: number; // Angle for automatic mouse rotation
 
     /**
      * Creates an instance of the Effect.
@@ -73,31 +74,10 @@ class Effect {
         this.activeInput = false; // Initialize the active input flag
 
         // Initialize the angle for automatic mouse rotation
-        let angle = 0;
-
-        // Function to update the mouse position in a circular path
-        const updateMousePosition = () => {
-            const radius = this.activeInput ? 500 : 15; // Radius of the circular path
-            const centerX = this.width / 2; // Center x-coordinate of the circular path
-            const centerY = this.height / 2; // Center y-coordinate of the circular path
-
-            // Calculate the new mouse position based on the angle
-            this.mouse1.x = centerX + radius * Math.cos(-angle);
-            this.mouse1.y = centerY + radius * Math.sin(-angle);
-
-            // Calculate the new second mouse position based on the angle
-            this.mouse2.x = centerX + radius * Math.cos(-angle + Math.PI);
-            this.mouse2.y = centerY + radius * Math.sin(-angle + Math.PI);
-
-            // Increment the angle for the next frame
-            angle += 0.01;
-
-            // Request the next frame to keep the animation going
-            requestAnimationFrame(updateMousePosition);
-        };
+        this.angle = 0;
 
         // Start the automatic mouse rotation
-        updateMousePosition();
+        // this.continouslyUpdateMousePosition();
 
         // Add event listeners for mouse movement, window resize, and mouse leave
         // window.addEventListener('click', this.handleMouseClick);
@@ -107,6 +87,33 @@ class Effect {
 
         this.init(); // Initialize the particles
     }
+
+    continouslyUpdateMousePosition = () => {
+        const radius = this.activeInput ? 500 : 15; // Radius of the circular path
+        const centerX = this.width / 2; // Center x-coordinate of the circular path
+        const centerY = this.height / 2; // Center y-coordinate of the circular path
+
+        // Calculate the new second mouse position based on the angle
+        this.mouse2.x = centerX + radius * Math.cos(-this.angle + Math.PI);
+        this.mouse2.y = centerY + radius * Math.sin(-this.angle + Math.PI);
+
+        // Increment the angle for the next frame
+        // this.angle += 0.005; // Slower increment for the angle
+        this.angle += 0.01;
+
+        // Request the next frame to keep the animation going
+        requestAnimationFrame(this.continouslyUpdateMousePosition);
+    };
+
+    // Function to update the mouse position in a circular path
+    updateMousePosition = () => {
+        this.mouse1.radius = this.activeInput ? 100000 : 3000; // Radius of the circular path
+        const centerX = this.width / 2; // Center x-coordinate of the circular path
+        const centerY = this.height / 2; // Center y-coordinate of the circular path
+        // Calculate the new mouse position based on the angle
+        this.mouse1.x = centerX;
+        this.mouse1.y = centerY;
+    };
 
     /**
      * Handles mouse move events.

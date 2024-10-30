@@ -89,6 +89,20 @@ const HTTP_ENCODING = {
 const KIOSK_FLAG: boolean = false;
 
 /**
+ * @constant
+ * @name RGB
+ * @description
+ * An object representing the minimum and maximum values for RGB color components.
+ * 
+ * @property {number} MAX - The maximum value for an RGB color component (255).
+ * @property {number} MIN - The minimum value for an RGB color component (0).
+ */
+const RGB = {
+    MAX: 255,
+    MIN: 0
+}
+
+/**
  * @constant {string} SECRET_KEY
  * @description
  * A constant string that holds a secret key used for authentication or encryption purposes.
@@ -118,7 +132,7 @@ const SECRET_KEY: string = 'secret-debug-key';
  *   // Perform strict mode specific operations
  * }
  */
-const STRICT_MODE: boolean = true;
+const STRICT_MODE: boolean = false;
 
 /**
  * A constant boolean flag used to enable or disable verbose logging throughout the application.
@@ -148,6 +162,7 @@ export {
     CLIENT_VERSION,
     HTTP_ENCODING,
     KIOSK_FLAG,
+    RGB,
     SECRET_KEY,
     STRICT_MODE,
     VERBOSE_FLAG,

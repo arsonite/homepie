@@ -41,7 +41,7 @@ script_dir=$(dirname "$(readlink -f "$0")")
 cd "$script_dir"
 cd ..
 
-# ./scripts/stop
+./scripts/stop
 
 # Load environment variables from .env file if it exists
 if [ -f .env ]; then

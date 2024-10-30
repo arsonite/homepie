@@ -39,6 +39,7 @@ interface IconProps {
     is_animation?: true; // Flag to determine if the icon is an animation
     is_image?: true; // Flag to determine if the icon is an animation
     positioning?: 'absolute' | 'relative';
+    style?: React.CSSProperties; // CSS style for the icon
     src: string[]; // Source paths for the SVG
     onClick?: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void; // Click event handler
     onError?: () => ErrorCallback | undefined; // Error event handler
@@ -110,6 +111,7 @@ const Icon: React.FC<IconProps> = (props: IconProps): JSX.Element => {
         <picture
             className={class_name}
             id={props.id}
+            style={props.style}
             onClick={props.onClick}
             onMouseEnter={props.onMouseEnter}
             onMouseLeave={props.onMouseLeave}

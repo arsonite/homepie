@@ -34,6 +34,7 @@ interface CollisionParticlesProps {
     particleFriction?: number;
 }
 
+// TODO: Completely refactor for proper react use, performance optimization, proper dismount, even on rerender
 /**
  * React component that renders the canvas and initializes the particle effect.
  */
@@ -93,7 +94,10 @@ const CollisionParticles: React.FC<CollisionParticlesProps> = (props) => {
     }, []); // Empty dependency array ensures this effect runs only once
 
     useEffect(() => {
-        effectRef.current.activeInput = props.activeInput;
+        if (effectRef.current) {
+            effectRef.current.activeInput = props.activeInput;
+            effectRef.current.updateMousePosition();
+        }
     }, [props.activeInput]); // Update the canvas size when activeInput changes
 
     // Render the canvas element inside a div
