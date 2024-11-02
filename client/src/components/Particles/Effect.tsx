@@ -77,6 +77,7 @@ class Effect {
         this.angle = 0;
 
         // Start the automatic mouse rotation
+        this.updateMousePosition();
         // this.continouslyUpdateMousePosition();
 
         // Add event listeners for mouse movement, window resize, and mouse leave
@@ -107,7 +108,7 @@ class Effect {
 
     // Function to update the mouse position in a circular path
     updateMousePosition = () => {
-        this.mouse1.radius = this.activeInput ? 100000 : 3000; // Radius of the circular path
+        this.mouse1.radius = this.activeInput ? 150000 : 3000; // Radius of the circular path
         const centerX = this.width / 2; // Center x-coordinate of the circular path
         const centerY = this.height / 2; // Center y-coordinate of the circular path
         // Calculate the new mouse position based on the angle

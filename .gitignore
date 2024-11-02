@@ -35,7 +35,7 @@ Thumbs.db
 .env.production
 
 # Node.js / npm
-node_modules/
+*node_modules/
 npm-debug.log
 yarn-error.log
 .pnp
@@ -149,7 +149,7 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
+*node_modules
 dist
 dist-ssr
 *.local

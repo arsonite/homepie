@@ -19,6 +19,7 @@
 
 // React imports
 import { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 // Components
 import CollisionParticles from '@/components/Particles/CollisionParticles.tsx';
@@ -34,9 +35,16 @@ import Sound from '@/util/Sound.ts';
 
 // Style
 import './_style/LoginPage.scss';
-import { error } from 'console';
+
+const DEBUG_PASSWORD = 'password';
+const MAX_FONT_SIZE_IN_REM = 7;
+const MAX_LETTERS_PER_LINE = 12;
+const MAX_LINES = 3;
+const MIN_FONT_SIZE_IN_REM = 2.5;
 
 const LoginPage: React.FC = (): JSX.Element => {
+    const navigate = useNavigate();
+
     const [displayText, setDisplayText] = useState<string[]>([]);
     const [errorCount, setErrorCount] = useState<number>(0);
     const [input, setInput] = useState<string>('');
@@ -48,6 +56,10 @@ const LoginPage: React.FC = (): JSX.Element => {
         new Sound('clicks/creamy-click-2'),
         new Sound('clicks/creamy-click-3'),
     ];
+
+    // Speak.
+    // Who is there?
+    // Identify.
 
     // Ahh, yes, I know you
     // You again, welcome back
@@ -64,83 +76,131 @@ const LoginPage: React.FC = (): JSX.Element => {
     const displayTextContainerRef = useRef<HTMLDivElement>(null);
     const letterRefs = useRef<(HTMLDivElement | null)[]>([]);
 
-    const handleKeyPress = (event: KeyboardEvent) => {
-        if (Keys.pressed(event.key, null, true, true, true)) {
-            return;
-        }
-
-        if (Keys.pressed(event.key, 'Enter')) {
-            setIsError(true);
-            setErrorCount((prev) => prev + 1); // Necessary to prevent asynchronicity during state batching
-            setTimeout(() => setIsError(false), 250);
-            error_sound.play();
-        } else if (Keys.pressed(event.key, 'Backspace')) {
-            setDisplayText((prev) => prev.slice(0, -1));
-            setInput((prev) => prev.slice(0, -1));
-            const randomSound = keyboard_sounds[Math.floor(Math.random() * keyboard_sounds.length)];
-            randomSound.play();
-        } else {
-            const randomSound = keyboard_sounds[Math.floor(Math.random() * keyboard_sounds.length)];
-            randomSound.play();
-            setDisplayText((prev) => [...prev, event.key]);
-            setInput((prev) => prev + event.key);
-        }
-    };
-
     useEffect(() => {
+        const handleKeyPress = (event: KeyboardEvent) => {
+            if (Keys.pressed(event.key, null, true, true, true)) {
+                return;
+            }
+
+            if (Keys.pressed(event.key, 'Enter')) {
+                if (input === DEBUG_PASSWORD) {
+                    navigate('/home');
+                } else {
+                    setIsError(true);
+                    setTimeout(() => setIsError(false), 250);
+                    error_sound.play();
+                }
+            } else if (Keys.pressed(event.key, 'Backspace')) {
+                setDisplayText((prev) => prev.slice(0, -1));
+                setInput((prev) => prev.slice(0, -1));
+                const randomSound = keyboard_sounds[Math.floor(Math.random() * keyboard_sounds.length)];
+                randomSound.play();
+            } else {
+                const container = displayTextContainerRef.current;
+                const letters = container ? (Array.from(container.children) as HTMLDivElement[]) : [];
+                const totalLetters = letters.length;
+                if (totalLetters >= MAX_LETTERS_PER_LINE * MAX_LINES) {
+                    return;
+                }
+
+                const randomSound = keyboard_sounds[Math.floor(Math.random() * keyboard_sounds.length)];
+                randomSound.play();
+                setDisplayText((prev) => [...prev, event.key]);
+                setInput((prev) => prev + event.key);
+            }
+        };
+
         window.addEventListener('keydown', handleKeyPress);
         return () => {
             window.removeEventListener('keydown', handleKeyPress);
         };
-        // Intended behaviour
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, [error_sound, input, keyboard_sounds, navigate]);
 
     useEffect(() => {
         const container = displayTextContainerRef.current;
         if (container) {
-            const MAX_FONT_SIZE_IN_REM = 7;
-            const MAX_FONT_SIZE_IN_PX = Pixel.fromREM(MAX_FONT_SIZE_IN_REM);
+            const letters = Array.from(container.children) as HTMLDivElement[];
+            const totalLetters = letters.length;
 
-            const containerWidth = container.offsetWidth;
-            console.log('containerWidth: ', containerWidth);
-            const totalLetters = displayText.length;
-            console.log('totalLetters: ', totalLetters);
-            const letterWidthInPX = containerWidth / totalLetters;
-            console.log('letterWidthInPX: ', letterWidthInPX);
-            let letterWidthInREM = Pixel.toREM(letterWidthInPX);
-            if (letterWidthInPX > MAX_FONT_SIZE_IN_PX) {
-                letterWidthInREM = MAX_FONT_SIZE_IN_REM;
-            }
+            if (totalLetters > 0) {
+                const lines = Math.ceil(totalLetters / MAX_LETTERS_PER_LINE);
+                const lettersPerLine = Math.min(totalLetters, MAX_LETTERS_PER_LINE);
+                const containerWidth = container.clientWidth;
+                const letterWidth = Math.min(containerWidth / lettersPerLine, MAX_FONT_SIZE_IN_REM * 16);
 
-            letterRefs.current.forEach((letterRef) => {
-                if (letterRef) {
-                    if (!letterRef.style.fill) {
-                        letterRef.style.fill = Color.HEX.random();
+                letters.forEach((letter) => {
+                    if (!letter.style.fill) {
+                        letter.style.fill = Color.HEX.random();
                     }
-                    letterRef.style.width = `${letterWidthInREM}rem`;
-                }
-            });
+                    if (totalLetters >= MAX_LETTERS_PER_LINE) {
+                        letter.style.flexBasis = `${MIN_FONT_SIZE_IN_REM}rem`;
+                    } else {
+                        letter.style.flexBasis = `${letterWidth}px`;
+                    }
+                });
+
+                container.style.flexWrap = lines > 1 ? 'wrap' : 'nowrap';
+            }
         }
     }, [displayText]);
 
-    const activeInput = displayText.length > 0;
+    useEffect(() => {
+        if (isError) {
+            if (errorCount < 4) {
+                setErrorCount((prev) => prev + 1); // Necessary to prevent asynchronicity during state batching
+            }
+            if (errorCount >= 3) {
+                setErrorCount(4);
+            }
+        }
+        // Intended behaviour
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isError]);
 
-    console.log(errorCount);
+    const activeInput = displayText.length > 0;
 
     return (
         <div id='login-page' className={isError ? 'error' : ''}>
             <Icon
-                className={`${activeInput ? 'active-input' : ''}`}
+                className={activeInput ? 'active-input' : ''}
                 is_image
                 id='homepie-logo'
                 positioning='absolute'
                 src={['homepie-logo']}
             />
 
+            <div className={activeInput ? 'active-input' : ''} id='speech-bubble'>
+                <p className='speech-bubble-text'>Ahh, yes, I know you</p>
+                <p className='speech-bubble-text'>And what is your secret?</p>
+            </div>
+
+            <div className={activeInput ? 'active-input' : ''} id='letter-count'>
+                <p>{displayText.length}</p>
+                <p>/</p>
+                <p>{MAX_LETTERS_PER_LINE * MAX_LINES}</p>
+            </div>
+
+            <div id='health' className={`${activeInput ? 'active-input' : ''}`}>
+                {errorCount >= 3 ? (
+                    <Icon className='heart broken' key={`heart-3-${errorCount}`} src={['common', 'heart-broken']} />
+                ) : (
+                    <Icon className='heart' key={`heart-3-${errorCount}`} src={['common', 'heart']} />
+                )}
+                {errorCount >= 2 ? (
+                    <Icon className='heart broken' key={`heart-2-${errorCount}`} src={['common', 'heart-broken']} />
+                ) : (
+                    <Icon className='heart' key={`heart-2-${errorCount}`} src={['common', 'heart']} />
+                )}
+                {errorCount >= 1 ? (
+                    <Icon className='heart broken' key={`heart-1-${errorCount}`} src={['common', 'heart-broken']} />
+                ) : (
+                    <Icon className='heart' key={`heart-1-${errorCount}`} src={['common', 'heart']} />
+                )}
+            </div>
+
             <div
-                id='display-text-container'
                 className={isError ? 'error' : ''}
+                id='display-text-container'
                 ref={displayTextContainerRef}
                 style={{ display: 'flex', flexWrap: 'wrap' }}
             >
@@ -162,24 +222,6 @@ const LoginPage: React.FC = (): JSX.Element => {
                 particleEase={0.2}
                 particleFriction={0.95}
             />
-
-            <div id='health' className={`${activeInput ? 'active-input' : ''}`}>
-                {errorCount >= 3 ? (
-                    <Icon key={`heart-3-${errorCount}`} className='heart broken' src={['common', 'heart-broken']} />
-                ) : (
-                    <Icon key={`heart-3-${errorCount}`} className='heart' src={['common', 'heart']} />
-                )}
-                {errorCount >= 2 ? (
-                    <Icon key={`heart-2-${errorCount}`} className='heart broken' src={['common', 'heart-broken']} />
-                ) : (
-                    <Icon key={`heart-2-${errorCount}`} className='heart' src={['common', 'heart']} />
-                )}
-                {errorCount >= 1 ? (
-                    <Icon key={`heart-1-${errorCount}`} className='heart broken' src={['common', 'heart-broken']} />
-                ) : (
-                    <Icon key={`heart-1-${errorCount}`} className='heart' src={['common', 'heart']} />
-                )}
-            </div>
         </div>
     );
 };

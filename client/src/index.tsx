@@ -19,6 +19,7 @@
 
 // React imports
 import React from 'react'; // Importing the React library
+import { BrowserRouter } from 'react-router-dom';
 import ReactDOM from 'react-dom/client'; // Importing the ReactDOM library for rendering the application
 
 // Components
@@ -66,7 +67,21 @@ const defineCapitalizePrototypeFunction = () => {
 // Call the function to define the 'capitalize' prototype function
 defineCapitalizePrototypeFunction();
 
-// Render the main Application component into the root element of the HTML
+/* createRoot(rootElement) is a React utility function used to create a react root element,
+ * which is a DOM element in which UI components render themselves.
+ * It takes as a parameter the root element that should be created.
+ */
 ReactDOM.createRoot(document.getElementById('root')!).render(
-    conditionalStrictMode(STRICT_MODE, <Application />) // Render the Application component within React's StrictMode for highlighting potential problems
+    /* StrictMode enables additional development behaviors and warnings for the component tree inside.
+     * It triggers a lot of re-renders, but is disabled in production automatically.
+     *
+     * BrowserRouting is necessary for REST-conform routing.
+     * Allows to apply routing, redirects and switches for dynamic rich-client changes in the front-end.
+     */
+    conditionalStrictMode(
+        STRICT_MODE,
+        <BrowserRouter>
+            <Application />
+        </BrowserRouter>
+    ) // Render the Application component within React's StrictMode for highlighting potential problems
 );

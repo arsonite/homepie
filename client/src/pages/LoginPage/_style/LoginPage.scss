@@ -29,6 +29,8 @@
     height: 100%;
     width: 100%;
 
+    transition: $global_transition_slow;
+
     #homepie-logo {
         position: absolute;
 
@@ -37,6 +39,8 @@
 
         transition: $global_transition_slow;
         z-index: $global_z_login_page_logo;
+
+        transition: inherit;
 
         img {
             height: 100%;
@@ -50,10 +54,10 @@
         }
 
         &.active-input {
-            margin-bottom: 22.5rem;
+            margin-bottom: 33.5em;
 
             background-color: rgba(0, 0, 0, 0.25);
-            border-radius: 3rem;
+            border-radius: 2rem;
             backdrop-filter: blur(0.35rem);
 
             z-index: $global_z_login_page_logo + 1;
@@ -67,6 +71,39 @@
         }
     }
 
+    #speech-bubble {
+        user-select: none;
+
+        position: absolute;
+        top: 38rem;
+
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        padding: 1rem;
+
+        background-color: rgba(0, 0, 0, 0.25);
+        border-radius: 1rem;
+        backdrop-filter: blur(0.35rem);
+        color: $global_white;
+        opacity: 0;
+        text-align: center;
+
+        transition: inherit;
+
+        &.active-input {
+            top: 29.5rem;
+
+            background-color: rgba(0, 0, 0, 0.25);
+            border-radius: 2rem;
+            backdrop-filter: blur(0.35rem);
+
+            z-index: $global_z_login_page_logo + 1;
+
+            opacity: 1;
+        }
+    }
+
     #display-text-container {
         overflow: hidden;
 
@@ -75,10 +112,10 @@
         display: flex;
         flex-direction: row;
         justify-content: center;
-        flex-wrap: wrap;
-        gap: 2rem;
+        gap: 1rem;
         height: fit-content;
-        width: 50rem;
+        padding-top: 2.5rem;
+        width: 42.5rem;
 
         z-index: $global_z_login_page_display_text;
 
@@ -88,8 +125,6 @@
         // as if the christian god gave it free will, seriously what the fuck
         .display-text-letter {
             user-select: none;
-
-            width: 7rem !important;
 
             animation: rainbow-fade 0.75s forwards;
 
@@ -133,23 +168,59 @@
         }
     }
 
-    #health {
-        position: absolute;
-        display: flex;
-        gap: 1rem;
-        justify-content: center;
-        padding: 1rem;
-        height: fit-content;
-        width: fit-content;
+    #letter-count {
+        user-select: none;
 
-        margin-top: 10rem;
-        opacity: 0;
+        position: absolute;
+        bottom: 50%;
+
+        display: flex;
+        flex-direction: row;
+        gap: 0.5rem;
+        height: fit-content;
+        padding: 1rem;
 
         background-color: rgba(0, 0, 0, 0.25);
-        border-radius: 2rem;
+        border-radius: 1rem;
         backdrop-filter: blur(0.35rem);
+        color: $global_white;
+        opacity: 0;
+        text-align: center;
 
-        transition: $global_transition_slow;
+        transition: inherit;
+        z-index: $global_z_login_page_logo + 1;
+
+        &:hover {
+            cursor: pointer;
+            fill: #222;
+        }
+
+        &.active-input {
+            bottom: 27.5rem;
+
+            fill: #111;
+            opacity: 1;
+        }
+    }
+
+    #health {
+        position: absolute;
+        bottom: 50%;
+
+        display: flex;
+        gap: 1rem;
+        height: fit-content;
+        justify-content: center;
+        padding: 1rem;
+        width: fit-content;
+
+        opacity: 0;
+
+        backdrop-filter: blur(0.35rem);
+        background-color: rgba(0, 0, 0, 0.25);
+        border-radius: 2rem;
+
+        transition: inherit;
         z-index: $global_z_login_page_display_text;
 
         .heart {
@@ -186,7 +257,7 @@
         }
 
         &.active-input {
-            margin-top: 22.5rem;
+            bottom: 21rem;
 
             opacity: 1;
         }
