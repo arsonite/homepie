@@ -58,5 +58,10 @@
         "name": "root",
         "help": "Change directory to root",
         "command": "cd /"
+    },
+    {
+        "name": "tt",
+        "help": "Change directory to teatype source path",
+        "command": "cd $TEATYPE_SOURCE_PATH"
     }
 ]

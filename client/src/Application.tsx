@@ -32,60 +32,7 @@ const Application: React.FC = (): JSX.Element => {
         <div id='homepie-application'>
             {/* <SoundControl /> */}
 
-            {!login ? (
-                <React.Fragment>
-                    <Navigate to='/login' />
-
-                    <Routes>
-                        <Route path='/login' element={<LoginPage />} />
-                    </Routes>
-                </React.Fragment>
-            ) : (
-                <React.Fragment>
-                    <RootPathProvider initial_root_path={pages_root_path}>
-                        <Sidebar pages={pages} />
-                    </RootPathProvider>
-
-                    <div id='content_frame'>
-                        <RootPathProvider initial_root_path={pages_root_path}>
-                            <Taskbar />
-                        </RootPathProvider>
-
-                        <main>
-                            <ErrorBoundary>
-                                {enabled_pages.length > 0 && (
-                                    <Routes>
-                                        {/* Redirecting "/" to first entry in enabled-pages-array */}
-                                        <Route
-                                            path='/'
-                                            element={
-                                                <Navigate replace to={enabled_pages[0]['encoded_name'] as string} />
-                                            }
-                                            // TODO: Temporary redirection to respective role hubs until dashboard is ready
-                                            // element={userSpecificRedirection(login, enabled_pages)}
-                                        />
-
-                                        {enabled_pages.map((enabled_page) => {
-                                            const Component = enabled_page.component as React.FC;
-                                            return (
-                                                <Route
-                                                    key={Page.name}
-                                                    // Trailing '*' necessary to render nested routes
-                                                    path={`${enabled_page.encoded_name}/*`}
-                                                    element={<Component />}
-                                                />
-                                            );
-                                        })}
-
-                                        {/* Catching all manually typed non-matches and automatic miss-matches */}
-                                        <Route path='*' element={<NoMatch />} />
-                                    </Routes>
-                                )}
-                            </ErrorBoundary>
-                        </main>
-                    </div>
-                </React.Fragment>
-            )}
+            <LoginPage />
         </div>
     );
 };

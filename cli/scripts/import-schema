@@ -1,0 +1,82 @@
+#!/usr/bin/env python3.11
+
+# Copyright (c) 2024-2024 Burak Günaydin
+# All Rights Reserved
+#
+# This software is the confidential and proprietary information of
+# Burak Günaydin. You may not use, modify, or distribute this
+# software (unless you have the permission of the copyright holder)
+# except in accordance with the terms of any applicable license agreement.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
+# System imports
+import os
+import sys
+
+'''
+Add the parent directory of 'src' to the system path.
+This allows the script to import modules from the 'src' directory.
+Specifically, it inserts the absolute path of the 'src' directory
+at the beginning of the system path list (sys.path).
+This is useful when the script is executed from a different directory
+and needs to access modules located in 'src'.
+'''
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+# From own imports
+from src.BaseCLI import BaseCLI
+
+class ImportSchema(BaseCLI):
+    def meta(self):
+        return {
+            'name': 'import-schema',
+            'shorthand': 'is',
+            'help': 'List the import schemas',
+            'commands': [
+                {
+                    'name': 'all',
+                    'shorthand': 'a',
+                    'help': 'List all import schema',
+                },
+                {
+                    'name': 'go',
+                    'shorthand': 'g',
+                    'help': 'List the go import schema',
+                },
+                {
+                    'name': 'python',
+                    'shorthand': 'py',
+                    'help': 'List the python import schema',
+                },
+                {
+                    'name': 'typescript',
+                    'shorthand': 'ts',
+                    'help': 'List the typescript import schema',
+                }
+            ],
+            'flags': [
+                {
+                    'name': 'no-copy',
+                    'shorthand': 'nc',
+                    'help': 'Stop copying the import schema',
+                },
+                {
+                    'name': 'no-verbose',
+                    'shorthand': 'nv',
+                    'help': 'Stop printing verbose output',
+                }
+            ]
+        }
+
+    def execute(self):
+        pass
+
+if __name__ == '__main__':
+    ImportSchema()

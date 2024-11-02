@@ -114,9 +114,9 @@ const CollisionParticles: React.FC<CollisionParticlesProps> = (props) => {
         animate();
 
         // Add mouse interaction event listeners to the window
-        window.addEventListener('click', effectRef.current.handleMouseClick);
-        window.addEventListener('mouseleave', effectRef.current.handleMouseLeave);
-        window.addEventListener('mousemove', effectRef.current.handleMouseMove);
+        // window.addEventListener('click', effectRef.current.handleMouseClick);
+        // window.addEventListener('mouseleave', effectRef.current.handleMouseLeave);
+        // window.addEventListener('mousemove', effectRef.current.handleMouseMove);
 
         /**
          * Cleanup function to remove event listeners and cancel the animation frame.
@@ -128,9 +128,9 @@ const CollisionParticles: React.FC<CollisionParticlesProps> = (props) => {
             }
             window.removeEventListener('resize', setCanvasSize);
             if (effectRef.current) {
-                window.removeEventListener('click', effectRef.current.handleMouseClick);
-                window.removeEventListener('mouseleave', effectRef.current.handleMouseLeave);
-                window.removeEventListener('mousemove', effectRef.current.handleMouseMove);
+                // window.removeEventListener('click', effectRef.current.handleMouseClick);
+                // window.removeEventListener('mouseleave', effectRef.current.handleMouseLeave);
+                // window.removeEventListener('mousemove', effectRef.current.handleMouseMove);
             }
             effectRef.current?.destroy();
             effectRef.current = null;
