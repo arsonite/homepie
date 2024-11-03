@@ -1,23 +1,20 @@
 #!/usr/bin/env python3.11
 
-# Copyright (c) 2024-2025 Burak Günaydin
-# All Rights Reserved
+# Copyright (C) 2024-2025 Burak Günaydin
 #
-# This software is the confidential and proprietary information of
-# Burak Günaydin. You may not use, modify, or distribute this
-# software (unless you have the permission of the copyright holder)
-# except in accordance with the terms of any applicable license agreement.
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, version 3 of the License.
 #
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 # System imports
-import importlib
 import inspect
 import os
 import shutil
@@ -27,7 +24,10 @@ import sys
 from src.BaseCLI import BaseCLI
 from src.Command import Command
 
-# From as-own imports
+# From-as system imports
+from importlib import util as iutil
+
+# From-as own imports
 from src.TemporaryDirectory import TemporaryDirectory as TempDir
 
 CURRENT_DIRECTORY = os.path.dirname(os.path.abspath(__file__))
@@ -73,8 +73,8 @@ class MainCLI(BaseCLI):
                                 print("An error occurred during file copy:", e)
 
                             # Load the module from the temp directory file directly without modifying sys.path
-                            spec = importlib.util.spec_from_file_location(formatted_module_name, temp_filepath)
-                            module = importlib.util.module_from_spec(spec)
+                            spec = iutil.spec_from_file_location(formatted_module_name, temp_filepath)
+                            module = iutil.module_from_spec(spec)
                             spec.loader.exec_module(module)
 
                             # Convert kebab-case to CamelCase for the class name

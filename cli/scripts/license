@@ -1,0 +1,179 @@
+#!/usr/bin/env python3.11
+
+# Copyright (C) 2024-2025 Burak Günaydin
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+# System imports
+import os
+import sys
+import traceback
+
+# Package imports
+import pyperclip
+
+'''
+Add the parent directory of 'src' to the system path.
+This allows the script to import modules from the 'src' directory.
+Specifically, it inserts the absolute path of the 'src' directory
+at the beginning of the system path list (sys.path).
+This is useful when the script is executed from a different directory
+and needs to access modules located in 'src'.
+'''
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+# From own imports
+from src.BaseCLI import BaseCLI
+from src.logging import critical, error, log
+
+class License(BaseCLI):
+    def meta(self):
+        return {
+            'name': 'license',
+            'shorthand': 'li',
+            'help': 'Print the license of the project for different programming languages',
+            'commands': [
+                {
+                    'name': 'go',
+                    'shorthand': 'g',
+                    'help': 'Print as a go compatible multi-line comment',
+                },
+                {
+                    'name': 'html',
+                    'shorthand': 'h',
+                    'help': 'Print as a html compatible multi-line comment',
+                },
+                {
+                    'name': 'jsonc',
+                    'shorthand': 'jc',
+                    'help': 'Print as a jsonc compatible multi-line comment',
+                },
+                {
+                    'name': 'python',
+                    'shorthand': 'py',
+                    'help': 'Print as a python compatible multi-line comment',
+                },
+                {
+                    'name': 'text',
+                    'shorthand': 't',
+                    'help': 'Print as a plain text',
+                },
+                {
+                    'name': 'typescript',
+                    'shorthand': 'ts',
+                    'help': 'Print as a typescript compatible comment',
+                }
+            ],
+            'flags': [
+                {
+                    'long': 'long',
+                    'short': 'l',
+                    'help': 'Print the long version of the license',
+                    'required': False
+                },
+                {
+                    'long': 'no-copy',
+                    'short': 'nc',
+                    'help': 'Stop copying the license text',
+                    'required': False,
+                },
+                {
+                    'long': 'no-print',
+                    'short': 'nv',
+                    'help': 'Stop printing the license text',
+                    'required': False
+                }
+            ]
+        }
+        
+    def format_license(self, license:str):
+        """
+        Formats the license text for printing to the console.
+        Adds a comment character to the beginning of each line.
+        
+        Args:
+            license (str): The license text to format.
+        
+        Returns:
+            str: The formatted license text.
+        """
+        # Split the license text into lines
+        lines = license.split('\n')
+        
+        # Initialize the comment character to an empty string
+        comment_character = ''
+        # Retrieve the current command provided by the user
+        command = self.get_command()
+        # Assign the comment character based on the selected command
+        if command == 'g' or command == 'go':
+            comment_character = '// ' # Go language single-line comment
+        elif command == 'h' or command == 'html':
+            comment_character = '' # HTML does not use single-line comments in this context
+        elif command == 'jc' or command == 'jsonc':
+            comment_character = ' * ' # JSONC uses asterisk for block comments
+        elif command == 'py' or command == 'python':
+            comment_character = '# ' # Python single-line comment
+        elif command == 't' or command == 'text':
+            comment_character = '' # Plain text does not require comment characters
+        elif command == 'ts' or command == 'typescript':
+            comment_character = ' * ' # TypeScript uses asterisk in block comments
+        
+        # Add a comment character to the beginning of each line
+        formatted_license = '\n'.join([f'{comment_character}{line}' for line in lines])
+        
+        # Post-process the formatted license text based on the selected command        
+        if command == 'h' or command == 'html':
+            formatted_license = f'<!--\n{formatted_license}\n-->' # HTML block comment
+        if command == 'jc' or command == 'jsonc':
+            formatted_license = f'/**\n{formatted_license}\n */' # TypeScript block comment
+        elif command == 'ts' or command == 'typescript':
+            formatted_license = f'/**\n * @license\n{formatted_license}\n */' # TypeScript block comment
+        
+        return formatted_license
+
+    def execute(self):
+        """
+        Executes the license printing command based on provided flags.
+        Retrieves the appropriate license text, optionally copies it to the clipboard,
+        and prints it to the console.
+        """
+        try:
+            # Determine the parent directory relative to the current file
+            parent_directory = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+            # Construct the path to the 'files' directory within the parent directory
+            files_directory_path = os.path.join(parent_directory, 'files')
+            
+            # Check if the 'long' flag is set to determine which license file to use
+            long_version = self.get_flag('long')
+            license_text_filename = 'license-long.txt' if long_version else 'license-short.txt'
+            
+            # Open and read the selected license file
+            with open(f'{files_directory_path}/{license_text_filename}', 'r') as file:
+                license = file.read()
+                # If 'no-copy' flag is not set, attempt to copy the license text to clipboard
+                if not self.get_flag('no-copy'):
+                    try:
+                        pyperclip.copy(license)
+                        log('The license text has been copied to the clipboard.')
+                    except:
+                        error('Could not copy the license text to the clipboard. Is it possible you are in a ssh session?')
+                
+                formatted_license = self.format_license(license)
+                # Log the license text with padding for formatting
+                log(formatted_license, padding=2)
+        except:
+            # Log a critical error if any exception occurs during the execution
+            critical('An error occurred while trying to print the license text.', log_traceback=True)
+                
+if __name__ == '__main__':
+    License()

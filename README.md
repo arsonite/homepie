@@ -61,7 +61,7 @@ Don't forget to give the project a star! Thanks again!
 
 ## License
 
-Distributed under custom proprietary License (for now). See `LICENSE` for more information.
+Distributed under GPL-3 license. See `LICENSE` for more information.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 

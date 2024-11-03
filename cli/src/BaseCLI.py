@@ -1,18 +1,16 @@
-# Copyright (c) 2024-2025 Burak Günaydin
-# All Rights Reserved
+# Copyright (C) 2024-2025 Burak Günaydin
 #
-# This software is the confidential and proprietary information of
-# Burak Günaydin. You may not use, modify, or distribute this
-# software (unless you have the permission of the copyright holder)
-# except in accordance with the terms of any applicable license agreement.
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, version 3 of the License.
 #
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 # System imports
 import subprocess
@@ -503,6 +501,7 @@ class BaseCLI(ABC):
             Any: The value of the command, initially set to None.
         """
         # Access the value attribute of the command instance and return it
+        # TODO: Always return long value of command
         for command in self.commands:
             if command.value:
                 return command.value

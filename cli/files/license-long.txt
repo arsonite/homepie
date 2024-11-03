@@ -1,5 +1,3 @@
-# License
-
                Copyright (C) 2024-2025 Burak Günaydin
 
                     GNU GENERAL PUBLIC LICENSE
