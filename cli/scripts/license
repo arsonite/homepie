@@ -16,25 +16,18 @@
 
 # System imports
 import os
-import sys
-import traceback
 
 # Package imports
-import pyperclip
-
-'''
-Add the parent directory of 'src' to the system path.
-This allows the script to import modules from the 'src' directory.
-Specifically, it inserts the absolute path of the 'src' directory
-at the beginning of the system path list (sys.path).
-This is useful when the script is executed from a different directory
-and needs to access modules located in 'src'.
-'''
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+try:
+    import pyperclip
+    pyperclip_installed = True
+except:
+    from teatype.logging import warn
+    pyperclip_installed = False
 
 # From own imports
-from src.BaseCLI import BaseCLI
-from src.logging import critical, error, log
+from teatype.cli import BaseCLI
+from teatype.logging import err, log
 
 class License(BaseCLI):
     def meta(self):
@@ -162,18 +155,20 @@ class License(BaseCLI):
                 license = file.read()
                 # If 'no-copy' flag is not set, attempt to copy the license text to clipboard
                 if not self.get_flag('no-copy'):
-                    try:
-                        pyperclip.copy(license)
-                        log('The license text has been copied to the clipboard.')
-                    except:
-                        error('Could not copy the license text to the clipboard. Is it possible you are in a ssh session?')
+                    if pyperclip_installed:
+                        try:
+                            pyperclip.copy(license)
+                            log('The license text has been copied to the clipboard.')
+                        except:
+                            err('Could not copy the license text to the clipboard. Is it possible you are in a ssh session?')
+                    else:
+                        warn('The "pyperclip" package is not installed. The license text will not be copied to the clipboard.', pad_top=1)
                 
                 formatted_license = self.format_license(license)
                 # Log the license text with padding for formatting
-                log(formatted_license, padding=2)
+                log(formatted_license, pad_top=1, pad_bottom=1)
         except:
-            # Log a critical error if any exception occurs during the execution
-            critical('An error occurred while trying to print the license text.', log_traceback=True)
+            err('An error occurred while trying to print the license text.', exit=True, traceback=True)
                 
 if __name__ == '__main__':
     License()

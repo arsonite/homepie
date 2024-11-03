@@ -16,18 +16,10 @@
 
 # System imports
 import os
-import sys
-
-# Add the parent directory of 'src' to the system path.
-# This allows the script to import modules from the 'src' directory.
-# Specifically, it inserts the absolute path of the 'src' directory
-# at the beginning of the system path list (sys.path).
-# This is useful when the script is executed from a different directory
-# and needs to access modules located in 'src'.
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 # From own imports
-from src.BaseCLI import BaseCLI
+from teatype.cli import BaseCLI
+from teatype.logging import err
 
 class MakeExecutable(BaseCLI):
     def meta(self):
@@ -91,7 +83,7 @@ class MakeExecutable(BaseCLI):
             self.make_file_executable(filename, git_support)
         else:
             # If the path is neither a file nor a directory, raise an error.
-            raise ValueError(f"The path '{filename}' is neither a file nor a directory.")
+            err(f'The path "{filename}" is neither a file nor a directory.', exit=True, traceback=True)
     
 if __name__ == '__main__':
     MakeExecutable()

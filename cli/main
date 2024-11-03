@@ -20,15 +20,15 @@ import os
 import shutil
 import sys
 
-# From own imports
-from src.BaseCLI import BaseCLI
-from src.Command import Command
+# From package imports
+from teatype.cli import BaseCLI, Command
+from teatype.logging import err, log, hint, nl
 
 # From-as system imports
 from importlib import util as iutil
 
-# From-as own imports
-from src.TemporaryDirectory import TemporaryDirectory as TempDir
+# From-as package imports
+from teatype.io import TemporaryDirectory as TempDir
 
 CURRENT_DIRECTORY = os.path.dirname(os.path.abspath(__file__))
 SCRIPTS_DIR = f'{CURRENT_DIRECTORY}/scripts'
@@ -125,11 +125,9 @@ class MainCLI(BaseCLI):
             indented_formatted_string += f'{script_str}'
             indented_formatted_string += '\n'
         
-        indented_formatted_string += '\n'
-        indented_formatted_string += 'Hint: Use "<script> -h, --help" flag for usage information.'
-        indented_formatted_string += '\n'
-            
         print(indented_formatted_string)
+        
+        hint('Use "<script> -h, --help" flag for usage information.', pad_bottom=1)
     
     def execute(self):
         """

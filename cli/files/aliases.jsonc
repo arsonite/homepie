@@ -1,0 +1,156 @@
+[
+    // homepie aliases
+    {
+        "name": "hpd",
+        "help": "Change directory to homepie data path",
+        "command": "cd $HOMEPIE_DATA_PATH"
+    },
+    {
+        "name": "hps",
+        "help": "Change directory to homepie source path",
+        "command": "cd $HOMEPIE_SOURCE_PATH"
+    },
+    {
+        "name": "hpc",
+        "help": "Change directory to homepie client path",
+        "command": "cd $HOMEPIE_SOURCE_PATH/client"
+    },
+    {
+        "name": "hpci",
+        "help": "Change directory to homepie cli path",
+        "command": "cd $HOMEPIE_SOURCE_PATH/cli"
+    },
+    {
+        "name": "hpco",
+        "help": "Change directory to homepie controller path",
+        "command": "cd $HOMEPIE_SOURCE_PATH/controller"
+    },
+    {
+        "name": "hpdb",
+        "help": "Change directory to homepie database-config path",
+        "command": "cd $HOMEPIE_SOURCE_PATH/database"
+    },
+    {
+        "name": "hpi",
+        "help": "Change directory to homepie ipc/redis-config path",
+        "command": "cd $HOMEPIE_SOURCE_PATH/ipc"
+    },
+    {
+        "name": "hpsv",
+        "help": "Change directory to homepie server/backend path",
+        "command": "cd $HOMEPIE_SOURCE_PATH/server"
+    },
+    {
+        "name": "hpv",
+        "help": "Activate the homepie virtual environment",
+        "command": ". $HOMEPIE_VENV_PATH/bin/activate"
+    },
+
+    // git aliases
+    {
+        "name": "gb",
+        "help": "Checkout a branch",
+        "function": [
+            "gb() {",
+            "   local branch_name='$1'",
+            "   if git rev-parse --verify '$branch_name' >/dev/null 2>&1; then",
+            "       git checkout '$branch_name'",
+            "   else",
+            "       git checkout -B '$branch_name'",
+            "   fi",
+            "}"
+        ]
+    },
+    {
+        "name": "gl",
+        "help": "Pull changes from a remote repository",
+        "command": "git pull"
+    },
+    {
+        "name": "gp",
+        "help": "Push changes to a remote repository",
+        "function": ["gp() {", "   git add .", "   git commit -m '$*'", "   git push", "}"]
+    },
+    {
+        "name": "gs",
+        "help": "Show the status of the repository",
+        "command": "git status"
+    },
+
+    // python aliases
+    {
+        "name": "pd",
+        "help": "Deactivate the current virtual environment",
+        "command": "deactivate"
+    },
+    {
+        "name": "pe",
+        "help": "Install a python package in editable mode",
+        "command": "python3.11 -m pip install -e ."
+    },
+    {
+        "name": "pi",
+        "help": "Install a python package",
+        "command": "python3.11 -m pip install"
+    },
+    {
+        "name": "pl",
+        "help": "View the installed python packages in a more detailed format",
+        "command": "python3.11 -m pip list --format=columns"
+    },
+    {
+        "name": "pr",
+        "help": "Install a python package",
+        "command": "python3.11 -m pip install -r requirements.txt"
+    },
+    {
+        "name": "py",
+        "help": "Run a python script",
+        "command": "python3.11"
+    },
+
+    // helpful aliases
+    {
+        "name": "bashrc",
+        "help": "Directly edit the bashrc file with 'vim'",
+        "command": "vim ~/.bashrc"
+    },
+    {
+        "name": "home",
+        "help": "Change directory to home",
+        "command": "cd ~"
+    },
+    {
+        "name": "l",
+        "help": "List all files and directories comprehensively",
+        "command": "ls -la -h --color"
+    },
+    {
+        "name": "root",
+        "help": "Change directory to root",
+        "command": "cd /"
+    },
+    {
+        "name": "sbashrc",
+        "help": "Source the bashrc",
+        "command": ". ~/.bashrc"
+    },
+
+    // teatype aliases
+    // TODO: Decouple
+    {
+        "name": "tt",
+        "help": "Change directory to teatype source path",
+        "command": "cd $TEATYPE_SOURCE_PATH"
+    },
+    {
+        "name": "ttp",
+        "help": "Change directory to teatype python source path",
+        "command": "cd $TEATYPE_PYTHON_SOURCE_PATH"
+    },
+    {
+        "name": "tts",
+        "help": "Change directory to teatype typescript source path",
+        "command": "cd $TEATYPE_TYPESCRIPT_SOURCE_PATH"
+    }
+]

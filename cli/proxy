@@ -20,7 +20,7 @@
 export PYTHONDONTWRITEBYTECODE=1
 
 # TODO: Decouple the path to .env
-. /usr/local/src/homepie/cli/venv/bin/activate
+. /usr/local/src/homepie/homepie-venv/bin/activate
 
 # Execute the main script of the homepie CLI tool with all passed arguments
 # "$@" ensures that all arguments passed to this script are forwarded to the main script.

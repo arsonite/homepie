@@ -21,16 +21,9 @@ import shutil
 import sys
 import traceback
 
-# Add the parent directory of 'src' to the system path.
-# This allows the script to import modules from the 'src' directory.
-# Specifically, it inserts the absolute path of the 'src' directory
-# at the beginning of the system path list (sys.path).
-# This is useful when the script is executed from a different directory
-# and needs to access modules located in 'src'.
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-
 # From own imports
-from src.BaseCLI import BaseCLI
+from teatype.cli import BaseCLI
+from teatype.logging import err, log
         
 class Aliases(BaseCLI):
     class _Alias:
@@ -127,11 +120,10 @@ class Aliases(BaseCLI):
         """
         List all aliases.
         """
-        print()
-        print('Available aliases:')
+        log('Available aliases:', padding_top=1)
         for alias in aliases:
-            print(f'    {alias.name}: {alias.help}')
-        print()
+            log(f'    {alias.name}: {alias.help}')
+        log()
         
     def edit_aliases(self, aliases):
         """
@@ -140,7 +132,7 @@ class Aliases(BaseCLI):
         
         # TODO: Move this to .env and make dynamically parsed from source path
         edited_alises_directory_path = '/usr/local/src/homepie/cli/dist'
-        edited_aliases_file_path = f'{edited_alises_directory_path}/aliases-edited.json'
+        edited_aliases_file_path = f'{edited_alises_directory_path}/aliases-edited.jsonc'
         
         # Check if the file exists, if not create it
         # Create parent directories if they do not exist
@@ -189,6 +181,7 @@ class Aliases(BaseCLI):
                 start_index = i
             if end_marker in line:
                 end_index = i
+                
         # Remove existing aliases block if present
         if start_index is not None and end_index is not None:
             print('Aliases already exist. Ejecting existing aliases first...')
@@ -280,8 +273,8 @@ class Aliases(BaseCLI):
         print('Resetting the edited aliases file...')
 
         # TODO: Move this to .env and make dynamically parsed from source path
-        default_file_path = '/usr/local/src/homepie/cli/files/aliases.json'
-        edited_file_path = '/usr/local/src/homepie/cli/dist/aliases-edited.json'
+        default_file_path = '/usr/local/src/homepie/cli/files/aliases.jsonc'
+        edited_file_path = '/usr/local/src/homepie/cli/dist/aliases-edited.jsonc'
 
         shutil.copyfile(default_file_path, edited_file_path)
 
@@ -297,8 +290,8 @@ class Aliases(BaseCLI):
         
         # Check if the edited aliases file exists
         # TODO: Move this to .env and make dynamically parsed from source path
-        default_file_path = '/usr/local/src/homepie/cli/files/aliases.json'
-        edited_file_path = '/usr/local/src/homepie/cli/dist/aliases-edited.json'
+        default_file_path = '/usr/local/src/homepie/cli/files/aliases.jsonc'
+        edited_file_path = '/usr/local/src/homepie/cli/dist/aliases-edited.jsonc'
         if os.path.exists(edited_file_path):
             file_path = edited_file_path
         else:
@@ -323,11 +316,9 @@ class Aliases(BaseCLI):
             elif command == 'eject' or command == 'ej':
                 self.eject_aliases(aliases)
         except json.JSONDecodeError:
-            print()
-            print(f'Failed to load aliases file at "{file_path}".')
-            print('Please make sure the (probably faulty edited) aliases file is in the correct format.')
-            print('You can also execute "aliases reset" to restore the proper aliases file.')
-            print()
+            log(f'Failed to load aliases file at "{file_path}".')
+            log('Please make sure the (probably faulty edited) aliases file is in the correct format.')
+            log('You can also execute "aliases reset" to restore the proper aliases file.')
         except:
             traceback.print_exc()
         

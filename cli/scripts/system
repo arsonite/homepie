@@ -14,21 +14,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-# System imports
-import os
-import sys
-import traceback
-
-# Add the parent directory of 'src' to the system path.
-# This allows the script to import modules from the 'src' directory.
-# Specifically, it inserts the absolute path of the 'src' directory
-# at the beginning of the system path list (sys.path).
-# This is useful when the script is executed from a different directory
-# and needs to access modules located in 'src'.
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-
 # From own imports
-from src.BaseCLI import BaseCLI
+from teatype.cli import BaseCLI
+from teatype.logging import err
         
 class System(BaseCLI):
     def meta(self):
@@ -86,7 +74,7 @@ class System(BaseCLI):
             elif command == 'stress' or command == 'st':
                 self.stress()
         except:
-            traceback.print_exc()
+            err('An error occurred while executing the command', exit=True, traceback=True)
         
 if __name__ == '__main__':
     System()

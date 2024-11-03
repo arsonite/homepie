@@ -38,9 +38,12 @@ fi
 script_directory=$(dirname "$(readlink -f "$0")")
 cd "$script_directory" || exit 1
 cd ..
+cd ..
 
 # TODO: Replace by .env path variable
-python3.11 -m venv venv
-. venv/bin/activate
+python3.11 -m venv homepie-venv
+. homepie-venv/bin/activate
+
+cd ./cli
 pip install -r requirements.txt
 sudo cp /usr/local/src/homepie/cli/proxy /usr/local/bin/hp

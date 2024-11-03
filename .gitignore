@@ -170,5 +170,4 @@ dist-ssr
 *.lock*
 */bin/
 */dist/
-*/teatype/
-*/venv/
+*venv/

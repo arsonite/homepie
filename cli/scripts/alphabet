@@ -1,0 +1,70 @@
+#!/usr/bin/env python3.11
+
+# Copyright (C) 2024-2025 Burak Günaydin
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+# From own imports
+from teatype.cli import BaseCLI
+from teatype.logging import log
+
+class Alphabet(BaseCLI):
+    """
+    A CLI tool to print the alphabet either horizontally or line by line.
+    """
+
+    def meta(self):
+        """
+        Provides metadata for the Alphabet CLI, including name, shorthand, help description,
+        and available flags.
+
+        Returns:
+            dict: A dictionary containing metadata information.
+        """
+        return {
+            'name': 'alphabet',
+            'shorthand': 'ab',
+            'help': 'Print the alphabet for big dum dums like myself',
+            'flags': [
+                {
+                    'long': 'vertical',
+                    'short': 'vl',
+                    'help': 'Print the alphabet vertically',
+                    'required': False
+                },
+            ]
+        }
+
+    def execute(self):
+        """
+        Executes the Alphabet CLI command. Depending on the 'vertical' flag,
+        it prints the alphabet in a vertical string or line by line.
+        """
+        log()
+        # Define the alphabet with pairs of uppercase and lowercase letters separated by spaces
+        alphabet = 'Aa | Bb | Cc | Dd | Ee | Ff | Gg | Hh | Ii | Jj | Kk | Ll | Mm | Nn | Oo | Pp | Qq | Rr | Ss | Tt | Uu | Vv | Ww | Xx | Yy | Zz'
+        alphabet_indices = '1  | 2  | 3  | 4  | 5  | 6  | 7  | 8  | 9  | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 20 | 21 | 22 | 23 | 24 | 25 | 26'
+        if self.get_flag('vertical'):
+            # Split the alphabet string into a list of letter pairs
+            alphabet_list = alphabet.split(' | ')
+            # Iterate through each letter pair and print them individually
+            for index, letter in enumerate(alphabet_list):
+                log(f'{index+1}: {letter}')
+        else:
+            # If 'vertical' flag is set, print the entire alphabet string
+            log(alphabet)
+            log(alphabet_indices)
+        log()
+        
+if __name__ == '__main__':
+    Alphabet()
