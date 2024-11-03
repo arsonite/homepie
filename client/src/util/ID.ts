@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright (c) 2024-2024 Burak Günaydin
+ * Copyright (c) 2024-2025 Burak Günaydin
  * All Rights Reserved
  *
  * This software is the confidential and proprietary information of
