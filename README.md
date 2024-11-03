@@ -4,11 +4,10 @@
 <br />
 <div align="center">
   <a href="https://github.com/arsonite/homepie">
-    <img src="files/homepie-logo.png" alt="Note icon" width="80" height="80">
+    <img src="files/homepie-logo.png" alt="homepie icon" width="80" height="80">
   </a>
 
-<h3 align="center">HomePie</h3>
-
+<h1 align="center">homepie</h3>
   <p align="center">
     This is the platform that powers all of my self-hosted web-apps
     <br />
@@ -70,8 +69,6 @@ Distributed under GPL-3 license. See `LICENSE` for more information.
 ## Contact
 
 Project Link: [https://github.com/arsonite/homepie](https://github.com/arsonite/homepie)
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
