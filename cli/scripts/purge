@@ -18,36 +18,16 @@
 from teatype.cli import BaseCLI
 
 # TODO: Implement
-class Venv(BaseCLI):
+class Purge(BaseCLI):
     def meta(self):
         return {
-            'name': 'venv',
-            'shorthand': 'v',
-            'help': 'Create a virtual environment',
-            'flags': [
-                {
-                    'long': 'delete',
-                    'short': 'd',
-                    'help': 'Delete the virtual environment',
-                    'required': False
-                },
-                {
-                    'long': 'no-activation',
-                    'short': 'na',
-                    'help': 'Stop activating the virtual environment',
-                    'required': False
-                },
-                {
-                    'long': 'reset',
-                    'short': 'r',
-                    'help': 'Reset the virtual environment',
-                    'required': False
-                }
-            ]
+            'name': 'purge',
+            'shorthand': 'p',
+            'help': 'Purge my custom software from the system'
         }
 
     def execute(self):
         pass
 
 if __name__ == '__main__':
-    Venv()
+    Purge()
