@@ -170,9 +170,9 @@ class Aliases(BaseCLI):
                 alias.command = self.replace_placeholders(alias.command, env_vars)
                 formatted_alias = f'alias {alias.name}="{alias.command}"'
             elif alias.function:
+                alias.function = [function.replace('\'', '\"') for function in alias.function]
                 formatted_alias = '\n'.join(alias.function)
             formatted_aliases.append(formatted_alias)
-            test
         
         # Read the current .bashrc content
         bashrc_path = os.path.expanduser('~/.bashrc')
