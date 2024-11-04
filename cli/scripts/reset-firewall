@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-# From own imports
+# From package imports
 from teatype.cli import BaseCLI
 
 # This is a test if double chatter occurs at 8Hz, but that doesnt seems to be the case which is really fucking awesome because this means I can type as fast as I can

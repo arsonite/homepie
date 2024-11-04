@@ -14,14 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-# System imports
-import json
-import os
-import sys
-
-
-
-# From own imports
+# From package imports
 from teatype.cli import BaseCLI
 
 class Template(BaseCLI):

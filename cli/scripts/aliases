@@ -21,16 +21,23 @@ import shutil
 import sys
 import traceback
 
-# From own imports
+# From system imports
+from typing import List
+
+# From package imports
 from teatype.cli import BaseCLI
-from teatype.logging import err, log
+from teatype.logging import err, log, nl
         
 class Aliases(BaseCLI):
     class _Alias:
-        def __init__(self, name, help, command):
+        def __init__(self, name:str, help:str, command:str=None, function:List[str]=None):
+            if not command and not function:
+                err('Either "command" or "function" must be provided.', exit=True, verbose=True)
+            
             self.name = name
             self.help = help
             self.command = command
+            self.function = function
             
     def meta(self):
         return {
@@ -120,12 +127,12 @@ class Aliases(BaseCLI):
         """
         List all aliases.
         """
-        log('Available aliases:', padding_top=1)
+        log('Available aliases:', pad_top=1)
         for alias in aliases:
             log(f'    {alias.name}: {alias.help}')
-        log()
+        nl()
         
-    def edit_aliases(self, aliases):
+    def edit_aliases(self):
         """
         Edit aliases.
         """
@@ -134,14 +141,13 @@ class Aliases(BaseCLI):
         edited_alises_directory_path = '/usr/local/src/homepie/cli/dist'
         edited_aliases_file_path = f'{edited_alises_directory_path}/aliases-edited.jsonc'
         
-        # Check if the file exists, if not create it
         # Create parent directories if they do not exist
         os.makedirs(edited_alises_directory_path, exist_ok=True)
         
-        # Save a prettified JSON of aliases to the file
-        with open(edited_aliases_file_path, 'w') as file:
-            json.dump([alias.__dict__ for alias in aliases], file, indent=4)
-            
+        # Check if the file exists, if not create it
+        if not os.path.exists(edited_aliases_file_path):
+            shutil.copyfile('/usr/local/src/homepie/cli/files/aliases.jsonc', edited_aliases_file_path)
+        
         # Open the edited file with vim for the user to edit
         self.shell(f'vim {edited_aliases_file_path}')
     
@@ -149,33 +155,34 @@ class Aliases(BaseCLI):
         """
         Inject all aliases.
         """
-        print()
-        print('Injecting all aliases...')
+        log('Injecting all aliases...', pad_top=1)
 
         # TODO: Move this to .env and make dynamically parsed
         env_path = '/usr/local/src/homepie/.env'
         # Load environment variables from .env file
         self.load_dotenv(env_path)
-
+        
+        formatted_aliases = []
         # Replace placeholders in alias commands
         env_vars = { key: os.getenv(key) for key in os.environ }
         for alias in aliases:
-            alias.command = self.replace_placeholders(alias.command, env_vars)
+            if alias.command:
+                alias.command = self.replace_placeholders(alias.command, env_vars)
+                formatted_alias = f'alias {alias.name}="{alias.command}"'
+            elif alias.function:
+                formatted_alias = '\n'.join(alias.function)
+            formatted_aliases.append(formatted_alias)
         
-        bashrc_path = os.path.expanduser('~/.bashrc')
-        start_marker = '# --- HOMEPIE ALIASES START ---'
-        end_marker = '# --- HOMEPIE ALIASES END ---'
-
-        # Format aliases into the proper structure
-        formatted_aliases = [f'alias {alias.name}="{alias.command}"' for alias in aliases]
-
         # Read the current .bashrc content
+        bashrc_path = os.path.expanduser('~/.bashrc')
         with open(bashrc_path, 'r') as file:
             bashrc_content = file.readlines()
             
         # Check if the aliases block already exists
         start_index = None
         end_index = None
+        start_marker = '# --- HOMEPIE ALIASES START ---'
+        end_marker = '# --- HOMEPIE ALIASES END ---'
         for i, line in enumerate(bashrc_content):
             if start_marker in line:
                 start_index = i
@@ -184,7 +191,7 @@ class Aliases(BaseCLI):
                 
         # Remove existing aliases block if present
         if start_index is not None and end_index is not None:
-            print('Aliases already exist. Ejecting existing aliases first...')
+            log('Aliases already exist. Ejecting existing aliases first...')
             self.eject_aliases(aliases, silent_mode=True, skip_refresh=True)
 
         # Read the current .bashrc content again
@@ -200,15 +207,14 @@ class Aliases(BaseCLI):
             file.writelines(bashrc_content)
         
         for alias in formatted_aliases:
-            print(f'Injected alias: {alias}')
+            log(f'Injected alias: {alias}')
             
-        print('Injected.')
+        log('Injected.')
         
         if skip_refresh:
-            print('Hint: Run "exec bash" to apply the changes.')
-            print()
+            log('Hint: Run "exec bash" to apply the changes.', pad_bottom=1)
         else:
-            print()
+            nl()
             # Refresh the current shell to load the new .bashrc
             self.shell(f'. {bashrc_path}')
             self.shell('exec bash')
@@ -219,8 +225,7 @@ class Aliases(BaseCLI):
         Eject all aliases.
         """
         if not silent_mode:
-            print()
-            print('Ejecting all aliases...')
+            log('Ejecting all aliases...', pad_top=1)
         
         bashrc_path = os.path.expanduser('~/.bashrc')
         start_marker = '# --- HOMEPIE ALIASES START ---'
@@ -251,16 +256,15 @@ class Aliases(BaseCLI):
         
         if not silent_mode:
             for alias in aliases:
-                print(f'Ejected alias: {alias.name}="{alias.command}"')
+                log(f'Ejected alias: {alias.name}="{alias.command}"')
             
-        print('Ejected.')
+        log('Ejected.')
         
         if skip_refresh:
             if not silent_mode:
-                print('Hint: Run "exec bash" to apply the changes.')
-                print()
+                log('Hint: Run "exec bash" to apply the changes.', pad_bottom=1)
         else:
-            print()
+            nl()
             # Refresh the current shell to load the new .bashrc
             self.shell(f'. {bashrc_path}')
             self.shell('exec bash')
@@ -269,8 +273,7 @@ class Aliases(BaseCLI):
         """
         Reset the edited aliases file to the default aliases file.
         """
-        print()
-        print('Resetting the edited aliases file...')
+        log('Resetting the edited aliases file...', pad_top=1)
 
         # TODO: Move this to .env and make dynamically parsed from source path
         default_file_path = '/usr/local/src/homepie/cli/files/aliases.jsonc'
@@ -278,8 +281,7 @@ class Aliases(BaseCLI):
 
         shutil.copyfile(default_file_path, edited_file_path)
 
-        print('Reset complete.')
-        print()
+        log('Reset complete.', pad_bottom=1)
     
     def execute(self):
         command = self.get_command()
@@ -298,9 +300,16 @@ class Aliases(BaseCLI):
             file_path = default_file_path
 
         try:
+            if command == 'edit' or command == 'ed':
+                self.edit_aliases()
+                
             # Read aliases from the selected JSON file
             with open(file_path, 'r') as file:
-                aliases_json = json.load(file)
+                # Load aliases from the JSONC file by reading its content, removing comment lines, and parsing the JSON.
+                aliases_jsonc = file.read() # Read the entire content of the aliases file
+                # Remove lines that start with '//' (comments)
+                aliases_jsonc = ''.join(line for line in aliases_jsonc.splitlines() if not line.strip().startswith('//')) 
+                aliases_json = json.loads(aliases_jsonc) # Parse the cleaned JSON content into a Python object
             
             aliases = []
             for alias in aliases_json:
@@ -309,8 +318,6 @@ class Aliases(BaseCLI):
                     
             if (command == 'list' or command == 'ls'):
                 self.list_aliases(aliases)
-            elif command == 'edit' or command == 'ed':
-                self.edit_aliases(aliases)
             elif command == 'inject' or command == 'in':
                 self.inject_aliases(aliases)
             elif command == 'eject' or command == 'ej':
@@ -320,7 +327,7 @@ class Aliases(BaseCLI):
             log('Please make sure the (probably faulty edited) aliases file is in the correct format.')
             log('You can also execute "aliases reset" to restore the proper aliases file.')
         except:
-            traceback.print_exc()
+            err('An error occurred while processing the aliases.', exit=True, traceback=True)
         
 if __name__ == '__main__':
     aliases = Aliases()

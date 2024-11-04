@@ -17,7 +17,7 @@
 # System imports
 import os
 
-# From own imports
+# From package imports
 from teatype.cli import BaseCLI
 from teatype.logging import err
 

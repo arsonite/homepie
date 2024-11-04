@@ -25,7 +25,7 @@ except:
     from teatype.logging import warn
     pyperclip_installed = False
 
-# From own imports
+# From package imports
 from teatype.cli import BaseCLI
 from teatype.logging import err, log
 
