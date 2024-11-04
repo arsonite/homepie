@@ -172,6 +172,7 @@ class Aliases(BaseCLI):
             elif alias.function:
                 formatted_alias = '\n'.join(alias.function)
             formatted_aliases.append(formatted_alias)
+            test
         
         # Read the current .bashrc content
         bashrc_path = os.path.expanduser('~/.bashrc')
