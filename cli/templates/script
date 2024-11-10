@@ -42,10 +42,6 @@ class Template(BaseCLI):
                     'short': '',
                     'long': '',
                     'help': '',
-                    'help_extension': [
-                        '',
-                        ''
-                    ],
                     'required': False
                 },
             ],

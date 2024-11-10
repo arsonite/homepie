@@ -37,40 +37,34 @@ class License(BaseCLI):
             'help': 'Print the license of the project for different programming languages',
             'commands': [
                 {
-                    'name': 'go',
+                    'name': 'gpl3',
                     'shorthand': 'g',
-                    'help': 'Print as a go compatible multi-line comment',
+                    'help': 'Print the GNU General Public License v3',
                 },
                 {
-                    'name': 'html',
-                    'shorthand': 'h',
-                    'help': 'Print as a html compatible multi-line comment',
-                },
-                {
-                    'name': 'jsonc',
-                    'shorthand': 'jc',
-                    'help': 'Print as a jsonc compatible multi-line comment',
-                },
-                {
-                    'name': 'python',
-                    'shorthand': 'py',
-                    'help': 'Print as a python compatible multi-line comment',
-                },
-                {
-                    'name': 'text',
-                    'shorthand': 't',
-                    'help': 'Print as a plain text',
-                },
-                {
-                    'name': 'typescript',
-                    'shorthand': 'ts',
-                    'help': 'Print as a typescript compatible comment',
+                    'name': 'mit',
+                    'shorthand': 'm',
+                    'help': 'Print the MIT License',
                 }
             ],
             'flags': [
                 {
-                    'long': 'long',
+                    'long': 'lang',
                     'short': 'l',
+                    'help': 'Print the license in a specific language',
+                    'options': [
+                        'go',
+                        'html',
+                        'jsonc',
+                        'python',
+                        'text',
+                        'typescript'
+                    ],
+                    'required': True
+                },
+                {
+                    'long': 'long',
+                    'short': 'lg',
                     'help': 'Print the long version of the license',
                     'required': False
                 },
@@ -105,31 +99,31 @@ class License(BaseCLI):
         
         # Initialize the comment character to an empty string
         comment_character = ''
-        # Retrieve the current command provided by the user
-        command = self.get_command()
-        # Assign the comment character based on the selected command
-        if command == 'g' or command == 'go':
+        # Retrieve the current flag value provided by the user
+        flag_value = self.get_flag('lang')
+        # Assign the comment character based on the selected flag value
+        if flag_value == 'g' or flag_value == 'go':
             comment_character = '// ' # Go language single-line comment
-        elif command == 'h' or command == 'html':
+        elif flag_value == 'h' or flag_value == 'html':
             comment_character = '' # HTML does not use single-line comments in this context
-        elif command == 'jc' or command == 'jsonc':
+        elif flag_value == 'jc' or flag_value == 'jsonc':
             comment_character = ' * ' # JSONC uses asterisk for block comments
-        elif command == 'py' or command == 'python':
+        elif flag_value == 'py' or flag_value == 'python':
             comment_character = '# ' # Python single-line comment
-        elif command == 't' or command == 'text':
+        elif flag_value == 't' or flag_value == 'text':
             comment_character = '' # Plain text does not require comment characters
-        elif command == 'ts' or command == 'typescript':
+        elif flag_value == 'ts' or flag_value == 'typescript':
             comment_character = ' * ' # TypeScript uses asterisk in block comments
         
         # Add a comment character to the beginning of each line
         formatted_license = '\n'.join([f'{comment_character}{line}' for line in lines])
         
-        # Post-process the formatted license text based on the selected command        
-        if command == 'h' or command == 'html':
+        # Post-process the formatted license text based on the selected flag value        
+        if flag_value == 'h' or flag_value == 'html':
             formatted_license = f'<!--\n{formatted_license}\n-->' # HTML block comment
-        if command == 'jc' or command == 'jsonc':
+        if flag_value == 'jc' or flag_value == 'jsonc':
             formatted_license = f'/**\n{formatted_license}\n */' # TypeScript block comment
-        elif command == 'ts' or command == 'typescript':
+        elif flag_value == 'ts' or flag_value == 'typescript':
             formatted_license = f'/**\n * @license\n{formatted_license}\n */' # TypeScript block comment
         
         return formatted_license
@@ -148,7 +142,8 @@ class License(BaseCLI):
             
             # Check if the 'long' flag is set to determine which license file to use
             long_version = self.get_flag('long')
-            license_text_filename = 'license-long.txt' if long_version else 'license-short.txt'
+            license_type = self.get_command()
+            license_text_filename = f'{license_type}-' + (f'license-long.txt' if long_version else 'license-short.txt')
             
             # Open and read the selected license file
             with open(f'{files_directory_path}/{license_text_filename}', 'r') as file:
@@ -162,13 +157,16 @@ class License(BaseCLI):
                         except:
                             err('Could not copy the license text to the clipboard. Is it possible you are in a ssh session?')
                     else:
-                        warn('The "pyperclip" package is not installed. The license text will not be copied to the clipboard.', pad_top=1)
+                        warn('The "pyperclip" package is not installed. The license text will not be copied to the clipboard.',
+                             pad_top=1)
                 
                 formatted_license = self.format_license(license)
                 # Log the license text with padding for formatting
                 log(formatted_license, pad_top=1, pad_bottom=1)
         except:
-            err('An error occurred while trying to print the license text.', exit=True, traceback=True)
+            err('An error occurred while trying to print the license text.',
+                exit=True,
+                traceback=True)
                 
 if __name__ == '__main__':
     License()

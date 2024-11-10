@@ -16,6 +16,7 @@
 
 # From package imports
 from teatype.cli import BaseCLI
+from teatype.io import shell
 
 # This is a test if double chatter occurs at 8Hz, but that doesnt seems to be the case which is really fucking awesome because this means I can type as fast as I can
 
@@ -37,28 +38,28 @@ class ResetFirewall(BaseCLI):
 
     def execute(self):
         # Disable ufw to preserve existing ssh connection
-        self.shell('ufw disable', sudo=True)
+        shell('ufw disable', sudo=True)
 
         # Resetting firewall rules
-        self.shell('ufw reset -y', sudo=True)
+        shell('ufw reset -y', sudo=True)
 
         # Enable ufw
-        self.shell('ufw enable', sudo=True)
+        shell('ufw enable', sudo=True)
         
         if not self.get_flag('--default'):
             # Allow SSH (port 22)
-            self.shell('ufw allow 22/tcp', sudo=True)
+            shell('ufw allow 22/tcp', sudo=True)
 
             # Allow HTTP (port 80)
-            self.shell('ufw allow 80/tcp', sudo=True)
-            self.shell('ufw allow out 80/tcp', sudo=True)
+            shell('ufw allow 80/tcp', sudo=True)
+            shell('ufw allow out 80/tcp', sudo=True)
 
             # Allow HTTPS (port 443)
-            self.shell('ufw allow 443/tcp', sudo=True)
-            self.shell('ufw allow out 443/tcp', sudo=True)
+            shell('ufw allow 443/tcp', sudo=True)
+            shell('ufw allow out 443/tcp', sudo=True)
 
             # Deny all other incoming connections
-            self.shell('ufw default deny incoming', sudo=True)
+            shell('ufw default deny incoming', sudo=True)
 
 if __name__ == '__main__':
     reset_firewall = ResetFirewall()

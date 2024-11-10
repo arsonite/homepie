@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env python3.11
 
 # Copyright (C) 2024-2025 Burak Günaydin
 #
@@ -14,38 +14,25 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-#########################################################
-#################### START CMD PARSE ####################
-#########################################################
+# From-as package imports
+from teatype.cli import Start as StartCLI
 
-# Check if there are any arguments
-if [ "$#" -gt 0 ]; then
-    echo
-    echo "Hint: This script does not accept any arguments. Proceeding anyways ..."
-    echo
-fi
+class Start(StartCLI):
+    def modified_meta(self):
+        return {
+            'flags': [
+                {
+                    'short': 'e',
+                    'long': 'env',
+                    'help': 'Environment to consider',
+                    'options': ['dev', 'prod'],
+                    'required': True
+                }
+            ]
+        }
+        
+    def pre_execute(self):
+        self.start_command = 'pnpm start'
 
-#######################################################
-#################### END CMD PARSE ####################
-#######################################################
-
-#######################################################
-#################### SCRIPT START #####################
-#######################################################
-
-# Get the directory of the script and navigate to it.
-# Necessary code-repetition to ensure being able to execute script from anywhere
-script_dir=$(dirname "$(readlink -f "$0")")
-cd "$script_dir"
-cd ..
-
-./scripts/stop
-
-# Load environment variables from .env file if it exists
-if [ -f .env ]; then
-    export $(grep -v '^#' .env | xargs)
-fi
-
-# TODO: Logs, detached mode, env/prod mode, check-if-running, stop
-# eval "pnpm start 2>&1" &
-eval "pnpm start 2>&1"
+if __name__ == '__main__':
+    Start()

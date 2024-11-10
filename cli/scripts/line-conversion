@@ -19,6 +19,7 @@ import os
 
 # From package imports
 from teatype.cli import BaseCLI
+from teatype.io import shell
 
 class LineConversion(BaseCLI):
     def meta(self):
@@ -57,11 +58,11 @@ class LineConversion(BaseCLI):
         # Check if the desired format is Unix (LF)
         if format == 'LF':
             # Use the 'dos2unix' command to convert Windows line endings (CRLF) to Unix line endings (LF)
-            self.shell(f'dos2unix {file}')
+            shell(f'dos2unix {file}')
         # Check if the desired format is Windows (CRLF)
         elif format == 'CRLF':
             # Use the 'unix2dos' command to convert Unix line endings (LF) to Windows line endings (CRLF)
-            self.shell(f'unix2dos {file}')
+            shell(f'unix2dos {file}')
         else:
             # Raise an error if an unsupported format is specified
             raise ValueError(f"Unsupported format: {format}")

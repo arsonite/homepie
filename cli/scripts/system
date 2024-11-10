@@ -16,6 +16,7 @@
 
 # From package imports
 from teatype.cli import BaseCLI
+from teatype.io import shell
 from teatype.logging import err
         
 class System(BaseCLI):
@@ -50,16 +51,16 @@ class System(BaseCLI):
         
         
     def monitor(self):
-        self.shell('htop -d 7 -H -t -U')
+        shell('htop -d 7 -H -t -U')
         
     def reboot(self):
-        self.shell('reboot -h now', sudo=True)
+        shell('reboot -h now', sudo=True)
         
     def shutdown(self):
-        self.shell('shutdown -h now', sudo=True)
+        shell('shutdown -h now', sudo=True)
         
     def stress(self):
-        self.shell('stress --cpu 8 --io 4 --vm 2 --vm-bytes 128M --timeout 10s')
+        shell('stress --cpu 8 --io 4 --vm 2 --vm-bytes 128M --timeout 10s')
 
     def execute(self):
         command = self.get_command()

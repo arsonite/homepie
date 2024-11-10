@@ -19,6 +19,7 @@ import os
 
 # From package imports
 from teatype.cli import BaseCLI
+from teatype.io import shell
 from teatype.logging import err
 
 class MakeExecutable(BaseCLI):
@@ -53,14 +54,14 @@ class MakeExecutable(BaseCLI):
         :param git_support: Boolean indicating whether to add the file to the git index.
         """
         # Change the file permissions to make it executable by all users.
-        self.shell(f'chmod a+x {file}', sudo=True)
+        shell(f'chmod a+x {file}', sudo=True)
         # Set the file permissions to 755 (rwxr-xr-x).
-        self.shell(f'chmod 755 {file}', sudo=True)
+        shell(f'chmod 755 {file}', sudo=True)
         if git_support:
             # Add the file to the git index.
-            self.shell(f'git add {file}')
+            shell(f'git add {file}')
             # Update the git index to mark the file as executable.
-            self.shell(f'git update-index --chmod=+x {file}')
+            shell(f'git update-index --chmod=+x {file}')
 
     def execute(self):
         """

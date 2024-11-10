@@ -26,6 +26,7 @@ from typing import List
 
 # From package imports
 from teatype.cli import BaseCLI
+from teatype.io import shell
 from teatype.logging import err, log, nl
         
 class Aliases(BaseCLI):
@@ -149,7 +150,7 @@ class Aliases(BaseCLI):
             shutil.copyfile('/usr/local/src/homepie/cli/files/aliases.jsonc', edited_aliases_file_path)
         
         # Open the edited file with vim for the user to edit
-        self.shell(f'vim {edited_aliases_file_path}')
+        shell(f'vim {edited_aliases_file_path}')
     
     def inject_aliases(self, aliases, skip_refresh:bool=False):
         """
@@ -217,8 +218,8 @@ class Aliases(BaseCLI):
         else:
             nl()
             # Refresh the current shell to load the new .bashrc
-            self.shell(f'. {bashrc_path}')
-            self.shell('exec bash')
+            shell(f'. {bashrc_path}')
+            shell('exec bash')
         
     # TODO: Print that no aliases exist to be ejected
     def eject_aliases(self, aliases, silent_mode:bool=False, skip_refresh:bool=False):
@@ -267,8 +268,8 @@ class Aliases(BaseCLI):
         else:
             nl()
             # Refresh the current shell to load the new .bashrc
-            self.shell(f'. {bashrc_path}')
-            self.shell('exec bash')
+            shell(f'. {bashrc_path}')
+            shell('exec bash')
             
     def reset_edited_aliases_file(self):
         """

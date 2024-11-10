@@ -86,8 +86,7 @@ class MainCLI(BaseCLI):
                             # Ensure the class is derived from BaseCLI
                             if script_class and inspect.isclass(script_class) and issubclass(script_class, BaseCLI):
                                 # Instantiate the class
-                                script_instance = script_class(auto_preinit=False,
-                                                               auto_parse=False,
+                                script_instance = script_class(auto_parse=False,
                                                                auto_validate=False,
                                                                auto_execute=False)
                                 scripts[script_instance.name] = script_instance
