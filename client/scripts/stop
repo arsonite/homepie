@@ -1,0 +1,54 @@
+#!/usr/bin/env python3.11
+
+# Copyright (C) 2024-2025 Burak Günaydin
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+# From-as package imports
+from teatype.cli import Stop as StopCLI
+
+class Stop(StopCLI):
+    """
+    The Stop class extends the StopCLI class to provide additional functionality
+    specific to the homepie client scripts. It modifies command-line flags and
+    pre-execution behavior.
+    """
+    def modified_meta(self):
+        """
+        Modifies the metadata for command-line flags by adding a new flag for environment selection.
+
+        Returns:
+            dict: A dictionary containing the updated flags configuration.
+        """
+        return {
+            'flags': [
+                {
+                    'short': 'e',
+                    'long': 'env',
+                    'help': 'Environment to consider',
+                    'options': ['dev', 'prod'],
+                    'required': True
+                }
+            ]
+        }
+        
+    def pre_execute(self):
+        """
+        Executes actions before the main execution of the Stop command.
+        Sets specific flags to control the behavior of the stop process.
+        """
+        self.set_flag('sleep', 0.25) # Sets a sleep duration of 0.25 seconds before stopping
+
+# Entry point of the script when executed from the command line
+if __name__ == '__main__':
+    Stop()

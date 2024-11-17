@@ -16,7 +16,7 @@
  */
 
 // React imports
-import { useState, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 // Components
@@ -28,92 +28,149 @@ import Color from '@/util/Color.ts';
 
 // Utility
 import Keys from '@/util/Keys.ts';
-import Pixel from '@/util/Pixel.ts';
 import Sound from '@/util/Sound.ts';
+import Storage from '@/util/Storage.ts';
 
 // Style
 import './_style/LoginPage.scss';
 
-const DEBUG_PASSWORD = 'password';
-const MAX_FONT_SIZE_IN_REM = 7;
-const MAX_LETTERS_PER_LINE = 12;
-const MAX_LINES = 3;
-const MIN_FONT_SIZE_IN_REM = 2.5;
+const DEBUG_PASSWORD = 'terrencehill'; // Debug password for testing
+const DEBUG_USERNAME = 'budspencer'; // Debug username for testing
+const MAX_FONT_SIZE_IN_REM = 7; // Maximum font size in rem units
+const MAX_LETTERS_PER_LINE = 12; // Max letters allowed per line
+const MAX_LINES = 3; // Maximum number of lines
+const MIN_FONT_SIZE_IN_REM = 2.5; // Minimum font size in rem units
 
+/**
+ * LoginPage component handles user login interactions, input display,
+ * error handling, and visual effects.
+ */
+// TODO: Fix particles performance issues on rerender/make proper deconstruction
+// TODO: Implement different display box for username, so that i can shift to the top and also fix spacing
+// Implement parallax effect
 const LoginPage: React.FC = (): JSX.Element => {
-    const navigate = useNavigate();
+    const navigate = useNavigate(); // Hook for navigation
 
+    // State to store displayed text as an array of characters
     const [displayText, setDisplayText] = useState<string[]>([]);
+    // State to track the number of input errors
     const [errorCount, setErrorCount] = useState<number>(0);
+    // State to keep the current input string
     const [input, setInput] = useState<string>('');
+    // State to indicate if there's an error in input
     const [isError, setIsError] = useState<boolean>(false);
+    // State to store the current password input
+    const [password, setPassword] = useState<string>('');
+    // State to indicate if the password input is active
+    const [passwordMode, setPasswordMode] = useState<boolean>(false);
+    // State to store the current username input
+    const [username, setUsername] = useState<string>('');
 
-    const error_sound = new Sound('error');
-    const keyboard_sounds = [
-        new Sound('clicks/creamy-click-1'),
-        new Sound('clicks/creamy-click-2'),
-        new Sound('clicks/creamy-click-3'),
-    ];
+    // Memoized Sound instance for error feedback
+    const error_sound = useMemo(() => new Sound('error'), []);
+    // Memoized array of Sound instances for keyboard clicks
+    const keyboard_sounds = useMemo(
+        () => [
+            new Sound('clicks/creamy-click-1'),
+            new Sound('clicks/creamy-click-2'),
+            new Sound('clicks/creamy-click-3'),
+        ],
+        []
+    );
 
-    // Speak.
-    // Who is there?
-    // Identify.
-
-    // Ahh, yes, I know you
-    // You again, welcome back
-    // I awaited your return
-
-    // And what is your secret?
-    // Tell me your secret
-    // I am going to keep your secret
-
-    // I am going to need the master key for that
-    // I won't let you in without the master key
-    // Sorry, come back with the master key
-
+    // Ref to the container displaying the input text
     const displayTextContainerRef = useRef<HTMLDivElement>(null);
+    // Ref array to store individual letter elements
     const letterRefs = useRef<(HTMLDivElement | null)[]>([]);
 
-    useEffect(() => {
-        const handleKeyPress = (event: KeyboardEvent) => {
+    // Function to perform login based on username and password
+    const performLogin = useCallback(() => {
+        if (username === DEBUG_USERNAME && password === DEBUG_PASSWORD) {
+            // TODO: Temporary login storage until proper authentication is implemented
+            Storage.set('login', username, true);
+            navigate('/home'); // Navigate to home if password is correct
+        } else {
+            setIsError(true); // Trigger error state
+            setTimeout(() => setIsError(false), 250); // Reset error state after delay
+            error_sound.play(); // Play error sound
+        }
+    }, [error_sound, navigate, password, username]);
+
+    const handleUsername = useCallback(() => {
+        setPasswordMode(true);
+        setUsername(input);
+    }, [input]);
+
+    const handleKeyPress = useCallback(
+        (event: KeyboardEvent) => {
+            // Ignore specific key presses based on utility function
             if (Keys.pressed(event.key, null, true, true, true)) {
                 return;
             }
 
+            // Handle Enter key press
             if (Keys.pressed(event.key, 'Enter')) {
-                if (input === DEBUG_PASSWORD) {
-                    navigate('/home');
+                console.log(passwordMode);
+                if (passwordMode) {
+                    performLogin();
                 } else {
-                    setIsError(true);
-                    setTimeout(() => setIsError(false), 250);
-                    error_sound.play();
+                    handleUsername();
                 }
-            } else if (Keys.pressed(event.key, 'Backspace')) {
-                setDisplayText((prev) => prev.slice(0, -1));
-                setInput((prev) => prev.slice(0, -1));
+            }
+            // Handle Backspace key press
+            else if (Keys.pressed(event.key, 'Backspace')) {
+                setDisplayText((prev) => prev.slice(0, -1)); // Remove last character from displayText
+                setInput((prev) => prev.slice(0, -1)); // Remove last character from input
+                // Play a random keyboard click sound
                 const randomSound = keyboard_sounds[Math.floor(Math.random() * keyboard_sounds.length)];
                 randomSound.play();
-            } else {
+            }
+            // Handle regular character input
+            else {
                 const container = displayTextContainerRef.current;
                 const letters = container ? (Array.from(container.children) as HTMLDivElement[]) : [];
                 const totalLetters = letters.length;
+                // Prevent adding more letters than the maximum allowed
                 if (totalLetters >= MAX_LETTERS_PER_LINE * MAX_LINES) {
                     return;
                 }
 
+                // Play a random keyboard click sound
                 const randomSound = keyboard_sounds[Math.floor(Math.random() * keyboard_sounds.length)];
                 randomSound.play();
+                // Add the new character to displayText and input
                 setDisplayText((prev) => [...prev, event.key]);
                 setInput((prev) => prev + event.key);
             }
-        };
+        },
+        [handleUsername, keyboard_sounds, passwordMode, performLogin]
+    );
 
+    /**
+     * Effect to handle key press events for user input.
+     */
+    useEffect(() => {
+        /**
+         * Handles key press events.
+         * @param event - Keyboard event object
+         */
+
+        // Attach the keydown event listener
         window.addEventListener('keydown', handleKeyPress);
+        // Cleanup the event listener on component unmount
         return () => {
             window.removeEventListener('keydown', handleKeyPress);
         };
-    }, [error_sound, input, keyboard_sounds, navigate]);
+        /* By adding handleKeyPress to the dependency array, the useEffect will re-run whenever handleKeyPress changes.
+         * Since handleKeyPress is memoized with useCallback, it only updates when one of its dependencies
+         * (passwordMode, performLogin, handleUsername, keyboard_sounds) changes, minimizing unnecessary effect executions.
+         */
+    }, [handleKeyPress]);
 
+    /**
+     * Effect to update the display text container and letter styles
+     * whenever displayText changes.
+     */
     useEffect(() => {
         const container = displayTextContainerRef.current;
         if (container) {
@@ -121,98 +178,125 @@ const LoginPage: React.FC = (): JSX.Element => {
             const totalLetters = letters.length;
 
             if (totalLetters > 0) {
-                const lines = Math.ceil(totalLetters / MAX_LETTERS_PER_LINE);
-                const lettersPerLine = Math.min(totalLetters, MAX_LETTERS_PER_LINE);
-                const containerWidth = container.clientWidth;
-                const letterWidth = Math.min(containerWidth / lettersPerLine, MAX_FONT_SIZE_IN_REM * 16);
+                const lines = Math.ceil(totalLetters / MAX_LETTERS_PER_LINE); // Calculate number of lines
+                const lettersPerLine = Math.min(totalLetters, MAX_LETTERS_PER_LINE); // Letters in the current line
+                const containerWidth = container.clientWidth; // Width of the container
+                const letterWidth = Math.min(containerWidth / lettersPerLine, MAX_FONT_SIZE_IN_REM * 16); // Calculate letter width
 
                 letters.forEach((letter) => {
                     if (!letter.style.fill) {
-                        letter.style.fill = Color.HEX.random();
+                        const randomColor = Color.HEX.random(); // Generate random color
+                        letter.style.color = randomColor;
+                        letter.style.fill = randomColor;
                     }
                     if (totalLetters >= MAX_LETTERS_PER_LINE) {
-                        letter.style.flexBasis = `${MIN_FONT_SIZE_IN_REM}rem`;
+                        letter.style.fontSize = `${MIN_FONT_SIZE_IN_REM}rem`; // Set maximum font size
+                        letter.style.flexBasis = `${MIN_FONT_SIZE_IN_REM}rem`; // Set minimum font size
                     } else {
-                        letter.style.flexBasis = `${letterWidth}px`;
+                        letter.style.fontSize = `${letterWidth}px`; // Set dynamic font size based on container
+                        letter.style.flexBasis = `${letterWidth}px`; // Set dynamic font size based on container
                     }
                 });
 
+                // Set flex wrapping based on the number of lines
                 container.style.flexWrap = lines > 1 ? 'wrap' : 'nowrap';
             }
         }
     }, [displayText]);
 
+    /**
+     * Effect to handle error count updates when an error occurs.
+     */
     useEffect(() => {
         if (isError) {
             if (errorCount < 4) {
                 setErrorCount((prev) => prev + 1); // Necessary to prevent asynchronicity during state batching
             }
             if (errorCount >= 3) {
-                setErrorCount(4);
+                setErrorCount(4); // Cap error count at 4
             }
         }
         // Intended behaviour
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isError]);
 
-    const activeInput = displayText.length > 0;
+    const activeInput = displayText.length > 0; // Determine if there is active input
 
     return (
         <div id='login-page' className={isError ? 'error' : ''}>
+            {/* Logo Icon */}
             <Icon
-                className={activeInput ? 'active-input' : ''}
+                className={`logo${activeInput ? ' active-input' : ''}`}
                 is_image
                 id='homepie-logo'
                 positioning='absolute'
                 src={['homepie-logo']}
             />
+            <Icon
+                className={`logo${activeInput ? ' active-input' : ''}`}
+                is_image
+                id='homepie-logo-with-font'
+                positioning='absolute'
+                src={['homepie-logo-with-font']}
+            />
 
-            <div className={activeInput ? 'active-input' : ''} id='speech-bubble'>
-                <p className='speech-bubble-text'>Ahh, yes, I know you</p>
-                <p className='speech-bubble-text'>And what is your secret?</p>
-            </div>
-
+            {/* Display current letter count */}
             <div className={activeInput ? 'active-input' : ''} id='letter-count'>
                 <p>{displayText.length}</p>
                 <p>/</p>
                 <p>{MAX_LETTERS_PER_LINE * MAX_LINES}</p>
             </div>
 
+            {/* Health indicators showing error status */}
             <div id='health' className={`${activeInput ? 'active-input' : ''}`}>
-                {errorCount >= 3 ? (
-                    <Icon className='heart broken' key={`heart-3-${errorCount}`} src={['common', 'heart-broken']} />
-                ) : (
-                    <Icon className='heart' key={`heart-3-${errorCount}`} src={['common', 'heart']} />
-                )}
-                {errorCount >= 2 ? (
-                    <Icon className='heart broken' key={`heart-2-${errorCount}`} src={['common', 'heart-broken']} />
-                ) : (
-                    <Icon className='heart' key={`heart-2-${errorCount}`} src={['common', 'heart']} />
-                )}
-                {errorCount >= 1 ? (
-                    <Icon className='heart broken' key={`heart-1-${errorCount}`} src={['common', 'heart-broken']} />
-                ) : (
-                    <Icon className='heart' key={`heart-1-${errorCount}`} src={['common', 'heart']} />
-                )}
+                {[3, 2, 1].map((level) => (
+                    <Icon
+                        className={`heart${errorCount >= level ? ' broken' : ''}`}
+                        key={`heart-${level}-${errorCount}`}
+                        src={['common', errorCount >= level ? 'heart-broken' : 'heart']}
+                    />
+                ))}
             </div>
 
+            {/* Container for displaying username input text */}
             <div
-                className={isError ? 'error' : ''}
-                id='display-text-container'
+                className='display-text-container'
+                id='display-text-username-container'
                 ref={displayTextContainerRef}
                 style={{ display: 'flex', flexWrap: 'wrap' }}
             >
-                {displayText.map((_, index) => (
+                {displayText.map((letter, index) => (
                     <div
                         className={`display-text-letter unintialized${isError ? ' error' : ''}`}
                         key={index}
                         ref={(element) => (letterRefs.current[index] = element)}
                     >
-                        <Icon src={['common', 'asterisk']} />
+                        {letter}
                     </div>
                 ))}
             </div>
 
+            {/* Container for displaying password asterisks */}
+            {passwordMode && (
+                <div
+                    className={`display-text-container${isError ? ' error' : ''}`}
+                    id='display-text-password-container'
+                    ref={displayTextContainerRef}
+                    style={{ display: 'flex', flexWrap: 'wrap' }}
+                >
+                    {displayText.map((_, index) => (
+                        <div
+                            className={`display-text-letter unintialized${isError ? ' error' : ''}`}
+                            key={index}
+                            ref={(element) => (letterRefs.current[index] = element)}
+                        >
+                            <Icon src={['common', 'asterisk']} />
+                        </div>
+                    ))}
+                </div>
+            )}
+
+            {/* Particle effects component */}
             <CollisionParticles
                 activeInput={activeInput}
                 effectGap={20}

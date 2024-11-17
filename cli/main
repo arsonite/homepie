@@ -36,6 +36,7 @@ SCRIPTS_DIR = f'{CURRENT_DIRECTORY}/scripts'
 # TODO: Replace with package constant
 TAB='    '
 
+# TODO: Write this as a package component
 class MainCLI(BaseCLI):
     def meta(self):
         return {
@@ -44,6 +45,7 @@ class MainCLI(BaseCLI):
             'help': 'Main CLI that manages and runs available commands from the "scripts" directory.'
         }
         
+    # TODO: Decouple this class from CheckIfRunning into BaseCLI to prevent DRY
     def load_scripts(self):
         """
         Discover and import all Python scripts in the `scripts/` directory, skipping __init__.py and non-Python files.

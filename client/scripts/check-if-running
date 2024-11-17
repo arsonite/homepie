@@ -1,0 +1,51 @@
+#!/usr/bin/env python3.11
+
+# Copyright (C) 2024-2025 Burak Günaydin
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+# From-as package imports
+from teatype.cli import CheckIfRunning as CheckIfRunningCLI
+
+# Define the CheckIfRunning class, inheriting from CheckIfRunningCLI
+class CheckIfRunning(CheckIfRunningCLI):
+    """
+    The CheckIfRunning class extends the CheckIfRunningCLI class to customize the process check command
+    with additional flags and pre-execution behavior.
+    """
+    def modified_meta(self):
+        """
+        Modify the command-line interface metadata by adding custom flags.
+
+        Returns:
+            dict: A dictionary containing the configuration for command-line flags.
+        """
+        return {
+            'flags': [
+                {
+                    'short': 'e',
+                    'long': 'env',
+                    'help': 'Environment to consider',
+                    'options': ['dev', 'prod'],
+                    'required': True
+                }
+            ]
+        }
+        
+    def pre_execute(self):
+        # List of process names to check if they are running
+        self.process_names = ['pnpm', 'vite']
+
+# Entry point of the script when executed from the command line
+if __name__ == '__main__':
+    CheckIfRunning()

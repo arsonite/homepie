@@ -29,16 +29,14 @@
 
     transition: $global_transition_slow;
 
-    #homepie-logo {
+    .logo {
         position: absolute;
 
         height: 10rem;
         width: 10rem;
 
-        transition: $global_transition_slow;
-        z-index: $global_z_login_page_logo;
-
         transition: inherit;
+        z-index: $global_z_login_page_logo;
 
         img {
             height: 100%;
@@ -52,11 +50,11 @@
         }
 
         &.active-input {
-            margin-bottom: 33.5em;
+            margin-bottom: 24.5em;
 
-            background-color: rgba(0, 0, 0, 0.25);
-            border-radius: 2rem;
-            backdrop-filter: blur(0.35rem);
+            // background-color: rgba(0, 0, 0, 0.25);
+            // border-radius: 2rem;
+            // backdrop-filter: blur(0.35rem);
 
             z-index: $global_z_login_page_logo + 1;
 
@@ -69,40 +67,24 @@
         }
     }
 
-    #speech-bubble {
-        user-select: none;
+    #homepie-logo {
+        &.active-input {
+            opacity: 0;
+        }
+    }
 
-        position: absolute;
-        top: 38rem;
-
-        display: flex;
-        flex-direction: column;
-        gap: 0.5rem;
-        padding: 1rem;
-
-        background-color: rgba(0, 0, 0, 0.25);
-        border-radius: 1rem;
-        backdrop-filter: blur(0.35rem);
-        color: $global_white;
+    #homepie-logo-with-font {
         opacity: 0;
-        text-align: center;
-
-        transition: inherit;
 
         &.active-input {
-            top: 29.5rem;
-
-            background-color: rgba(0, 0, 0, 0.25);
-            border-radius: 2rem;
-            backdrop-filter: blur(0.35rem);
-
-            z-index: $global_z_login_page_logo + 1;
-
             opacity: 1;
         }
     }
 
-    #display-text-container {
+    #display-text-username-container {
+    }
+
+    .display-text-container {
         overflow: hidden;
 
         position: absolute;
@@ -125,8 +107,11 @@
             user-select: none;
 
             animation: rainbow-fade 0.75s forwards;
+            font-weight: bold;
+            text-align: center;
 
             transition: $global_transition_default;
+            text-align: center;
 
             @keyframes rainbow-fade {
                 0% {
@@ -136,6 +121,7 @@
                     opacity: 1;
                 }
                 100% {
+                    color: $global_anthrazit;
                     fill: $global_anthrazit;
                     opacity: 0.35;
                 }
@@ -194,7 +180,7 @@
         }
 
         &.active-input {
-            bottom: 27.5rem;
+            bottom: 25rem;
 
             fill: #111;
             opacity: 1;
@@ -206,7 +192,7 @@
         bottom: 50%;
 
         display: flex;
-        gap: 1rem;
+        gap: 0.35rem;
         height: fit-content;
         justify-content: center;
         padding: 1rem;
@@ -214,9 +200,9 @@
 
         opacity: 0;
 
-        backdrop-filter: blur(0.35rem);
-        background-color: rgba(0, 0, 0, 0.25);
-        border-radius: 2rem;
+        // backdrop-filter: blur(0.35rem);
+        // background-color: rgba(0, 0, 0, 0.25);
+        // border-radius: 2rem;
 
         transition: inherit;
         z-index: $global_z_login_page_display_text;
@@ -225,7 +211,7 @@
             position: relative;
 
             height: fit-content;
-            width: 2rem;
+            width: 1rem;
 
             animation: pulsate 1.5s infinite;
             fill: #6d3030;
@@ -255,7 +241,7 @@
         }
 
         &.active-input {
-            bottom: 21rem;
+            bottom: 22.5rem;
 
             opacity: 1;
         }

@@ -32,6 +32,7 @@ interface CollisionParticlesProps {
     particleFriction?: number;
 }
 
+// TODO: Rewrite this component for better performance and readability and maintainability as a react component
 /**
  * `CollisionParticles` is a React functional component that renders a canvas element and manages
  * particle collision effects based on user interactions and window resizing.

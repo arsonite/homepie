@@ -18,7 +18,17 @@
 from teatype.cli import Start as StartCLI
 
 class Start(StartCLI):
+    """
+    The Start class extends the StartCLI class to customize the start command
+    with additional flags and pre-execution behavior.
+    """
     def modified_meta(self):
+        """
+        Modify the command-line interface metadata by adding custom flags.
+
+        Returns:
+            dict: A dictionary containing the configuration for command-line flags.
+        """
         return {
             'flags': [
                 {
@@ -32,7 +42,12 @@ class Start(StartCLI):
         }
         
     def pre_execute(self):
+        """
+        Define actions to perform before executing the main start command.
+        Sets the start_command attribute to use 'pnpm start'.
+        """
         self.start_command = 'pnpm start'
 
+# Entry point of the script when executed from the command line
 if __name__ == '__main__':
     Start()
