@@ -51,6 +51,8 @@ const MIN_FONT_SIZE_IN_REM = 2.5; // Minimum font size in rem units
 const LoginPage: React.FC = (): JSX.Element => {
     const navigate = useNavigate(); // Hook for navigation
 
+    // State to track active input
+    const [activeInput, setActiveInput] = useState<boolean>(false);
     // State to store displayed text as an array of characters
     const [displayText, setDisplayText] = useState<string[]>([]);
     // State to track the number of input errors
@@ -59,8 +61,6 @@ const LoginPage: React.FC = (): JSX.Element => {
     const [input, setInput] = useState<string>('');
     // State to indicate if there's an error in input
     const [isError, setIsError] = useState<boolean>(false);
-    // State to store the current password input
-    const [password, setPassword] = useState<string>('');
     // State to indicate if the password input is active
     const [passwordMode, setPasswordMode] = useState<boolean>(false);
     // State to store the current username input
@@ -85,20 +85,22 @@ const LoginPage: React.FC = (): JSX.Element => {
 
     // Function to perform login based on username and password
     const performLogin = useCallback(() => {
-        if (username === DEBUG_USERNAME && password === DEBUG_PASSWORD) {
+        if (username === DEBUG_USERNAME && input === DEBUG_PASSWORD) {
             // TODO: Temporary login storage until proper authentication is implemented
             Storage.set('login', username, true);
-            navigate('/home'); // Navigate to home if password is correct
+            navigate('/hub'); // Navigate to hub if password is correct
         } else {
             setIsError(true); // Trigger error state
             setTimeout(() => setIsError(false), 250); // Reset error state after delay
             error_sound.play(); // Play error sound
         }
-    }, [error_sound, navigate, password, username]);
+    }, [error_sound, input, username, navigate]);
 
     const handleUsername = useCallback(() => {
         setPasswordMode(true);
         setUsername(input);
+        setInput('');
+        setDisplayText([]);
     }, [input]);
 
     const handleKeyPress = useCallback(
@@ -110,23 +112,20 @@ const LoginPage: React.FC = (): JSX.Element => {
 
             // Handle Enter key press
             if (Keys.pressed(event.key, 'Enter')) {
-                console.log(passwordMode);
                 if (passwordMode) {
                     performLogin();
                 } else {
                     handleUsername();
                 }
-            }
-            // Handle Backspace key press
-            else if (Keys.pressed(event.key, 'Backspace')) {
+            } else if (Keys.pressed(event.key, 'Backspace')) {
+                // Handle Backspace key press
                 setDisplayText((prev) => prev.slice(0, -1)); // Remove last character from displayText
                 setInput((prev) => prev.slice(0, -1)); // Remove last character from input
-                // Play a random keyboard click sound
+                // Play a random keyboard click soundw
                 const randomSound = keyboard_sounds[Math.floor(Math.random() * keyboard_sounds.length)];
                 randomSound.play();
-            }
-            // Handle regular character input
-            else {
+            } else {
+                // Handle regular character input
                 const container = displayTextContainerRef.current;
                 const letters = container ? (Array.from(container.children) as HTMLDivElement[]) : [];
                 const totalLetters = letters.length;
@@ -134,7 +133,6 @@ const LoginPage: React.FC = (): JSX.Element => {
                 if (totalLetters >= MAX_LETTERS_PER_LINE * MAX_LINES) {
                     return;
                 }
-
                 // Play a random keyboard click sound
                 const randomSound = keyboard_sounds[Math.floor(Math.random() * keyboard_sounds.length)];
                 randomSound.play();
@@ -143,7 +141,7 @@ const LoginPage: React.FC = (): JSX.Element => {
                 setInput((prev) => prev + event.key);
             }
         },
-        [handleUsername, keyboard_sounds, passwordMode, performLogin]
+        [keyboard_sounds, passwordMode, handleUsername, performLogin]
     );
 
     /**
@@ -202,6 +200,11 @@ const LoginPage: React.FC = (): JSX.Element => {
                 container.style.flexWrap = lines > 1 ? 'wrap' : 'nowrap';
             }
         }
+        if (!passwordMode) {
+            setActiveInput(displayText.length > 0); // Set active input state based on displayText length
+        }
+        // Intended behaviour
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [displayText]);
 
     /**
@@ -219,8 +222,7 @@ const LoginPage: React.FC = (): JSX.Element => {
         // Intended behaviour
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isError]);
-
-    const activeInput = displayText.length > 0; // Determine if there is active input
+    console.log(username, input);
 
     return (
         <div id='login-page' className={isError ? 'error' : ''}>
@@ -258,32 +260,20 @@ const LoginPage: React.FC = (): JSX.Element => {
                 ))}
             </div>
 
-            {/* Container for displaying username input text */}
-            <div
-                className='display-text-container'
-                id='display-text-username-container'
-                ref={displayTextContainerRef}
-                style={{ display: 'flex', flexWrap: 'wrap' }}
-            >
-                {displayText.map((letter, index) => (
-                    <div
-                        className={`display-text-letter unintialized${isError ? ' error' : ''}`}
-                        key={index}
-                        ref={(element) => (letterRefs.current[index] = element)}
-                    >
-                        {letter}
-                    </div>
-                ))}
-            </div>
-
-            {/* Container for displaying password asterisks */}
             {passwordMode && (
+                <div id='username-display'>
+                    <p>{username}</p>
+                </div>
+            )}
+
+            {passwordMode ? (
                 <div
                     className={`display-text-container${isError ? ' error' : ''}`}
                     id='display-text-password-container'
                     ref={displayTextContainerRef}
                     style={{ display: 'flex', flexWrap: 'wrap' }}
                 >
+                    {/* Container for displaying password asterisks */}
                     {displayText.map((_, index) => (
                         <div
                             className={`display-text-letter unintialized${isError ? ' error' : ''}`}
@@ -291,6 +281,24 @@ const LoginPage: React.FC = (): JSX.Element => {
                             ref={(element) => (letterRefs.current[index] = element)}
                         >
                             <Icon src={['common', 'asterisk']} />
+                        </div>
+                    ))}
+                </div>
+            ) : (
+                <div
+                    className='display-text-container'
+                    id='display-text-username-container'
+                    ref={displayTextContainerRef}
+                    style={{ display: 'flex', flexWrap: 'wrap' }}
+                >
+                    {/* Container for displaying username input text */}
+                    {displayText.map((letter, index) => (
+                        <div
+                            className={`display-text-letter unintialized${isError ? ' error' : ''}`}
+                            key={index}
+                            ref={(element) => (letterRefs.current[index] = element)}
+                        >
+                            {letter}
                         </div>
                     ))}
                 </div>

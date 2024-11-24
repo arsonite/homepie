@@ -1,4 +1,5 @@
 /**
+ * @license
  * Copyright (C) 2024-2025 Burak Günaydin
  *
  * This program is free software: you can redistribute it and/or modify
@@ -14,11 +15,23 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#homepie-application {
-    overflow: hidden;
-    display: flex;
-    height: 100%;
-    width: 100%;
-    align-items: center;
-    justify-content: center; /* Center the text */
-}
+// React imports
+import React from 'react';
+
+// Classes
+import { AppClass } from '@/classes/AppClass.ts';
+
+// eslint-disable-next-line react-refresh/only-export-components
+export const meta: AppClass = {
+    name: 'NameGen',
+};
+
+const App: React.FC = () => {
+    return (
+        <div id='namegen-app'>
+            <p>namegen</p>
+        </div>
+    );
+};
+
+export default App;

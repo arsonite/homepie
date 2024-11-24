@@ -74,15 +74,12 @@ class Effect {
         // Initialize the angle for automatic mouse rotation
         this.angle = 0;
 
-        // Start the automatic mouse rotation
-        this.updateMousePosition();
-        // this.continouslyUpdateMousePosition();
+        // TODO: Remove this line
+        this.mouse1.radius = 0;
 
-        // Add event listeners for mouse movement, window resize, and mouse leave
-        // window.addEventListener('click', this.handleMouseClick);
-        // window.addEventListener('mouseleave', this.handleMouseLeave);
-        // window.addEventListener('mousemove', this.handleMouseMove);
-        // window.addEventListener('resize', this.handleResize);
+        // Start the automatic mouse rotation
+        // this.updateMousePosition();
+        // this.continouslyUpdateMousePosition();
 
         this.init(); // Initialize the particles
     }
@@ -121,13 +118,21 @@ class Effect {
     handleMouseMove = (event: MouseEvent) => {
         this.mouse1.x = event.clientX * window.devicePixelRatio; // Update mouse x-coordinate
         this.mouse1.y = event.pageY * window.devicePixelRatio; // Update mouse y-coordinate
+        this.mouse1.radius = this.activeInput ? 150000 : 3000; // Radius of the circular path
+
+        let timeout;
+        (() => {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => {
+                this.mouse1.radius = 0;
+            }, 1000);
+        })();
     };
 
     /**
      * Handles mouse leave events.
      */
     handleMouseLeave = () => {
-        console.log('leave');
         this.mouse1.x = -Infinity; // Move mouse x-coordinate out of bounds
         this.mouse1.y = -Infinity; // Move mouse y-coordinate out of bounds
         this.mouse1.radius = 0; // Set mouse interaction radius to zero

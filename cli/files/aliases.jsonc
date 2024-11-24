@@ -106,11 +106,6 @@
 
     // python aliases
     {
-        "name": "pd",
-        "help": "Deactivate the current virtual environment",
-        "command": "deactivate"
-    },
-    {
         "name": "pe",
         "help": "Install a python package in editable mode",
         "command": "python3.11 -m pip install -e ."
@@ -127,8 +122,48 @@
     },
     {
         "name": "pr",
-        "help": "Install a python package",
+        "help": "Install all the python packages in the requirements.txt file",
         "command": "python3.11 -m pip install -r requirements.txt"
+    },
+    {
+        "name": "pv",
+        "help": "Activates the first python virtual environment found in the directory (recursively)",
+        "function": [
+            "pv() {",
+            "   local dir='${1:-.}'",
+            "   local venv_dir",
+            "   venv_dir=$(find '$dir' -type d -name '*venv' | head -n 1)",
+            "   if [ -n '$venv_dir' ]; then",
+            "       . '$venv_dir/bin/activate' && echo 'Activated virtual environment: $venv_dir'",
+            "   else",
+            "       echo 'No 'venv' directory found.'",
+            "       return 1",
+            "   fi",
+            "}"
+        ]
+    },
+    {
+        "name": "pvc <venv_name>",
+        "help": "Create a python virtual environment with the given name",
+        "function": [
+            "pvc() {",
+            "   if [ -z '$1' ]; then",
+            "       echo 'Usage: pvc <env_name>'",
+            "       return 1",
+            "   fi",
+            "   local env_name='$1'",
+            "   if [ -d '$env_name' ]; then",
+            "       echo 'Directory '$env_name' already exists.'",
+            "       return 1",
+            "   fi",
+            "   python3.11 -m venv '$env_name-venv' && echo 'Virtual environment '$env_name-venv' created.'",
+            "}"
+        ]
+    },
+    {
+        "name": "pvd",
+        "help": "Deactivate the current virtual environment",
+        "command": "deactivate"
     },
     {
         "name": "py",
@@ -141,6 +176,20 @@
         "name": "bashrc",
         "help": "Directly edit the bashrc file with 'vim'",
         "command": "vim ~/.bashrc"
+    },
+    {
+        "name": "clean-all",
+        "help": "Search and delete .zone.identifier files and __pycache__ directories",
+        "function": [
+            "clean-all() {",
+            "   echo 'Searching and deleting .zone.identifier files and __pycache__ directories, ignoring .git, node_modules, and venv...'",
+            "   find . \\( -path './.git' -o -path './node_modules' -o -path './venv' \\) -prune -o \\",
+            "       -type d -name '__pycache__' -print -exec rm -rf {} +",
+            "   find . \\( -path './.git' -o -path './node_modules' -o -path './venv' \\) -prune -o \\",
+            "       -type f -name '*:Zone.Identifier' -print -exec rm -f {} +",
+            "   echo 'Cleanup complete.'",
+            "}"
+        ]
     },
     {
         "name": "home",

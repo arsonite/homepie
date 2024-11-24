@@ -21,7 +21,7 @@ import { BrowserRouter } from 'react-router-dom';
 import ReactDOM from 'react-dom/client'; // Importing the ReactDOM library for rendering the application
 
 // Components
-import Application from '@/Application.tsx'; // Importing the main Application component
+import Platform from '@/Platform.tsx'; // Importing the main Platform component
 
 // Utility
 import { STRICT_MODE } from '@/const.ts';
@@ -55,7 +55,7 @@ const defineCapitalizePrototypeFunction = () => {
          * The value of the 'capitalize' property is a function that capitalizes the first letter of the string.
          * @returns {string} The string with the first letter capitalized.
          */
-        value: function () {
+        value: function (): string {
             return this.charAt(0).toUpperCase() + this.slice(1); // Capitalize the first letter and concatenate with the rest of the string
         },
         enumerable: false, // The property will not be enumerable
@@ -79,7 +79,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     conditionalStrictMode(
         STRICT_MODE,
         <BrowserRouter>
-            <Application />
+            <Platform />
         </BrowserRouter>
-    ) // Render the Application component within React's StrictMode for highlighting potential problems
+    ) // Render the Platform component within React's StrictMode for highlighting potential problems
 );
