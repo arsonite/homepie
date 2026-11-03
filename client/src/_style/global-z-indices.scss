@@ -23,6 +23,7 @@ $global_z_login_page_particles: 1; // z-index for the particles on the login pag
 
 // z: 2
 $global_z_login_page_display_text: 2; // z-index for the display text on the login page, above particles and base layer
+$global_z_hub_apps: 2; // z-index for the app tiles on the hub, above the particles
 
 // z: 10
 $global_z_screen_saver: 10; // z-index for the screen saver, significantly above the login page elements

@@ -1,0 +1,96 @@
+#!/bin/bash
+
+# Copyright (C) 2024-2025 Burak Günaydin
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+#########################################################
+#################### START CMD PARSE ####################
+#########################################################
+
+# Usage: ./deploy [client|nginx|all]
+target="${1:-all}"
+
+case "$target" in
+    client | nginx | all) ;;
+    *)
+        echo
+        echo "Unknown target '$target'."
+        echo "Usage: ./deploy [client|nginx|all]"
+        echo "    client  Build the landing page and publish it to /var/www/homepie/client"
+        echo "    nginx   Install the reverse proxy configuration and reload nginx"
+        echo "    all     Both (default)"
+        echo
+        exit 1
+        ;;
+esac
+
+#########################################################
+##################### END CMD PARSE #####################
+#########################################################
+
+#########################################################
+##################### SCRIPT START ######################
+#########################################################
+
+# Asking for sudo permissions before script executes any further and surpresses usage information
+sudo 2>/dev/null
+
+# Get the directory of the script and navigate to it.
+# Necessary code-repetition to ensure being able to execute script from anywhere
+script_directory=$(dirname "$(readlink -f "$0")")
+cd "$script_directory" || exit 1
+cd ../..
+repository_root=$(pwd)
+
+set -euo pipefail
+
+deploy_client() {
+    echo "Building the client ..."
+    cd "$repository_root/client"
+    pnpm install --frozen-lockfile
+    # Not `pnpm build`: that runs tsc first, and the client currently has type errors that must not block a deploy
+    pnpm exec vite build
+
+    echo "Publishing the client ..."
+    sudo install -d -m 755 /var/www/homepie/client
+    sudo rsync -a --delete build/ /var/www/homepie/client/
+    sudo chmod -R a+rX /var/www/homepie
+    cd "$repository_root"
+}
+
+deploy_nginx() {
+    echo "Installing the nginx configuration ..."
+    sudo install -d -m 755 /etc/nginx/snippets
+    sudo install -m 644 nginx/snippets/*.conf /etc/nginx/snippets/
+    sudo install -m 644 nginx/conf.d/*.conf /etc/nginx/conf.d/
+
+    # Never reload a broken configuration, the running nginx would just keep the old one
+    sudo nginx -t
+
+    if systemctl is-active --quiet nginx; then
+        sudo systemctl reload nginx
+    else
+        sudo systemctl start nginx
+    fi
+}
+
+if [ "$target" = "client" ] || [ "$target" = "all" ]; then
+    deploy_client
+fi
+
+if [ "$target" = "nginx" ] || [ "$target" = "all" ]; then
+    deploy_nginx
+fi
+
+echo "Done."

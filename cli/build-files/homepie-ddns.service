@@ -1,0 +1,8 @@
+[Unit]
+Description=Update the Cloudflare A records of homepie.net with the current public IP
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/homepie-cloudflare-ddns

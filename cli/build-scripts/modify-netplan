@@ -42,5 +42,5 @@ script_directory=$(dirname "$(readlink -f "$0")")
 cd "$script_directory" || exit 1
 cd ..
 
-sudo cp files/99_config.yaml /etc/netplan/99_config.yaml
+sudo cp build-files/99_config.yaml /etc/netplan/99_config.yaml
 sudo netplan apply

@@ -18,8 +18,15 @@
 // React imports
 import React from 'react';
 
+// Apps
+import { EXTERNAL_APPS } from '@/apps/registry.ts';
+
 // Components
+import AppTile from '@/components/AppTile.tsx';
 import CollisionParticles from '@/components/Particles/CollisionParticles.tsx';
+
+// Style
+import './_style/Hub.scss';
 
 const Hub: React.FC = () => {
     return (
@@ -31,6 +38,12 @@ const Hub: React.FC = () => {
                 particleEase={0.2}
                 particleFriction={0.95}
             />
+
+            <div id='hub-apps'>
+                {EXTERNAL_APPS.map((app) => (
+                    <AppTile key={app.name} app={app} />
+                ))}
+            </div>
         </div>
     );
 };

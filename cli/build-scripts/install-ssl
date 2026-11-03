@@ -36,18 +36,35 @@ fi
 # Asking for sudo permissions before script executes any further and surpresses usage information
 sudo 2>/dev/null
 
-# Install Certbot and the Certbot Nginx plugin using apt-get
-sudo apt-get install -y certbot python3-certbot-nginx
+# Issues ONE wildcard certificate for homepie.net and *.homepie.net (covers www, lockkliye, ...).
+# Wildcards require the DNS-01 challenge, which certbot solves through the Cloudflare API.
+# As a bonus no inbound port has to be open for issuing or renewing the certificate.
+set -euo pipefail
 
-# Obtain SSL certificates for homepie.net and www.homepie.net using Certbot
-sudo certbot -d homepie.net -d www.homepie.net
+if ! sudo test -r /etc/homepie/cloudflare.ini; then
+    echo "Missing /etc/homepie/cloudflare.ini. Run ./setup-cloudflare-credentials first. Exiting ..."
+    exit 1
+fi
+
+# Install Certbot and its Cloudflare DNS plugin
+sudo apt-get install -y certbot python3-certbot-dns-cloudflare
+
+# Obtain the wildcard certificate
+sudo certbot certonly \
+    --dns-cloudflare \
+    --dns-cloudflare-credentials /etc/homepie/cloudflare.ini \
+    --dns-cloudflare-propagation-seconds 30 \
+    --cert-name homepie.net \
+    -d homepie.net \
+    -d '*.homepie.net'
+
+# Reload nginx whenever the certificate was renewed, so that it serves the new one
+sudo install -d /etc/letsencrypt/renewal-hooks/deploy
+printf '#!/bin/sh\nsystemctl reload nginx\n' | sudo tee /etc/letsencrypt/renewal-hooks/deploy/reload-nginx > /dev/null
+sudo chmod 755 /etc/letsencrypt/renewal-hooks/deploy/reload-nginx
 
 # Check the status of the Certbot timer to ensure it is running
-sudo systemctl status certbot.timer
+sudo systemctl status certbot.timer --no-pager
 
 # Perform a dry run of the certificate renewal process to verify it works correctly
 sudo certbot renew --dry-run
-
-# Stop and disable the Nginx service
-sudo systemctl stop nginx
-sudo systemctl disable nginx

@@ -1,0 +1,143 @@
+#!/bin/bash
+
+# Copyright (C) 2024-2025 Burak Günaydin
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+# Keeps the Cloudflare A records of homepie.net pointed at the current public IPv4 address of this server.
+# Installed to /usr/local/bin/homepie-cloudflare-ddns and run every 5 minutes by homepie-ddns.timer
+# (see build-scripts/setup-periodic-cloudflare-ddns).
+#
+# The API token is read from a certbot-style credentials file, so that certbot and this script share one token:
+#     dns_cloudflare_api_token = <token with Zone:DNS:Edit on homepie.net>
+#
+# Optional environment variables:
+#     HOMEPIE_DOMAIN                   Zone name (default: homepie.net)
+#     HOMEPIE_DDNS_RECORDS             Space separated record names (default: "<domain> *.<domain>")
+#     HOMEPIE_DDNS_PROXIED             Proxy state of newly created records (default: false)
+#     HOMEPIE_CLOUDFLARE_ZONE_ID       Skip the zone lookup
+#     HOMEPIE_CLOUDFLARE_CREDENTIALS   Credentials file (default: /etc/homepie/cloudflare.ini)
+#
+# Existing records keep their "proxied" setting. Note that Cloudflare can only proxy a wildcard record on
+# Enterprise plans, so the wildcard record has to stay DNS-only (grey cloud).
+
+set -uo pipefail
+
+CREDENTIALS_FILE="${HOMEPIE_CLOUDFLARE_CREDENTIALS:-/etc/homepie/cloudflare.ini}"
+DOMAIN="${HOMEPIE_DOMAIN:-homepie.net}"
+RECORDS="${HOMEPIE_DDNS_RECORDS:-$DOMAIN *.$DOMAIN}"
+PROXIED_ON_CREATE="${HOMEPIE_DDNS_PROXIED:-false}"
+ZONE_ID="${HOMEPIE_CLOUDFLARE_ZONE_ID:-}"
+
+#########################################################
+##################### SCRIPT START ######################
+#########################################################
+
+log() {
+    echo "$(date '+%Y-%m-%d %H:%M:%S') $*"
+}
+
+for dependency in curl jq; do
+    if ! command -v "$dependency" > /dev/null; then
+        log "Missing dependency: $dependency (sudo apt-get install -y $dependency)"
+        exit 1
+    fi
+done
+
+if [ ! -r "$CREDENTIALS_FILE" ]; then
+    log "Cannot read $CREDENTIALS_FILE. Run build-scripts/setup-cloudflare-credentials first."
+    exit 1
+fi
+
+TOKEN=$(sed -n 's/^[[:space:]]*dns_cloudflare_api_token[[:space:]]*=[[:space:]]*//p' "$CREDENTIALS_FILE" | head -n 1 | tr -d '[:space:]')
+if [ -z "$TOKEN" ]; then
+    log "No dns_cloudflare_api_token found in $CREDENTIALS_FILE"
+    exit 1
+fi
+
+# The token is passed to curl through a private config file, so that it never shows up in the process list
+CURL_CONFIG=$(mktemp)
+trap 'rm -f "$CURL_CONFIG"' EXIT
+chmod 600 "$CURL_CONFIG"
+printf 'header = "Authorization: Bearer %s"\n' "$TOKEN" > "$CURL_CONFIG"
+
+# Usage: cf <METHOD> <path> [json-body]
+cf() {
+    local method="$1" path="$2" body="${3:-}"
+    local args=(-sS -m 20 -X "$method" -K "$CURL_CONFIG" -H "Content-Type: application/json")
+    if [ -n "$body" ]; then
+        args+=(--data "$body")
+    fi
+    curl "${args[@]}" "https://api.cloudflare.com/client/v4$path"
+}
+
+# Public IPv4 address, with a second source as fallback
+CURRENT_IP=""
+for source in https://api.ipify.org https://dynamicdns.park-your-domain.com/getip; do
+    CURRENT_IP=$(curl -s -m 10 "$source" | tr -d '[:space:]')
+    if [[ "$CURRENT_IP" =~ ^([0-9]{1,3}\.){3}[0-9]{1,3}$ ]]; then
+        break
+    fi
+    CURRENT_IP=""
+done
+
+if [ -z "$CURRENT_IP" ]; then
+    log "Could not determine the public IP address."
+    exit 1
+fi
+
+if [ -z "$ZONE_ID" ]; then
+    ZONE_ID=$(cf GET "/zones?name=$DOMAIN" | jq -r '.result[0].id // empty')
+    if [ -z "$ZONE_ID" ]; then
+        log "Failed to look up the zone of $DOMAIN. Check the API token and that the domain is active on Cloudflare."
+        exit 1
+    fi
+fi
+
+# Not using unquoted expansion, because the wildcard record name must not be glob-expanded
+read -ra record_names <<< "$RECORDS"
+
+failed=0
+for name in "${record_names[@]}"; do
+    existing=$(cf GET "/zones/$ZONE_ID/dns_records?type=A&name=$(jq -rn --arg n "$name" '$n|@uri')")
+    if ! jq -e '.success' <<< "$existing" > /dev/null; then
+        log "FAILED to query $name: $(jq -rc '.errors' <<< "$existing")"
+        failed=1
+        continue
+    fi
+
+    record_id=$(jq -r '.result[0].id // empty' <<< "$existing")
+    record_ip=$(jq -r '.result[0].content // empty' <<< "$existing")
+
+    if [ -z "$record_id" ]; then
+        body=$(jq -nc --arg name "$name" --arg ip "$CURRENT_IP" --argjson proxied "$PROXIED_ON_CREATE" \
+            '{type: "A", name: $name, content: $ip, ttl: 1, proxied: $proxied}')
+        response=$(cf POST "/zones/$ZONE_ID/dns_records" "$body")
+        action="Created"
+    elif [ "$record_ip" != "$CURRENT_IP" ]; then
+        body=$(jq -nc --arg ip "$CURRENT_IP" '{content: $ip}')
+        response=$(cf PATCH "/zones/$ZONE_ID/dns_records/$record_id" "$body")
+        action="Updated"
+    else
+        continue
+    fi
+
+    if jq -e '.success' <<< "$response" > /dev/null; then
+        log "$action $name -> $CURRENT_IP"
+    else
+        log "FAILED to write $name: $(jq -rc '.errors' <<< "$response")"
+        failed=1
+    fi
+done
+
+exit $failed

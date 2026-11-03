@@ -54,7 +54,7 @@
         "paths": { "@/*": ["./src/*"] }
     },
     // Specify files to be included in the compilation
-    "include": ["src", "**/*.ts", "typings"],
+    "include": ["src", "typings"],
 
     // Reference to another tsconfig file
     "references": [{ "path": "./tsconfig.node.json" }]

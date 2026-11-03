@@ -33,4 +33,32 @@ fi
 ##################### SCRIPT START ######################
 #########################################################
 
-# TODO: Implement the script
+# Replaces the Namecheap based ddclient, which cannot work once the nameservers point to Cloudflare
+# (Namecheap answers "CUSTOM-DNS" to every update)
+set -euo pipefail
+
+script_directory=$(dirname "$(readlink -f "$0")")
+cd "$script_directory" || exit 1
+cd ../build-files
+
+if [ ! -r /etc/homepie/cloudflare.ini ] && ! sudo test -r /etc/homepie/cloudflare.ini; then
+    echo "Missing /etc/homepie/cloudflare.ini. Run ./setup-cloudflare-credentials first."
+    exit 1
+fi
+
+sudo apt-get install -y curl jq
+
+sudo install -m 755 cloudflare-ddns /usr/local/bin/homepie-cloudflare-ddns
+sudo install -m 644 homepie-ddns.service /etc/systemd/system/homepie-ddns.service
+sudo install -m 644 homepie-ddns.timer /etc/systemd/system/homepie-ddns.timer
+
+if systemctl list-unit-files ddclient.service > /dev/null 2>&1 && systemctl cat ddclient.service > /dev/null 2>&1; then
+    sudo systemctl disable --now ddclient
+fi
+
+sudo systemctl daemon-reload
+sudo systemctl enable --now homepie-ddns.timer
+
+# Run once right away, so that the records exist immediately
+sudo systemctl start homepie-ddns.service
+sudo journalctl -u homepie-ddns.service -n 10 --no-pager

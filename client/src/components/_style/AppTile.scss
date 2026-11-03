@@ -1,0 +1,52 @@
+/**
+ * Copyright (C) 2024-2025 Burak Günaydin
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, version 3 of the License.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ */
+
+.app-tile {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    align-items: center;
+    width: 8rem;
+
+    color: $global_white;
+    cursor: pointer;
+
+    .app-tile-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 6rem;
+        width: 6rem;
+
+        border-radius: 1.5rem;
+        background: linear-gradient(135deg, $global_blue, $global_homepie_accent);
+        box-shadow: 0 0.5rem 1.5rem rgba($global_black_pure, 0.5);
+        color: $global_black;
+        font-size: 3rem;
+        font-weight: 700;
+        transition: $global_transition_default;
+    }
+
+    .app-tile-name {
+        font-size: $global_font_big;
+        text-align: center;
+    }
+
+    &:hover .app-tile-icon,
+    &:focus-visible .app-tile-icon {
+        transform: scale(1.08);
+    }
+}

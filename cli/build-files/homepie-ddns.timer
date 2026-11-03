@@ -1,0 +1,10 @@
+[Unit]
+Description=Periodically update the Cloudflare A records of homepie.net
+
+[Timer]
+OnBootSec=1min
+OnUnitActiveSec=5min
+Unit=homepie-ddns.service
+
+[Install]
+WantedBy=timers.target

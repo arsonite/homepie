@@ -1,0 +1,73 @@
+#!/bin/bash
+
+# Copyright (C) 2024-2025 Burak Günaydin
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+#########################################################
+#################### START CMD PARSE ####################
+#########################################################
+
+# Check if there are any arguments
+if [ "$#" -gt 0 ]; then
+    echo
+    echo "Hint: This script does not accept any arguments. Proceeding anyways ..."
+    echo
+fi
+
+#########################################################
+##################### END CMD PARSE #####################
+#########################################################
+
+#########################################################
+##################### SCRIPT START ######################
+#########################################################
+
+# Asking for sudo permissions before script executes any further and surpresses usage information
+sudo 2>/dev/null
+
+# Get the directory of the script and navigate to it.
+# Necessary code-repetition to ensure being able to execute script from anywhere
+script_directory=$(dirname "$(readlink -f "$0")")
+cd "$script_directory" || exit 1
+cd ../..
+
+# Installs nginx and opens the firewall. Needs the certificate from ./install-ssl, because nginx refuses to
+# load the configuration without it.
+set -euo pipefail
+
+if ! sudo test -r /etc/letsencrypt/live/homepie.net/fullchain.pem; then
+    echo "Missing certificate. Run ./install-ssl first. Exiting ..."
+    exit 1
+fi
+
+# Vite's dev server also wants port 443
+if ss -tln | grep -q ':443 ' && ! systemctl is-active --quiet nginx; then
+    echo "Port 443 is already taken by another process (vite dev server?). Stop it first. Exiting ..."
+    exit 1
+fi
+
+sudo apt-get update -y
+sudo apt-get install -y nginx
+
+# The packaged default site is a default_server on port 80 and would clash with homepie.conf
+sudo rm -f /etc/nginx/sites-enabled/default
+
+# Open 80 (redirect) and 443 (https), if the firewall is in use
+if command -v ufw > /dev/null && sudo ufw status | grep -q "Status: active"; then
+    sudo ufw allow 'Nginx Full'
+fi
+
+sudo systemctl enable nginx
+
+cli/build-scripts/deploy nginx
