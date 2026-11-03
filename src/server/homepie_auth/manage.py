@@ -13,7 +13,7 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 """
-User management, normally started through cli/build-scripts/manage-users:
+User management, normally started through scripts/server/manage-users:
 
     manage-users init
     manage-users add <username>
@@ -63,7 +63,7 @@ def main(argv: list[str] | None = None) -> int:
     ):
         commands.add_parser(name, help=help_text).add_argument("username")
     commands.add_parser("list", help="list all users")
-    commands.add_parser("init", help="create the encryption key (done by cli/build-scripts/install-auth-server)")
+    commands.add_parser("init", help="create the encryption key (done by scripts/server/install-auth-server)")
 
     arguments = parser.parse_args(argv)
 

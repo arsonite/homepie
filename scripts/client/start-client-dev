@@ -50,8 +50,8 @@ set -euo pipefail
 
 script_directory=$(dirname "$(readlink -f "$0")")
 repository_root=$(cd "$script_directory/../.." && pwd)
-# shellcheck source=../build-files/load-env
-source "$repository_root/cli/build-files/load-env"
+# shellcheck source=../load-env
+source "$repository_root/scripts/load-env"
 
 if [ ! -d "$repository_root/client/node_modules" ]; then
     "$script_directory/install-client"
@@ -63,14 +63,14 @@ if [ "$start_auth" = true ]; then
         echo "The auth server is already running, using it."
         echo "Hint: if it was started without --dev, its Secure cookies are rejected on http://, so login will not work here."
     else
-        "$script_directory/start-auth-server" --dev --detach
+        "$repository_root/scripts/server/start-auth-server" --dev --detach
         started_auth_server=true
     fi
 fi
 
 stop_auth_server() {
     if [ "$started_auth_server" = true ]; then
-        "$script_directory/stop-auth-server" || true
+        "$repository_root/scripts/server/stop-auth-server" || true
     fi
 }
 trap stop_auth_server EXIT

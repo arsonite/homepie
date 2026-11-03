@@ -50,8 +50,8 @@ set -euo pipefail
 
 script_directory=$(dirname "$(readlink -f "$0")")
 repository_root=$(cd "$script_directory/../.." && pwd)
-# shellcheck source=../build-files/load-env
-source "$repository_root/cli/build-files/load-env"
+# shellcheck source=../load-env
+source "$repository_root/scripts/load-env"
 
 owner="${SUDO_USER:-$(id -un)}"
 group=$(id -gn "$owner")

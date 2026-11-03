@@ -16,7 +16,7 @@
 Settings, read from the process environment and the repository's .env.
 
 Precedence: process environment > .env > DEFAULT_<KEY> in .env > DEFAULT_<KEY> in .env.template.
-The shell scripts export the same values (cli/build-files/load-env), so both ways of starting the server agree.
+The shell scripts export the same values (scripts/load-env), so both ways of starting the server agree.
 """
 
 from __future__ import annotations

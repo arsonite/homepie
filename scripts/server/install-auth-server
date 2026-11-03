@@ -33,41 +33,32 @@ fi
 ##################### SCRIPT START ######################
 #########################################################
 
-# Stops the auth server that was started with start-auth-server.
+# Prepares everything the auth server needs: the data directories below /var/lib/homepie, the python
+# environment with the dependencies, and the encryption key for the user database.
+# Safe to run again, it is also what `deploy auth` uses to update the dependencies.
 set -euo pipefail
 
 script_directory=$(dirname "$(readlink -f "$0")")
 repository_root=$(cd "$script_directory/../.." && pwd)
-# shellcheck source=../build-files/load-env
-source "$repository_root/cli/build-files/load-env"
+# shellcheck source=../load-env
+source "$repository_root/scripts/load-env"
 
-pid_file="$HOMEPIE_RUNTIME_PATH/auth-server.pid"
+echo "Creating the data directories ..."
+"$repository_root/scripts/build/setup-data-dirs" homepie
 
-if [ ! -f "$pid_file" ]; then
-    echo "The auth server is not running."
-    exit 0
+echo "Preparing the python environment in $HOMEPIE_VENV_PATH ..."
+if [ ! -x "$HOMEPIE_VENV_PATH/bin/python" ]; then
+    python_binary=$(command -v python3.11 || command -v python3)
+    "$python_binary" -m venv "$HOMEPIE_VENV_PATH"
 fi
+"$HOMEPIE_VENV_PATH/bin/python" -m pip install --quiet --upgrade pip
+"$HOMEPIE_VENV_PATH/bin/python" -m pip install --quiet -r "$repository_root/server/requirements/auth.txt"
 
-pid=$(cat "$pid_file")
+echo "Creating the encryption key for the user database ..."
+cd "$repository_root/server"
+"$HOMEPIE_VENV_PATH/bin/python" -m homepie_auth.manage init
 
-# Never signal a pid that has been reused by an unrelated process
-if ! kill -0 "$pid" 2>/dev/null || ! grep -q homepie_auth "/proc/$pid/cmdline" 2>/dev/null; then
-    echo "The auth server is not running (removing the stale pid file)."
-    rm -f "$pid_file"
-    exit 0
-fi
-
-echo "Stopping the auth server (pid $pid) ..."
-kill "$pid"
-
-for _ in $(seq 1 20); do
-    if ! kill -0 "$pid" 2>/dev/null; then
-        rm -f "$pid_file"
-        echo "Stopped."
-        exit 0
-    fi
-    sleep 0.5
-done
-
-echo "The auth server did not stop within 10 seconds. Stop it manually with: kill -9 $pid"
-exit 1
+echo
+echo "Auth server installed. Next steps:"
+echo "    scripts/server/manage-users add <username>   Create your first user"
+echo "    scripts/server/start-auth-server             Start it"

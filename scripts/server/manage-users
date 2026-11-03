@@ -45,12 +45,17 @@ set -euo pipefail
 
 script_directory=$(dirname "$(readlink -f "$0")")
 repository_root=$(cd "$script_directory/../.." && pwd)
-# shellcheck source=../build-files/load-env
-source "$repository_root/cli/build-files/load-env"
+# shellcheck source=../load-env
+source "$repository_root/scripts/load-env"
 
 if [ ! -x "$HOMEPIE_VENV_PATH/bin/python" ]; then
-    echo "No python environment in $HOMEPIE_VENV_PATH. Run cli/build-scripts/install-auth-server first."
+    echo "No python environment in $HOMEPIE_VENV_PATH. Run scripts/server/install-auth-server first."
     exit 1
+fi
+
+# Creates /var/lib/homepie (asks for sudo once) if install-auth-server has not been run yet
+if [ ! -d "$HOMEPIE_SECRETS_PATH" ] || [ ! -d "$HOMEPIE_DATA_PATH" ]; then
+    "$repository_root/scripts/build/setup-data-dirs" homepie
 fi
 
 cd "$repository_root/server"

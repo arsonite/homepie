@@ -56,8 +56,8 @@ repository_root=$(pwd)
 
 set -euo pipefail
 
-# shellcheck source=../build-files/load-env
-source "$repository_root/cli/build-files/load-env"
+# shellcheck source=../load-env
+source "$repository_root/scripts/load-env"
 
 deploy_client() {
     echo "Building the client ..."

@@ -52,25 +52,25 @@ set -euo pipefail
 
 script_directory=$(dirname "$(readlink -f "$0")")
 repository_root=$(cd "$script_directory/../.." && pwd)
-# shellcheck source=../build-files/load-env
-source "$repository_root/cli/build-files/load-env"
+# shellcheck source=../load-env
+source "$repository_root/scripts/load-env"
 
 pid_file="$HOMEPIE_RUNTIME_PATH/auth-server.pid"
 log_file="$HOMEPIE_RUNTIME_PATH/auth-server.log"
 
 if [ ! -x "$HOMEPIE_VENV_PATH/bin/python" ]; then
-    echo "No python environment in $HOMEPIE_VENV_PATH. Run cli/build-scripts/install-auth-server first."
+    echo "No python environment in $HOMEPIE_VENV_PATH. Run scripts/server/install-auth-server first."
     exit 1
 fi
 
 if [ ! -d "$HOMEPIE_RUNTIME_PATH" ]; then
-    echo "$HOMEPIE_RUNTIME_PATH does not exist. Run cli/build-scripts/install-auth-server first."
+    echo "$HOMEPIE_RUNTIME_PATH does not exist. Run scripts/server/install-auth-server first."
     exit 1
 fi
 
 # A pid file of a crashed server is not a running server
 if [ -f "$pid_file" ] && kill -0 "$(cat "$pid_file")" 2>/dev/null && grep -q homepie_auth "/proc/$(cat "$pid_file")/cmdline" 2>/dev/null; then
-    echo "The auth server is already running (pid $(cat "$pid_file")). Stop it with cli/build-scripts/stop-auth-server."
+    echo "The auth server is already running (pid $(cat "$pid_file")). Stop it with scripts/server/stop-auth-server."
     exit 1
 fi
 
