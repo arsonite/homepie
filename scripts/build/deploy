@@ -98,11 +98,11 @@ deploy_nginx() {
 
 deploy_auth() {
     # Idempotent: creates the data directories and the venv if they are missing, installs the pinned requirements
-    "$script_directory/install-auth-server"
+    "$repository_root/scripts/server/install-auth-server"
 
     # Python only reads the code on start
-    "$script_directory/stop-auth-server" || true
-    "$script_directory/start-auth-server" --detach
+    "$repository_root/scripts/server/stop-auth-server" || true
+    "$repository_root/scripts/server/start-auth-server" --detach
 }
 
 if [ "$target" = "client" ] || [ "$target" = "all" ]; then
