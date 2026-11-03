@@ -30,12 +30,13 @@ import logging
 from urllib.parse import urlsplit
 
 from fastapi import FastAPI, HTTPException, Request, Response
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 
 from .config import SESSION_COOKIE_NAME, Settings, get_settings
 from .crypto import DUMMY_HASH, Vault, verify_password
-from .security import LoginRateLimiter, SessionStore
-from .users import UserStore, normalize_username
+from .security import FailedAttempts, LoginRateLimiter, SessionStore
+from .users import UserError, UserStore, normalize_username
 
 logger = logging.getLogger("homepie_auth")
 if not logger.handlers:
@@ -62,6 +63,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     users = UserStore(settings.users_file, Vault.load(settings.key_file))
     sessions = SessionStore(settings.sessions_file, settings.session_idle_seconds, settings.session_max_seconds)
     limiter = LoginRateLimiter()
+    failed_attempts = FailedAttempts(settings.failed_attempts_file)
 
     app = FastAPI(docs_url=None, openapi_url=None, redoc_url=None, title="homepie auth")
 
@@ -123,9 +125,25 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         if user is None or not valid:
             limiter.failed(client, username)
             logger.warning("Failed login for %r from %s", username[:64], client)
-            raise HTTPException(status_code=401, detail="Invalid credentials", headers=NO_STORE)
+            failures = failed_attempts.failed(username)
+            attempts_left = max(settings.max_failed_attempts - failures, 0)
+            if attempts_left == 0:
+                # Unknown names run through the same cycle, so the answer is identical for them
+                failed_attempts.clear(username)
+                if user is not None:
+                    try:
+                        users.delete(username)
+                        logger.warning("Deleted %r after %d failed logins", username, failures)
+                    except UserError:
+                        pass
+            return JSONResponse(
+                status_code=401,
+                content={"detail": "Invalid credentials", "attempts_left": attempts_left},
+                headers=NO_STORE,
+            )
 
         limiter.succeeded(client, username)
+        failed_attempts.clear(username)
         token = sessions.create(user.username, user.stamp)
         response.set_cookie(
             SESSION_COOKIE_NAME,

@@ -170,3 +170,57 @@ class LoginRateLimiter:
     def _forget_old(self, now: float) -> None:
         for key in [key for key, attempts in self._failures.items() if not attempts or now - attempts[-1] >= self._window]:
             del self._failures[key]
+
+
+class FailedAttempts:
+    """
+    Counts consecutive failed logins per username, whether or not the user exists, so that the answer never reveals
+    which usernames exist. Persisted, so that a restart or a page reload does not give new attempts. The counter of a
+    name is forgotten after `forget_seconds` without a failure.
+    """
+
+    def __init__(self, path: Path, forget_seconds: int = 86400, max_entries: int = 1000) -> None:
+        self._path = path
+        self._forget_seconds = forget_seconds
+        self._max_entries = max_entries
+        self._lock = threading.Lock()
+        self._entries: dict[str, list[float]] = {}
+        self._load()
+
+    def failed(self, username: str) -> int:
+        """Records a failure and returns the number of consecutive failures."""
+        now = time.time()
+        with self._lock:
+            self._entries = {
+                name: entry for name, entry in self._entries.items() if now - entry[1] < self._forget_seconds
+            }
+            count = int(self._entries.pop(username, [0, now])[0]) + 1
+            self._entries[username] = [count, now]
+            while len(self._entries) > self._max_entries:
+                del self._entries[next(iter(self._entries))]
+            self._persist()
+            return count
+
+    def clear(self, username: str) -> None:
+        with self._lock:
+            if self._entries.pop(username, None) is not None:
+                self._persist()
+
+    def _load(self) -> None:
+        try:
+            raw = json.loads(self._path.read_text(encoding="utf-8"))
+            self._entries = {name: [int(entry[0]), float(entry[1])] for name, entry in raw.items()}
+        except (FileNotFoundError, ValueError, TypeError, IndexError, AttributeError):
+            self._entries = {}
+
+    def _persist(self) -> None:
+        self._path.parent.mkdir(parents=True, exist_ok=True)
+        descriptor, temporary_name = tempfile.mkstemp(dir=self._path.parent, prefix=".failed-", suffix=".tmp")
+        try:
+            with os.fdopen(descriptor, "w", encoding="utf-8") as file:
+                json.dump(self._entries, file)
+            os.chmod(temporary_name, 0o600)
+            os.replace(temporary_name, self._path)
+        except BaseException:
+            Path(temporary_name).unlink(missing_ok=True)
+            raise

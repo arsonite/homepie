@@ -36,6 +36,7 @@ import Sound from '@/util/Sound.ts';
 // Style
 import './_style/LoginPage.scss';
 
+const MAX_ATTEMPTS = 3; // Hearts shown, matches HOMEPIE_AUTH_MAX_FAILED_ATTEMPTS
 const MAX_FONT_SIZE_IN_REM = 7; // Maximum font size in rem units
 const MAX_LETTERS_PER_LINE = 12; // Max letters allowed per line
 const MAX_LINES = 3; // Maximum number of lines
@@ -113,6 +114,12 @@ const LoginPage: React.FC = (): JSX.Element => {
             // Wrong credentials, too many attempts and an unreachable server all look the same to the user
             if (!(error instanceof AuthError)) {
                 console.error(error);
+            } else if (error.attemptsLeft !== null) {
+                // The server counts, so reloading the page does not give new attempts. At 0 the user is deleted.
+                setErrorCount(Math.min(MAX_ATTEMPTS, Math.max(MAX_ATTEMPTS - error.attemptsLeft, 0)));
+                if (error.attemptsLeft === 0) {
+                    setTimeout(() => setErrorCount(0), 3000); // The server starts counting from scratch
+                }
             }
             setInput('');
             setDisplayText([]);
@@ -246,6 +253,12 @@ const LoginPage: React.FC = (): JSX.Element => {
                 const lettersPerLine = Math.min(totalLetters, MAX_LETTERS_PER_LINE); // Letters in the current line
                 const containerWidth = container.clientWidth; // Width of the container
                 const letterWidth = Math.min(containerWidth / lettersPerLine, MAX_FONT_SIZE_IN_REM * 16); // Calculate letter width
+                // The smallest letter size must still fit MAX_LETTERS_PER_LINE letters (and their gaps) into the container
+                const gap = parseFloat(getComputedStyle(container).columnGap) || 0;
+                const minLetterWidth = Math.min(
+                    MIN_FONT_SIZE_IN_REM * 16,
+                    (containerWidth - gap * (MAX_LETTERS_PER_LINE - 1)) / MAX_LETTERS_PER_LINE
+                );
 
                 letters.forEach((letter) => {
                     if (!letter.style.fill) {
@@ -254,8 +267,8 @@ const LoginPage: React.FC = (): JSX.Element => {
                         letter.style.fill = randomColor;
                     }
                     if (totalLetters >= MAX_LETTERS_PER_LINE) {
-                        letter.style.fontSize = `${MIN_FONT_SIZE_IN_REM}rem`; // Set maximum font size
-                        letter.style.flexBasis = `${MIN_FONT_SIZE_IN_REM}rem`; // Set minimum font size
+                        letter.style.fontSize = `${minLetterWidth}px`; // Set minimum font size
+                        letter.style.flexBasis = `${minLetterWidth}px`; // Set minimum font size
                     } else {
                         letter.style.fontSize = `${letterWidth}px`; // Set dynamic font size based on container
                         letter.style.flexBasis = `${letterWidth}px`; // Set dynamic font size based on container
@@ -272,22 +285,6 @@ const LoginPage: React.FC = (): JSX.Element => {
         // Intended behaviour
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [displayText]);
-
-    /**
-     * Effect to handle error count updates when an error occurs.
-     */
-    useEffect(() => {
-        if (isError) {
-            if (errorCount < 4) {
-                setErrorCount((prev) => prev + 1); // Necessary to prevent asynchronicity during state batching
-            }
-            if (errorCount >= 3) {
-                setErrorCount(4); // Cap error count at 4
-            }
-        }
-        // Intended behaviour
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [isError]);
 
     return (
         <div id='login-page' className={isError ? 'error' : ''} onClick={focusHiddenInput}>

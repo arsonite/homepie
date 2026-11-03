@@ -27,10 +27,12 @@ const AUTH_API_ROUTE = '/api/auth';
 type AuthFailure = 'invalid' | 'rate-limited' | 'unreachable';
 
 class AuthError extends Error {
+    public readonly attemptsLeft: number | null;
     public readonly failure: AuthFailure;
 
-    public constructor(failure: AuthFailure) {
+    public constructor(failure: AuthFailure, attemptsLeft: number | null = null) {
         super(failure);
+        this.attemptsLeft = attemptsLeft;
         this.failure = failure;
     }
 }
@@ -75,8 +77,12 @@ const login = async (username: string, password: string): Promise<string> => {
     if (response.status === 429) {
         throw new AuthError('rate-limited');
     }
+    if (response.status === 401) {
+        const data = (await response.json().catch(() => ({}))) as { attempts_left?: number };
+        throw new AuthError('invalid', data.attempts_left ?? null);
+    }
     if (!response.ok) {
-        throw new AuthError(response.status === 401 ? 'invalid' : 'unreachable');
+        throw new AuthError('unreachable');
     }
     const data = (await response.json()) as { username?: string };
     return data.username ?? username;

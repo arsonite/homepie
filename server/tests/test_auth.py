@@ -36,8 +36,10 @@ def settings(tmp_path) -> Settings:
         cookie_secure=True,
         data_path=tmp_path / "data",
         domain="homepie.net",
+        failed_attempts_file=tmp_path / "run" / "failed-logins.json",
         host="127.0.0.1",
         key_file=tmp_path / "secrets" / "users.key",
+        max_failed_attempts=3,
         port=8888,
         runtime_path=tmp_path / "run",
         secrets_path=tmp_path / "secrets",
@@ -179,10 +181,48 @@ def test_session_expires(settings, store, monkeypatch):
 
 def test_brute_force_is_throttled(client):
     for _ in range(5):
-        assert login(client, password="wrong-password-xx").status_code == 401
-    blocked = login(client)
+        assert login(client, username="nobody", password="wrong-password-123").status_code == 401
+    blocked = login(client, username="nobody", password="wrong-password-123")
     assert blocked.status_code == 429
     assert int(blocked.headers["retry-after"]) > 0
+
+
+def test_attempts_are_counted_down(client):
+    for expected in (2, 1):
+        response = login(client, password="wrong-password-123")
+        assert response.status_code == 401
+        assert response.json()["attempts_left"] == expected
+    assert login(client).status_code == 200
+
+
+def test_user_is_deleted_after_three_failures(client, store):
+    left = [login(client, password="wrong-password-123").json()["attempts_left"] for _ in range(3)]
+    assert left == [2, 1, 0]
+    assert store.get("burak") is None
+    assert login(client).status_code == 401
+
+
+def test_success_resets_the_counter(client, store):
+    for _ in range(2):
+        login(client, password="wrong-password-123")
+    assert login(client).status_code == 200
+    for _ in range(2):
+        login(client, password="wrong-password-123")
+    assert store.get("burak") is not None
+
+
+def test_failures_survive_a_restart(settings, store):
+    first = TestClient(create_app(settings), base_url="https://homepie.net")
+    for _ in range(2):
+        login(first, password="wrong-password-123")
+    second = TestClient(create_app(settings), base_url="https://homepie.net")
+    assert login(second, password="wrong-password-123").json()["attempts_left"] == 0
+    assert store.get("burak") is None
+
+
+def test_unknown_user_gets_the_same_countdown(client):
+    left = [login(client, username="nobody", password="wrong-password-123").json()["attempts_left"] for _ in range(4)]
+    assert left == [2, 1, 0, 2]
 
 
 def test_foreign_origin_is_rejected(client):

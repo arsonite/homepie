@@ -104,7 +104,8 @@ cli/build-scripts/manage-users add|passwd|delete|list [name]
     unauthenticated visitors are redirected to `https://homepie.net/login` (from an app with `?app=<name>`).
 -   Apps get the user in the header `X-Homepie-User` and never see the session cookie. They must listen on
     `127.0.0.1` only.
--   5 failed logins per user and client lock login for 15 minutes.
+-   3 wrong passwords in a row (the 3 hearts) **delete the user**. Re-create it with `cli/build-scripts/manage-users add <name>`. Change the limit with `HOMEPIE_AUTH_MAX_FAILED_ATTEMPTS` in `.env`. Careful: anyone who knows a username can delete it this way.
+-   5 failed logins per client lock login for 15 minutes.
 
 ### Configuration
 

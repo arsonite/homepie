@@ -266,4 +266,55 @@
             opacity: 1;
         }
     }
+
+    // Phones: the desktop layout is positioned with fixed offsets from the center and a 42.5rem wide text box.
+    // Here everything is stacked from the top instead, so that it also fits when the on-screen keyboard shrinks the page.
+    @media (max-width: 48rem) {
+        .logo {
+            height: 6rem;
+            width: 6rem;
+
+            &.active-input {
+                top: 0.75rem;
+                margin-bottom: 0;
+            }
+        }
+
+        #letter-count.active-input {
+            top: 6.75rem;
+            bottom: auto;
+            padding: 0.5rem 1rem;
+        }
+
+        #health.active-input {
+            top: 9.5rem;
+            bottom: auto;
+            padding: 0.25rem;
+        }
+
+        .display-text-container,
+        #username-display {
+            gap: 0.25rem;
+            padding-top: 0;
+            width: calc(100% - 2rem);
+        }
+
+        #username-display {
+            top: 12rem;
+            bottom: auto;
+
+            p {
+                font-size: 1.5rem;
+                overflow-wrap: anywhere;
+            }
+        }
+
+        .display-text-container {
+            top: 15rem;
+        }
+
+        #display-text-username-container {
+            top: 12rem;
+        }
+    }
 }

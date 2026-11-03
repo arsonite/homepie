@@ -81,6 +81,8 @@ class Settings:
     domain: str
     host: str
     key_file: Path
+    failed_attempts_file: Path
+    max_failed_attempts: int
     port: int
     runtime_path: Path
     secrets_path: Path
@@ -113,7 +115,9 @@ def get_settings() -> Settings:
         dev=dev,
         domain=env.get("HOMEPIE_DOMAIN", "homepie.net"),
         host=env.get("HOMEPIE_AUTH_HOST", "127.0.0.1"),
+        failed_attempts_file=runtime_path / "failed-logins.json",
         key_file=secrets_path / "users.key",
+        max_failed_attempts=max(1, int(env.get("HOMEPIE_AUTH_MAX_FAILED_ATTEMPTS", "3"))),
         port=int(env.get("HOMEPIE_AUTH_PORT", "8888")),
         runtime_path=runtime_path,
         secrets_path=secrets_path,
