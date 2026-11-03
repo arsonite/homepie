@@ -77,12 +77,15 @@ class Path {
     };
 
     /**
-     * Retrieves the root path for assets.
-     * 
+     * Retrieves the root path for assets that are loaded at runtime (icons, images, animations and sounds).
+     *
+     * They live in public/static and are therefore served as they are by both the vite dev server and nginx.
+     * Anything below src/ only exists in the dev server, a production build contains no /src.
+     *
      * @returns A string representing the asset root path.
      */
     public static readonly getAssetRootPath = (): string => {
-        return '/src/assets';
+        return '/static';
     }
 
     /**

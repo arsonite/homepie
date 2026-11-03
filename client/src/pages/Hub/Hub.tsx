@@ -18,6 +18,9 @@
 // React imports
 import React from 'react';
 
+// API
+import { useAuth } from '@/api/AuthContext.tsx';
+
 // Apps
 import { EXTERNAL_APPS } from '@/apps/registry.ts';
 
@@ -29,6 +32,8 @@ import CollisionParticles from '@/components/Particles/CollisionParticles.tsx';
 import './_style/Hub.scss';
 
 const Hub: React.FC = () => {
+    const { logout, username } = useAuth();
+
     return (
         <div id='hub'>
             <CollisionParticles
@@ -38,6 +43,13 @@ const Hub: React.FC = () => {
                 particleEase={0.2}
                 particleFriction={0.95}
             />
+
+            <div id='hub-session'>
+                <span id='hub-username'>{username}</span>
+                <button id='hub-logout' onClick={logout} type='button'>
+                    Log out
+                </button>
+            </div>
 
             <div id='hub-apps'>
                 {EXTERNAL_APPS.map((app) => (

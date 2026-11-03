@@ -1,0 +1,109 @@
+#!/bin/bash
+
+# Copyright (C) 2024-2025 Burak Günaydin
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+#########################################################
+#################### START CMD PARSE ####################
+#########################################################
+
+# Usage: ./start-auth-server [--dev] [--detach]
+development=false
+detach=false
+
+for argument in "$@"; do
+    case "$argument" in
+        --dev) development=true ;;
+        --detach) detach=true ;;
+        *)
+            echo
+            echo "Unknown argument '$argument'."
+            echo "Usage: ./start-auth-server [--dev] [--detach]"
+            echo "    --dev     Auto-reload on code changes, cookies that work on plain http (use with start-client-dev)"
+            echo "    --detach  Run in the background, logs go to \$HOMEPIE_RUNTIME_PATH/auth-server.log"
+            echo
+            exit 1
+            ;;
+    esac
+done
+
+#########################################################
+##################### END CMD PARSE #####################
+#########################################################
+
+#########################################################
+##################### SCRIPT START ######################
+#########################################################
+
+# Runs the auth server on $HOMEPIE_AUTH_HOST:$HOMEPIE_AUTH_PORT (127.0.0.1:8888 by default). It is never
+# exposed directly, nginx (production) or the vite dev server (development) forward /api/auth to it.
+set -euo pipefail
+
+script_directory=$(dirname "$(readlink -f "$0")")
+repository_root=$(cd "$script_directory/../.." && pwd)
+# shellcheck source=../build-files/load-env
+source "$repository_root/cli/build-files/load-env"
+
+pid_file="$HOMEPIE_RUNTIME_PATH/auth-server.pid"
+log_file="$HOMEPIE_RUNTIME_PATH/auth-server.log"
+
+if [ ! -x "$HOMEPIE_VENV_PATH/bin/python" ]; then
+    echo "No python environment in $HOMEPIE_VENV_PATH. Run cli/build-scripts/install-auth-server first."
+    exit 1
+fi
+
+if [ ! -d "$HOMEPIE_RUNTIME_PATH" ]; then
+    echo "$HOMEPIE_RUNTIME_PATH does not exist. Run cli/build-scripts/install-auth-server first."
+    exit 1
+fi
+
+# A pid file of a crashed server is not a running server
+if [ -f "$pid_file" ] && kill -0 "$(cat "$pid_file")" 2>/dev/null && grep -q homepie_auth "/proc/$(cat "$pid_file")/cmdline" 2>/dev/null; then
+    echo "The auth server is already running (pid $(cat "$pid_file")). Stop it with cli/build-scripts/stop-auth-server."
+    exit 1
+fi
+
+if [ "$development" = true ]; then
+    export HOMEPIE_AUTH_DEV=1
+    server_arguments=(--reload --reload-dir "$repository_root/server")
+else
+    server_arguments=(--no-server-header)
+fi
+
+cd "$repository_root/server"
+command=("$HOMEPIE_VENV_PATH/bin/python" -m uvicorn --factory homepie_auth.app:create_app
+    --host "$HOMEPIE_AUTH_HOST" --port "$HOMEPIE_AUTH_PORT" "${server_arguments[@]}")
+
+if [ "$detach" = true ]; then
+    nohup "${command[@]}" >>"$log_file" 2>&1 &
+    echo $! >"$pid_file"
+
+    for _ in $(seq 1 20); do
+        if curl -fsS "http://$HOMEPIE_AUTH_HOST:$HOMEPIE_AUTH_PORT/api/auth/health" >/dev/null 2>&1; then
+            echo "Auth server is running (pid $(cat "$pid_file")) on http://$HOMEPIE_AUTH_HOST:$HOMEPIE_AUTH_PORT"
+            echo "Logs: $log_file"
+            exit 0
+        fi
+        sleep 0.5
+    done
+
+    echo "The auth server did not come up. Last log lines:"
+    tail -n 20 "$log_file"
+    rm -f "$pid_file"
+    exit 1
+fi
+
+echo $$ >"$pid_file"
+# exec keeps the pid, so that stop-auth-server stops the server itself and not just this script
+exec "${command[@]}"

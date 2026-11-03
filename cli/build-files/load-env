@@ -1,0 +1,76 @@
+# Copyright (C) 2024-2025 Burak Günaydin
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+# Sourced (not executed) by the scripts in cli/build-scripts:
+#
+#     source "$repository_root/cli/build-files/load-env"
+#
+# 1. Creates .env from .env.template if it does not exist yet
+# 2. Appends keys that were added to the template after .env was created
+# 3. Exports everything in .env, without overriding variables that are already set in the environment
+# 4. Uses DEFAULT_<KEY> for every <KEY> that is still unset
+#
+# Expects $repository_root to be set by the caller.
+
+homepie_env_file="$repository_root/.env"
+homepie_env_template="$repository_root/.env.template"
+
+if [ ! -f "$homepie_env_file" ]; then
+    echo "Creating .env from .env.template ..."
+    cp "$homepie_env_template" "$homepie_env_file"
+fi
+
+# Make sure the last line ends with a newline before appending
+if [ -s "$homepie_env_file" ] && [ -n "$(tail -c1 "$homepie_env_file")" ]; then
+    echo >>"$homepie_env_file"
+fi
+
+while IFS= read -r homepie_env_line; do
+    case "$homepie_env_line" in
+        [A-Z]*=*)
+            homepie_env_key="${homepie_env_line%%=*}"
+            if ! grep -q "^${homepie_env_key}=" "$homepie_env_file"; then
+                echo "Adding new key ${homepie_env_key} to .env"
+                echo "$homepie_env_line" >>"$homepie_env_file"
+            fi
+            ;;
+    esac
+done <"$homepie_env_template"
+
+while IFS= read -r homepie_env_line || [ -n "$homepie_env_line" ]; do
+    case "$homepie_env_line" in
+        [A-Za-z_]*=*)
+            homepie_env_key="${homepie_env_line%%=*}"
+            homepie_env_value="${homepie_env_line#*=}"
+            homepie_env_value="${homepie_env_value%$'\r'}"
+            # Strip one pair of surrounding quotes
+            case "$homepie_env_value" in
+                \"*\" | \'*\') homepie_env_value="${homepie_env_value:1:${#homepie_env_value}-2}" ;;
+            esac
+            # Variables that are already set (e.g. `HOMEPIE_AUTH_PORT=9000 ./start-auth-server`) win over .env
+            if [ -z "$(printenv "$homepie_env_key")" ]; then
+                export "$homepie_env_key=$homepie_env_value"
+            fi
+            ;;
+    esac
+done <"$homepie_env_file"
+
+for homepie_env_default in $(compgen -v DEFAULT_); do
+    homepie_env_key="${homepie_env_default#DEFAULT_}"
+    if [ -z "$(printenv "$homepie_env_key")" ]; then
+        export "$homepie_env_key=$(printenv "$homepie_env_default")"
+    fi
+done
+
+unset homepie_env_default homepie_env_file homepie_env_key homepie_env_line homepie_env_template homepie_env_value

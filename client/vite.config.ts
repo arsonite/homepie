@@ -25,6 +25,7 @@ import Terminal from 'vite-plugin-terminal'
 const VITE_PORT = Number(process.env.VITE_PORT) || 443;
 const VITE_SSL_CERT_PATH = process.env.VITE_SSL_CERT_PATH;
 const VITE_SSL_KEY_PATH = process.env.VITE_SSL_KEY_PATH;
+const AUTH_TARGET = `http://${process.env.HOMEPIE_AUTH_HOST || '127.0.0.1'}:${process.env.HOMEPIE_AUTH_PORT || 8888}`;
 
 // https://vitejs.dev/config/
 /**
@@ -118,6 +119,10 @@ export default defineConfig({
       key: fs.readFileSync(VITE_SSL_KEY_PATH)
     } : undefined,
     open: false, // Set this to false to prevent opening a browser
-    port: VITE_PORT
+    port: VITE_PORT,
+    // Same origin for the page and the auth API, so the session cookie works without CORS (see `start-auth-server --dev`)
+    proxy: {
+      '/api/auth': { changeOrigin: false, target: AUTH_TARGET }
+    }
   }
 });

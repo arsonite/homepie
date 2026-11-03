@@ -17,7 +17,11 @@
 
 // React imports
 import React, { useEffect, useMemo, useState } from 'react';
-import { Navigate, Route, Routes, useNavigate } from 'react-router-dom';
+import { Navigate, Route, Routes, useSearchParams } from 'react-router-dom';
+
+// API
+import { EXTERNAL_APPS, getExternalAppUrl } from '@/apps/registry.ts';
+import { useAuth } from '@/api/AuthContext.tsx';
 
 // Pages
 import Hub from '@/pages/Hub/Hub.tsx';
@@ -29,20 +33,34 @@ import { AppClass } from '@/classes/AppClass.ts';
 
 // Utility
 import Path from '@/util/Path.ts';
-import Storage from '@/util/Storage.ts';
 
 // Style
 import './_style/Platform.scss';
 
+/**
+ * Where an authenticated user ends up on /login: back at the app that sent them here (`?app=<name>`, set by nginx
+ * for unauthenticated requests to a subdomain) or else on the hub. Only apps from the registry are accepted, so
+ * that /login cannot be abused as an open redirect.
+ */
+const PostLoginRedirect: React.FC = (): JSX.Element => {
+    const [searchParams] = useSearchParams();
+    const app = EXTERNAL_APPS.find((candidate) => candidate.name === searchParams.get('app'));
+
+    useEffect(() => {
+        if (app) {
+            window.location.replace(getExternalAppUrl(app));
+        }
+    }, [app]);
+
+    return app ? <React.Fragment /> : <Navigate replace to='/hub' />;
+};
+
 const Platform: React.FC = (): JSX.Element => {
-    const navigate = useNavigate();
+    const { status } = useAuth();
 
     const [apps, setApps] = useState<AppClass[]>([]);
 
-    const login: string = Storage.get('login', true) as string;
-    if (login && window.location.pathname === '/login') {
-        navigate('/');
-    }
+    const login: boolean = status === 'authenticated';
 
     const appsPath: string = Path.getAbsolutePath(import.meta.url) + 'apps';
     const appsWhitelist: string[] = useMemo(
@@ -85,14 +103,11 @@ const Platform: React.FC = (): JSX.Element => {
 
     return (
         <div id='homepie-platform'>
-            {!login ? (
-                <React.Fragment>
-                    <Navigate to='/login' />
-
-                    <Routes>
-                        <Route path='/login' element={<LoginPage />} />
-                    </Routes>
-                </React.Fragment>
+            {status === 'loading' ? null : !login ? (
+                <Routes>
+                    <Route path='/login' element={<LoginPage />} />
+                    <Route path='*' element={<Navigate replace to='/login' />} />
+                </Routes>
             ) : (
                 <React.Fragment>
                     {/* <SoundControl /> */}
@@ -106,6 +121,8 @@ const Platform: React.FC = (): JSX.Element => {
                     <main>
                         <Routes>
                             <Route path='/' element={<Navigate replace to='hub' />} />
+
+                            <Route path='/login' element={<PostLoginRedirect />} />
 
                             <Route key='hub' path='/hub' element={<Hub />} />
 

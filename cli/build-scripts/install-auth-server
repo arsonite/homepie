@@ -1,0 +1,64 @@
+#!/bin/bash
+
+# Copyright (C) 2024-2025 Burak Günaydin
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+#########################################################
+#################### START CMD PARSE ####################
+#########################################################
+
+# Check if there are any arguments
+if [ "$#" -gt 0 ]; then
+    echo
+    echo "Hint: This script does not accept any arguments. Proceeding anyways ..."
+    echo
+fi
+
+#########################################################
+##################### END CMD PARSE #####################
+#########################################################
+
+#########################################################
+##################### SCRIPT START ######################
+#########################################################
+
+# Prepares everything the auth server needs: the data directories below /var/lib/homepie, the python
+# environment with the dependencies, and the encryption key for the user database.
+# Safe to run again, it is also what `deploy auth` uses to update the dependencies.
+set -euo pipefail
+
+script_directory=$(dirname "$(readlink -f "$0")")
+repository_root=$(cd "$script_directory/../.." && pwd)
+# shellcheck source=../build-files/load-env
+source "$repository_root/cli/build-files/load-env"
+
+echo "Creating the data directories ..."
+"$script_directory/setup-data-dirs" homepie
+
+echo "Preparing the python environment in $HOMEPIE_VENV_PATH ..."
+if [ ! -x "$HOMEPIE_VENV_PATH/bin/python" ]; then
+    python_binary=$(command -v python3.11 || command -v python3)
+    "$python_binary" -m venv "$HOMEPIE_VENV_PATH"
+fi
+"$HOMEPIE_VENV_PATH/bin/python" -m pip install --quiet --upgrade pip
+"$HOMEPIE_VENV_PATH/bin/python" -m pip install --quiet -r "$repository_root/server/requirements/auth.txt"
+
+echo "Creating the encryption key for the user database ..."
+cd "$repository_root/server"
+"$HOMEPIE_VENV_PATH/bin/python" -m homepie_auth.manage init
+
+echo
+echo "Auth server installed. Next steps:"
+echo "    cli/build-scripts/manage-users add <username>   Create your first user"
+echo "    cli/build-scripts/start-auth-server             Start it"

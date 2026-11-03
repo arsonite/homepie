@@ -17,7 +17,10 @@
 
 // React imports
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+
+// API
+import { AuthError } from '@/api/auth.ts';
+import { useAuth } from '@/api/AuthContext.tsx';
 
 // Components
 import CollisionParticles from '@/components/Particles/CollisionParticles.tsx';
@@ -29,13 +32,10 @@ import Color from '@/util/Color.ts';
 // Utility
 import Keys from '@/util/Keys.ts';
 import Sound from '@/util/Sound.ts';
-import Storage from '@/util/Storage.ts';
 
 // Style
 import './_style/LoginPage.scss';
 
-const DEBUG_PASSWORD = 'terrencehill'; // Debug password for testing
-const DEBUG_USERNAME = 'budspencer'; // Debug username for testing
 const MAX_FONT_SIZE_IN_REM = 7; // Maximum font size in rem units
 const MAX_LETTERS_PER_LINE = 12; // Max letters allowed per line
 const MAX_LINES = 3; // Maximum number of lines
@@ -49,7 +49,7 @@ const MIN_FONT_SIZE_IN_REM = 2.5; // Minimum font size in rem units
 // TODO: Implement different display box for username, so that i can shift to the top and also fix spacing
 // Implement parallax effect
 const LoginPage: React.FC = (): JSX.Element => {
-    const navigate = useNavigate(); // Hook for navigation
+    const { login } = useAuth(); // Logging in flips the platform to the authenticated routes
 
     // State to track active input
     const [activeInput, setActiveInput] = useState<boolean>(false);
@@ -78,33 +78,73 @@ const LoginPage: React.FC = (): JSX.Element => {
         []
     );
 
+    // Ref that prevents a second request while the first one is still pending
+    const submittingRef = useRef<boolean>(false);
+
     // Ref to the container displaying the input text
     const displayTextContainerRef = useRef<HTMLDivElement>(null);
     // Ref array to store individual letter elements
     const letterRefs = useRef<(HTMLDivElement | null)[]>([]);
 
+    const showError = useCallback(() => {
+        setIsError(true); // Trigger error state
+        setTimeout(() => setIsError(false), 250); // Reset error state after delay
+        error_sound.play(); // Play error sound
+    }, [error_sound]);
+
     // Function to perform login based on username and password
-    const performLogin = useCallback(() => {
-        if (username === DEBUG_USERNAME && input === DEBUG_PASSWORD) {
-            // TODO: Temporary login storage until proper authentication is implemented
-            Storage.set('login', username, true);
-            navigate('/hub'); // Navigate to hub if password is correct
-        } else {
-            setIsError(true); // Trigger error state
-            setTimeout(() => setIsError(false), 250); // Reset error state after delay
-            error_sound.play(); // Play error sound
+    const performLogin = useCallback(async () => {
+        if (submittingRef.current) {
+            return;
         }
-    }, [error_sound, input, username, navigate]);
+        if (input.length === 0) {
+            showError();
+            return;
+        }
+
+        submittingRef.current = true;
+        try {
+            // On success the platform switches to the authenticated routes and redirects from /login
+            await login(username, input);
+        } catch (error) {
+            // Wrong credentials, too many attempts and an unreachable server all look the same to the user
+            if (!(error instanceof AuthError)) {
+                console.error(error);
+            }
+            setInput('');
+            setDisplayText([]);
+            showError();
+        } finally {
+            submittingRef.current = false;
+        }
+    }, [input, login, showError, username]);
 
     const handleUsername = useCallback(() => {
+        if (input.length === 0) {
+            showError();
+            return;
+        }
         setPasswordMode(true);
         setUsername(input);
         setInput('');
         setDisplayText([]);
-    }, [input]);
+    }, [input, showError]);
+
+    // Goes back from the password to the username, so that a typo in the username can be corrected
+    const handleBack = useCallback(() => {
+        setPasswordMode(false);
+        setInput(username);
+        setDisplayText(Array.from(username));
+        setUsername('');
+    }, [username]);
 
     const handleKeyPress = useCallback(
         (event: KeyboardEvent) => {
+            if (event.key === 'Escape' && passwordMode) {
+                handleBack();
+                return;
+            }
+
             // Ignore specific key presses based on utility function
             if (Keys.pressed(event.key, null, true, true, true)) {
                 return;
@@ -141,7 +181,7 @@ const LoginPage: React.FC = (): JSX.Element => {
                 setInput((prev) => prev + event.key);
             }
         },
-        [keyboard_sounds, passwordMode, handleUsername, performLogin]
+        [keyboard_sounds, passwordMode, handleBack, handleUsername, performLogin]
     );
 
     /**
@@ -222,7 +262,6 @@ const LoginPage: React.FC = (): JSX.Element => {
         // Intended behaviour
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isError]);
-    console.log(username, input);
 
     return (
         <div id='login-page' className={isError ? 'error' : ''}>

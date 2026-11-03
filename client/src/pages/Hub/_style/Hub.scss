@@ -18,6 +18,33 @@
     height: 100%;
     width: 100%;
 
+    #hub-session {
+        position: absolute;
+        top: 1.5rem;
+        right: 1.5rem;
+        z-index: $global_z_hub_apps;
+
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+        color: rgba(255, 255, 255, 0.7);
+
+        #hub-logout {
+            padding: 0.4rem 0.9rem;
+            cursor: pointer;
+            color: inherit;
+            font: inherit;
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.35);
+            border-radius: 0.5rem;
+
+            &:hover {
+                color: #fff;
+                border-color: #fff;
+            }
+        }
+    }
+
     #hub-apps {
         position: absolute;
         inset: 0;

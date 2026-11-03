@@ -84,6 +84,13 @@ class Effect {
         this.init(); // Initialize the particles
     }
 
+    /**
+     * Releases the particles. Called when the component that owns the effect unmounts.
+     */
+    destroy = () => {
+        this.particlesArray = [];
+    };
+
     continouslyUpdateMousePosition = () => {
         const radius = this.activeInput ? 500 : 15; // Radius of the circular path
         const centerX = this.width / 2; // Center x-coordinate of the circular path

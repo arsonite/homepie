@@ -1,0 +1,97 @@
+#!/bin/bash
+
+# Copyright (C) 2024-2025 Burak Günaydin
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+#########################################################
+#################### START CMD PARSE ####################
+#########################################################
+
+# Usage: ./setup-data-dirs [homepie|lockkliye|teatype|all]
+target="${1:-all}"
+
+case "$target" in
+    homepie | lockkliye | teatype | all) ;;
+    *)
+        echo
+        echo "Unknown project '$target'."
+        echo "Usage: ./setup-data-dirs [homepie|lockkliye|teatype|all]"
+        echo
+        exit 1
+        ;;
+esac
+
+#########################################################
+##################### END CMD PARSE #####################
+#########################################################
+
+#########################################################
+##################### SCRIPT START ######################
+#########################################################
+
+# Creates the runtime directories of the projects, /var/lib/<project> by default (see .env.template):
+#   data     persistent data, e.g. the homepie user database
+#   run      pid files, logs, sessions
+#   secrets  encryption keys (mode 700)
+#   tmp      scratch files
+# They are owned by the user who runs this script, so that the servers do not have to run as root.
+set -euo pipefail
+
+script_directory=$(dirname "$(readlink -f "$0")")
+repository_root=$(cd "$script_directory/../.." && pwd)
+# shellcheck source=../build-files/load-env
+source "$repository_root/cli/build-files/load-env"
+
+owner="${SUDO_USER:-$(id -un)}"
+group=$(id -gn "$owner")
+
+ensure_directory() {
+    local mode="$1"
+    local path="$2"
+
+    # Only ask for sudo when the user cannot do it himself, e.g. creating a directory directly below /var/lib
+    if mkdir -p "$path" 2>/dev/null && [ -O "$path" ]; then
+        chmod "$mode" "$path"
+    else
+        sudo install -d -o "$owner" -g "$group" -m "$mode" "$path"
+        sudo chown "$owner:$group" "$path"
+        sudo chmod "$mode" "$path"
+    fi
+}
+
+setup_project() {
+    local name="$1" data="$2" runtime="$3" secrets="$4" temp="$5"
+
+    echo "Setting up $data ..."
+    # The data directory first, the others usually live inside of it
+    ensure_directory 755 "$data"
+    ensure_directory 755 "$runtime"
+    ensure_directory 700 "$secrets"
+    ensure_directory 700 "$temp"
+    echo "    $name: data=$data runtime=$runtime secrets=$secrets temp=$temp"
+}
+
+if [ "$target" = "homepie" ] || [ "$target" = "all" ]; then
+    setup_project homepie "$HOMEPIE_DATA_PATH" "$HOMEPIE_RUNTIME_PATH" "$HOMEPIE_SECRETS_PATH" "$HOMEPIE_TEMP_PATH"
+fi
+
+if [ "$target" = "lockkliye" ] || [ "$target" = "all" ]; then
+    setup_project lockkliye "$LOCKKLIYE_DATA_PATH" "$LOCKKLIYE_RUNTIME_PATH" "$LOCKKLIYE_SECRETS_PATH" "$LOCKKLIYE_TEMP_PATH"
+fi
+
+if [ "$target" = "teatype" ] || [ "$target" = "all" ]; then
+    setup_project teatype "$TEATYPE_DATA_PATH" "$TEATYPE_RUNTIME_PATH" "$TEATYPE_SECRETS_PATH" "$TEATYPE_TEMP_PATH"
+fi
+
+echo "Done."

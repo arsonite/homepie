@@ -1,0 +1,57 @@
+#!/bin/bash
+
+# Copyright (C) 2024-2025 Burak Günaydin
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+#########################################################
+#################### START CMD PARSE ####################
+#########################################################
+
+# Usage: ./manage-users init | list | add <username> | passwd <username> | delete <username>
+if [ "$#" -lt 1 ]; then
+    echo
+    echo "Usage: ./manage-users <command> [username]"
+    echo "    add <username>     Create a user, the password is asked for interactively"
+    echo "    passwd <username>  Change a password, logs the user out everywhere"
+    echo "    delete <username>  Delete a user, logs the user out everywhere"
+    echo "    list               List all users"
+    echo "    init               Create the encryption key (install-auth-server does this already)"
+    echo
+    exit 1
+fi
+
+#########################################################
+##################### END CMD PARSE #####################
+#########################################################
+
+#########################################################
+##################### SCRIPT START ######################
+#########################################################
+
+# Users are stored in $HOMEPIE_DATA_PATH/users.json, passwords as encrypted scrypt hashes. The running auth
+# server picks changes up on its own, it does not have to be restarted.
+set -euo pipefail
+
+script_directory=$(dirname "$(readlink -f "$0")")
+repository_root=$(cd "$script_directory/../.." && pwd)
+# shellcheck source=../build-files/load-env
+source "$repository_root/cli/build-files/load-env"
+
+if [ ! -x "$HOMEPIE_VENV_PATH/bin/python" ]; then
+    echo "No python environment in $HOMEPIE_VENV_PATH. Run cli/build-scripts/install-auth-server first."
+    exit 1
+fi
+
+cd "$repository_root/server"
+exec "$HOMEPIE_VENV_PATH/bin/python" -m homepie_auth.manage "$@"

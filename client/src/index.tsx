@@ -20,6 +20,9 @@ import React from 'react'; // Importing the React library
 import { BrowserRouter } from 'react-router-dom';
 import ReactDOM from 'react-dom/client'; // Importing the ReactDOM library for rendering the application
 
+// API
+import { AuthProvider } from '@/api/AuthContext.tsx';
+
 // Components
 import Platform from '@/Platform.tsx'; // Importing the main Platform component
 
@@ -79,7 +82,9 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     conditionalStrictMode(
         STRICT_MODE,
         <BrowserRouter>
-            <Platform />
+            <AuthProvider>
+                <Platform />
+            </AuthProvider>
         </BrowserRouter>
     ) // Render the Platform component within React's StrictMode for highlighting potential problems
 );
