@@ -29,6 +29,18 @@
 
     transition: $global_transition_slow;
 
+    // Invisible, but not display:none, because only a focusable input opens the on-screen keyboard
+    #login-hidden-input {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        height: 1px;
+        width: 1px;
+        opacity: 0;
+        pointer-events: none;
+        font-size: 16px; // Below 16px iOS zooms into the focused input
+    }
+
     .logo {
         position: absolute;
 

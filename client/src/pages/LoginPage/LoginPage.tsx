@@ -81,6 +81,9 @@ const LoginPage: React.FC = (): JSX.Element => {
     // Ref that prevents a second request while the first one is still pending
     const submittingRef = useRef<boolean>(false);
 
+    // Ref to the invisible input that opens the on-screen keyboard on touch devices
+    const hiddenInputRef = useRef<HTMLInputElement>(null);
+
     // Ref to the container displaying the input text
     const displayTextContainerRef = useRef<HTMLDivElement>(null);
     // Ref array to store individual letter elements
@@ -138,8 +141,31 @@ const LoginPage: React.FC = (): JSX.Element => {
         setUsername('');
     }, [username]);
 
+    const playKeyboardSound = useCallback(() => {
+        keyboard_sounds[Math.floor(Math.random() * keyboard_sounds.length)].play();
+    }, [keyboard_sounds]);
+
+    // Touch devices send no usable key events, the text comes from the hidden input instead
+    const handleHiddenInputChange = useCallback(
+        (event: React.ChangeEvent<HTMLInputElement>) => {
+            const value = Array.from(event.target.value).slice(0, MAX_LETTERS_PER_LINE * MAX_LINES);
+            playKeyboardSound();
+            setInput(value.join(''));
+            setDisplayText(value);
+        },
+        [playKeyboardSound]
+    );
+
+    // Tapping the logo (or anywhere else on the page) opens the keyboard
+    const focusHiddenInput = useCallback(() => hiddenInputRef.current?.focus(), []);
+
     const handleKeyPress = useCallback(
         (event: KeyboardEvent) => {
+            const fromHiddenInput = event.target === hiddenInputRef.current;
+            if (fromHiddenInput && event.key !== 'Enter' && event.key !== 'Escape') {
+                return; // Characters and Backspace are handled by handleHiddenInputChange
+            }
+
             if (event.key === 'Escape' && passwordMode) {
                 handleBack();
                 return;
@@ -264,7 +290,20 @@ const LoginPage: React.FC = (): JSX.Element => {
     }, [isError]);
 
     return (
-        <div id='login-page' className={isError ? 'error' : ''}>
+        <div id='login-page' className={isError ? 'error' : ''} onClick={focusHiddenInput}>
+            <input
+                aria-label={passwordMode ? 'Password' : 'Username'}
+                autoCapitalize='off'
+                autoComplete='off'
+                autoCorrect='off'
+                enterKeyHint={passwordMode ? 'go' : 'next'}
+                id='login-hidden-input'
+                onChange={handleHiddenInputChange}
+                ref={hiddenInputRef}
+                spellCheck={false}
+                type={passwordMode ? 'password' : 'text'}
+                value={input}
+            />
             {/* Logo Icon */}
             <Icon
                 className={`logo${activeInput ? ' active-input' : ''}`}
