@@ -51,31 +51,31 @@ browser ─► Cloudflare DNS ─► router (80/443) ─► nginx ─┬─ home
                          every request is checked first by the auth server (FastAPI, 127.0.0.1:8888)
 ```
 
-All scripts are in [`cli/build-scripts`](cli/build-scripts) and can be run from anywhere. Needs Ubuntu 22.04, `node` and
-`pnpm`.
+All scripts are in [`scripts/`](scripts) (`build`, `client`, `server`) and can be run from anywhere. Needs Ubuntu 22.04,
+`node` and `pnpm`.
 
 ### Production, fresh server
 
 ```bash
-cli/build-scripts/setup-cloudflare-credentials     # Cloudflare API token (see "DNS setup" below)
-cli/build-scripts/setup-periodic-cloudflare-ddns   # DNS records follow the public IP
-cli/build-scripts/install-ssl                      # wildcard certificate for homepie.net + *.homepie.net
-cli/build-scripts/install-nginx                    # nginx + firewall
+scripts/build/setup-cloudflare-credentials     # Cloudflare API token (see "DNS setup" below)
+scripts/build/setup-periodic-cloudflare-ddns   # DNS records follow the public IP
+scripts/build/install-ssl                      # wildcard certificate for homepie.net + *.homepie.net
+scripts/build/install-nginx                    # nginx + firewall
 
-cli/build-scripts/install-auth-server              # /var/lib/homepie, python venv, encryption key
-cli/build-scripts/manage-users add <name>          # without a user nobody can log in
-cli/build-scripts/start-client-prod                # build client, install nginx config, start auth server, health check
+scripts/server/install-auth-server             # /var/lib/homepie, python venv, encryption key
+scripts/server/manage-users add <name>         # without a user nobody can log in
+scripts/client/start-client-prod               # build client, install nginx config, start auth server, health check
 ```
 
 Router: forward **TCP 80 and 443** to the server (`192.168.2.134`, pinned by `modify-netplan`).
 
-**Update** after a `git pull`: `cli/build-scripts/deploy` (or only `deploy client`, `deploy nginx`, `deploy auth`).
+**Update** after a `git pull`: `scripts/build/deploy` (or only `deploy client`, `deploy nginx`, `deploy auth`).
 
 ### Development
 
 ```bash
-cli/build-scripts/install-client        # once
-cli/build-scripts/start-client-dev      # http://localhost:5173, also starts the auth server (dev mode). Ctrl+C stops both
+scripts/client/install-client        # once
+scripts/client/start-client-dev      # http://localhost:5173, also starts the auth server (dev mode). Ctrl+C stops both
 ```
 
 Dev mode needs a user too (`manage-users add <name>`). The login works on the dev origin only, not on subdomains.
@@ -83,10 +83,10 @@ Dev mode needs a user too (`manage-users add <name>`). The login works on the de
 ### Auth server and users
 
 ```bash
-cli/build-scripts/start-auth-server --detach    # background, log: /var/lib/homepie/run/auth-server.log
-cli/build-scripts/start-auth-server             # foreground (--dev: auto-reload, cookies for plain http)
-cli/build-scripts/stop-auth-server
-cli/build-scripts/manage-users add|passwd|delete|list [name]
+scripts/server/start-auth-server --detach    # background, log: /var/lib/homepie/run/auth-server.log
+scripts/server/start-auth-server             # foreground (--dev: auto-reload, cookies for plain http)
+scripts/server/stop-auth-server
+scripts/server/manage-users add|passwd|delete|list [name]
 ```
 
 -   Nothing starts at boot. After a reboot run `start-auth-server --detach`; until then nginx answers `500`.
@@ -104,7 +104,7 @@ cli/build-scripts/manage-users add|passwd|delete|list [name]
     unauthenticated visitors are redirected to `https://homepie.net/login` (from an app with `?app=<name>`).
 -   Apps get the user in the header `X-Homepie-User` and never see the session cookie. They must listen on
     `127.0.0.1` only.
--   3 wrong passwords in a row (the 3 hearts) **delete the user**. Re-create it with `cli/build-scripts/manage-users add <name>`. Change the limit with `HOMEPIE_AUTH_MAX_FAILED_ATTEMPTS` in `.env`. Careful: anyone who knows a username can delete it this way.
+-   3 wrong passwords in a row (the 3 hearts) **delete the user**. Re-create it with `scripts/server/manage-users add <name>`. Change the limit with `HOMEPIE_AUTH_MAX_FAILED_ATTEMPTS` in `.env`. Careful: anyone who knows a username can delete it this way.
 -   5 failed logins per client lock login for 15 minutes.
 
 ### Configuration
@@ -120,7 +120,7 @@ Runtime data of every project lives in `/var/lib/<project>` (`homepie`, `lockkli
 1. Let it listen on `127.0.0.1:<port>`.
 2. Add `<name> 127.0.0.1:<port>;` to [`nginx/conf.d/00-homepie-apps.conf`](nginx/conf.d/00-homepie-apps.conf).
 3. Add a tile in [`client/src/apps/registry.ts`](client/src/apps/registry.ts).
-4. `cli/build-scripts/deploy`
+4. `scripts/build/deploy`
 
 No DNS or certificate change needed (wildcard). Unknown subdomains return `404` (after login).
 
@@ -133,13 +133,13 @@ No DNS or certificate change needed (wildcard). Unknown subdomains return `404` 
    choose **Custom DNS** and enter the two Cloudflare nameservers; disable DNSSEC. From then on all DNS records are
    managed in Cloudflare, Namecheap's redirect, parking page and Dynamic DNS no longer work.
 
-   ![Namecheap custom nameservers](cli/docs/namecheap-cloudflare-nameservers.png)
+   ![Namecheap custom nameservers](docs/namecheap-cloudflare-nameservers.png)
 
 2. **API token** (one token for DDNS and the certificate): Cloudflare → My Profile → API Tokens → Create Token →
    template **Edit zone DNS** → Zone · DNS · Edit, zone `homepie.net`. Then run `setup-cloudflare-credentials`, which
    verifies it and stores it in `/etc/homepie/cloudflare.ini` (root, mode 600). Never commit it.
 
-   ![API token settings](cli/docs/cloudflare-api-token-3.png)
+   ![API token settings](docs/cloudflare-api-token-3.png)
 
 3. **DDNS**: `setup-periodic-cloudflare-ddns` installs a systemd timer (every 5 min) that keeps the A records
    `homepie.net` and `*.homepie.net` on the current public IP (check: `sudo journalctl -u homepie-ddns.service -n 20`).

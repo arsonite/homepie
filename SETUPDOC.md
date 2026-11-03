@@ -49,5 +49,5 @@ C. Verify, from mobile data and not your home Wi-Fi
 Then open https://homepie.net in a browser. You should see the lockscreen, and after login the Lockkliye tile.
 
 Afterwards
-Start Lockkliye on 127.0.0.1:8101, or change the port in nginx/conf.d/00-homepie-apps.conf and run cli/build-scripts/deploy nginx.
+Start Lockkliye on 127.0.0.1:8101, or change the port in nginx/conf.d/00-homepie-apps.conf and run scripts/build/deploy nginx.
 If anything fails, the README's Troubleshooting section has a symptom table. If a step fails, send me the output.

@@ -70,4 +70,4 @@ fi
 
 sudo systemctl enable nginx
 
-cli/build-scripts/deploy nginx
+"$script_directory/deploy" nginx
