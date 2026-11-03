@@ -26,7 +26,7 @@ from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
 
-REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
+REPOSITORY_ROOT = Path(__file__).resolve().parents[3]
 
 # Constraints for passwords. The maximum matches the input limit of the lockscreen in the client
 # (MAX_LETTERS_PER_LINE * MAX_LINES in LoginPage.tsx), anything longer could not be typed in anyway.

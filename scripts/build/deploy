@@ -61,7 +61,7 @@ source "$repository_root/scripts/load-env"
 
 deploy_client() {
     echo "Building the client ..."
-    cd "$repository_root/client"
+    cd "$repository_root/src/client"
     pnpm install --frozen-lockfile
     # Not `pnpm build`: that runs tsc first, and the client currently has type errors that must not block a deploy
     pnpm exec vite build
@@ -76,13 +76,13 @@ deploy_client() {
 deploy_nginx() {
     echo "Installing the nginx configuration ..."
     sudo install -d -m 755 /etc/nginx/snippets
-    sudo install -m 644 nginx/snippets/*.conf /etc/nginx/snippets/
-    sudo install -m 644 nginx/conf.d/*.conf /etc/nginx/conf.d/
+    sudo install -m 644 src/nginx/snippets/*.conf /etc/nginx/snippets/
+    sudo install -m 644 src/nginx/conf.d/*.conf /etc/nginx/conf.d/
 
     # The upstream of the auth server follows HOMEPIE_AUTH_HOST/HOMEPIE_AUTH_PORT from .env
     upstream_config=$(mktemp)
     sed "s#server [^;]*; *\# homepie-auth-upstream#server ${HOMEPIE_AUTH_HOST}:${HOMEPIE_AUTH_PORT}; \# homepie-auth-upstream#" \
-        nginx/conf.d/00-homepie-auth.conf >"$upstream_config"
+        src/nginx/conf.d/00-homepie-auth.conf >"$upstream_config"
     sudo install -m 644 "$upstream_config" /etc/nginx/conf.d/00-homepie-auth.conf
     rm -f "$upstream_config"
 

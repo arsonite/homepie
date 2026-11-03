@@ -53,7 +53,7 @@ repository_root=$(cd "$script_directory/../.." && pwd)
 # shellcheck source=../load-env
 source "$repository_root/scripts/load-env"
 
-if [ ! -d "$repository_root/client/node_modules" ]; then
+if [ ! -d "$repository_root/src/client/node_modules" ]; then
     "$script_directory/install-client"
 fi
 
@@ -75,6 +75,6 @@ stop_auth_server() {
 }
 trap stop_auth_server EXIT
 
-cd "$repository_root/client"
+cd "$repository_root/src/client"
 echo "Client dev server: http://localhost:$HOMEPIE_CLIENT_DEV_PORT (login on http, cookies are not shared with subdomains)"
 VITE_PORT="$HOMEPIE_CLIENT_DEV_PORT" pnpm exec vite

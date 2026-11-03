@@ -44,6 +44,6 @@ if ! command -v pnpm >/dev/null 2>&1; then
     exit 1
 fi
 
-cd "$repository_root/client"
+cd "$repository_root/src/client"
 pnpm install --frozen-lockfile
 echo "Done."

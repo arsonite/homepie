@@ -16,7 +16,7 @@
 
 # Keeps the Cloudflare A records of homepie.net pointed at the current public IPv4 address of this server.
 # Installed to /usr/local/bin/homepie-cloudflare-ddns and run every 5 minutes by homepie-ddns.timer
-# (see build-scripts/setup-periodic-cloudflare-ddns).
+# (see scripts/build/setup-periodic-cloudflare-ddns).
 #
 # The API token is read from a certbot-style credentials file, so that certbot and this script share one token:
 #     dns_cloudflare_api_token = <token with Zone:DNS:Edit on homepie.net>
@@ -55,7 +55,7 @@ for dependency in curl jq; do
 done
 
 if [ ! -r "$CREDENTIALS_FILE" ]; then
-    log "Cannot read $CREDENTIALS_FILE. Run build-scripts/setup-cloudflare-credentials first."
+    log "Cannot read $CREDENTIALS_FILE. Run scripts/build/setup-cloudflare-credentials first."
     exit 1
 fi
 

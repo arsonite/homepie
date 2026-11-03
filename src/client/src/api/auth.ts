@@ -16,7 +16,7 @@
  */
 
 /**
- * Client for the homepie auth server (server/homepie_auth).
+ * Client for the homepie auth server (src/server/homepie_auth).
  *
  * All requests are relative to the current origin: nginx proxies /api/auth to the auth server in production and the
  * vite dev server does the same in development, so that the session cookie always belongs to the page's own origin.

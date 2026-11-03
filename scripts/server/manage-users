@@ -58,5 +58,5 @@ if [ ! -d "$HOMEPIE_SECRETS_PATH" ] || [ ! -d "$HOMEPIE_DATA_PATH" ]; then
     "$repository_root/scripts/build/setup-data-dirs" homepie
 fi
 
-cd "$repository_root/server"
+cd "$repository_root/src/server"
 exec "$HOMEPIE_VENV_PATH/bin/python" -m homepie_auth.manage "$@"

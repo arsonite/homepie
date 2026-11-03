@@ -1,0 +1,162 @@
+#!/bin/bash
+
+# Copyright (C) 2024-2025 Burak Günaydin
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+#########################################################
+#################### START CMD PARSE ####################
+#########################################################
+
+# Usage: ./entrypoint [--yes]
+auto_yes=false
+for argument in "$@"; do
+    case "$argument" in
+        --yes | -y) auto_yes=true ;;
+        *)
+            echo
+            echo "Usage: ./entrypoint [--yes]"
+            echo "    --yes  Do not ask, run every step that is on by default"
+            echo
+            exit 1
+            ;;
+    esac
+done
+
+#########################################################
+##################### END CMD PARSE #####################
+#########################################################
+
+#########################################################
+##################### SCRIPT START ######################
+#########################################################
+
+# Sets up a fresh server from start to finish by calling the other scripts one by one. Before each step you are
+# asked whether to run it, so already finished steps can be skipped. Every step can also be run on its own.
+set -uo pipefail
+
+script_directory=$(dirname "$(readlink -f "$0")")
+cd "$script_directory/.." || exit 1
+
+# Asking for sudo permissions once, before the first step
+sudo -v || exit 1
+
+executed=()
+skipped=()
+
+# step <title> <default y|n> <description> <command> [arguments...]
+step() {
+    local title="$1" default="$2" description="$3" answer prompt
+    shift 3
+
+    echo
+    echo "=== $title"
+    echo "    $description"
+
+    if [ "$default" = "y" ]; then
+        prompt="[Y/n/q]"
+    else
+        prompt="[y/N/q]"
+    fi
+
+    if [ "$auto_yes" = true ]; then
+        answer="$default"
+    else
+        read -r -p "    Run it? $prompt " answer
+        answer="${answer:-$default}"
+    fi
+
+    case "${answer,,}" in
+        y | yes) ;;
+        q | quit)
+            echo "Stopped. Run scripts/entrypoint again to continue, finished steps can be skipped."
+            exit 0
+            ;;
+        *)
+            skipped+=("$title")
+            return 0
+            ;;
+    esac
+
+    echo
+    if "$@"; then
+        executed+=("$title")
+        return 0
+    fi
+
+    echo
+    echo "Step '$title' failed."
+    if [ "$auto_yes" = true ]; then
+        exit 1
+    fi
+    read -r -p "Continue with the next step anyway? [y/N] " answer
+    if [ "${answer,,}" != "y" ]; then
+        exit 1
+    fi
+    skipped+=("$title (failed)")
+}
+
+create_first_user() {
+    local username
+    read -r -p "    Username (empty to skip): " username
+    if [ -z "$username" ]; then
+        echo "    No user created. Add one later with scripts/server/manage-users add <name>."
+        return 0
+    fi
+    scripts/server/manage-users add "$username"
+}
+
+step "Static IP" n \
+    "Pins the server to 192.168.2.134 with netplan. Only needed once, and wrong settings can lock you out of ssh." \
+    scripts/build/modify-netplan
+
+step "Cloudflare credentials" y \
+    "Stores the Cloudflare API token (DNS setup in the README)." \
+    scripts/build/setup-cloudflare-credentials
+
+step "Dynamic DNS" y \
+    "Keeps the DNS records of homepie.net and *.homepie.net on the public IP of the server." \
+    scripts/build/setup-periodic-cloudflare-ddns
+
+step "SSL certificate" y \
+    "Wildcard certificate for homepie.net and *.homepie.net (Let's Encrypt, DNS challenge via Cloudflare)." \
+    scripts/build/install-ssl
+
+step "fail2ban" y \
+    "Bans IPs with repeated failed ssh logins." \
+    scripts/build/install-fail2ban
+
+step "nginx" y \
+    "Installs nginx, opens the firewall and installs the reverse proxy configuration." \
+    scripts/build/install-nginx
+
+step "Auth server" y \
+    "Creates /var/lib/homepie, the python environment and the encryption key." \
+    scripts/server/install-auth-server
+
+step "First user" y \
+    "Without a user nobody can log in. The password is asked for next." \
+    create_first_user
+
+step "Client dependencies" y \
+    "pnpm install for the client." \
+    scripts/client/install-client
+
+step "Deploy" y \
+    "Builds and publishes the client, installs the nginx config, restarts the auth server and checks https." \
+    scripts/client/start-client-prod
+
+echo
+echo "=== Summary"
+echo "    Executed: $(IFS=,; echo "${executed[*]:-none}")"
+echo "    Skipped:  $(IFS=,; echo "${skipped[*]:-none}")"

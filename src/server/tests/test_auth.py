@@ -12,7 +12,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-"""Run with: HOMEPIE_VENV/bin/python -m pytest server/tests (needs pytest and httpx)."""
+"""Run with: HOMEPIE_VENV/bin/python -m pytest src/server/tests (needs pytest and httpx)."""
 
 import json
 from dataclasses import replace

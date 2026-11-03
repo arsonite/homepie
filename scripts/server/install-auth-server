@@ -52,10 +52,10 @@ if [ ! -x "$HOMEPIE_VENV_PATH/bin/python" ]; then
     "$python_binary" -m venv "$HOMEPIE_VENV_PATH"
 fi
 "$HOMEPIE_VENV_PATH/bin/python" -m pip install --quiet --upgrade pip
-"$HOMEPIE_VENV_PATH/bin/python" -m pip install --quiet -r "$repository_root/server/requirements/auth.txt"
+"$HOMEPIE_VENV_PATH/bin/python" -m pip install --quiet -r "$repository_root/src/server/requirements/auth.txt"
 
 echo "Creating the encryption key for the user database ..."
-cd "$repository_root/server"
+cd "$repository_root/src/server"
 "$HOMEPIE_VENV_PATH/bin/python" -m homepie_auth.manage init
 
 echo

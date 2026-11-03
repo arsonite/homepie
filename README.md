@@ -45,9 +45,9 @@
 ## Deployment
 
 ```
-browser ─► Cloudflare DNS ─► router (80/443) ─► nginx ─┬─ homepie.net           landing page (client/build)
+browser ─► Cloudflare DNS ─► router (80/443) ─► nginx ─┬─ homepie.net           landing page (src/client/build)
                                                        ├─ lockkliye.homepie.net ─► 127.0.0.1:8101
-                                                       └─ <app>.homepie.net     ─► see nginx/conf.d/00-homepie-apps.conf
+                                                       └─ <app>.homepie.net     ─► see src/nginx/conf.d/00-homepie-apps.conf
                          every request is checked first by the auth server (FastAPI, 127.0.0.1:8888)
 ```
 
@@ -55,6 +55,12 @@ All scripts are in [`scripts/`](scripts) (`build`, `client`, `server`) and can b
 `node` and `pnpm`.
 
 ### Production, fresh server
+
+```bash
+scripts/entrypoint     # runs all steps below one by one and asks before each, so you can skip finished ones
+```
+
+Or run the steps yourself:
 
 ```bash
 scripts/build/setup-cloudflare-credentials     # Cloudflare API token (see "DNS setup" below)
@@ -93,7 +99,7 @@ scripts/server/manage-users add|passwd|delete|list [name]
 -   User changes apply immediately. Changing a password logs that user out everywhere.
 -   Users live in `/var/lib/homepie/users.json` (scrypt hashes, additionally encrypted with
     `/var/lib/homepie/secrets/users.key`). **Back up that key**, without it the users are unreadable.
--   Tests: `pip install -r server/requirements/auth-test.txt && python -m pytest server`.
+-   Tests: `pip install -r src/server/requirements/auth-test.txt && python -m pytest src/server`.
 
 ### How the login works
 
@@ -118,8 +124,8 @@ Runtime data of every project lives in `/var/lib/<project>` (`homepie`, `lockkli
 ### Adding an app
 
 1. Let it listen on `127.0.0.1:<port>`.
-2. Add `<name> 127.0.0.1:<port>;` to [`nginx/conf.d/00-homepie-apps.conf`](nginx/conf.d/00-homepie-apps.conf).
-3. Add a tile in [`client/src/apps/registry.ts`](client/src/apps/registry.ts).
+2. Add `<name> 127.0.0.1:<port>;` to [`src/nginx/conf.d/00-homepie-apps.conf`](src/nginx/conf.d/00-homepie-apps.conf).
+3. Add a tile in [`src/client/src/apps/registry.ts`](src/client/src/apps/registry.ts).
 4. `scripts/build/deploy`
 
 No DNS or certificate change needed (wildcard). Unknown subdomains return `404` (after login).

@@ -76,12 +76,12 @@ fi
 
 if [ "$development" = true ]; then
     export HOMEPIE_AUTH_DEV=1
-    server_arguments=(--reload --reload-dir "$repository_root/server")
+    server_arguments=(--reload --reload-dir "$repository_root/src/server")
 else
     server_arguments=(--no-server-header)
 fi
 
-cd "$repository_root/server"
+cd "$repository_root/src/server"
 command=("$HOMEPIE_VENV_PATH/bin/python" -m uvicorn --factory homepie_auth.app:create_app
     --host "$HOMEPIE_AUTH_HOST" --port "$HOMEPIE_AUTH_PORT" "${server_arguments[@]}")
 

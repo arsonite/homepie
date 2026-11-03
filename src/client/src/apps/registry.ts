@@ -22,7 +22,7 @@ const BASE_DOMAIN = 'homepie.net';
 
 /**
  * An app that runs on its own subdomain and is reverse-proxied by nginx.
- * Every app listed here also needs a line in nginx/conf.d/00-homepie-apps.conf.
+ * Every app listed here also needs a line in src/nginx/conf.d/00-homepie-apps.conf.
  */
 interface ExternalApp {
     readonly description: string;
