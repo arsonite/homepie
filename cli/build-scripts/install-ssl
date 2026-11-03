@@ -49,14 +49,20 @@ fi
 # Install Certbot and its Cloudflare DNS plugin
 sudo apt-get install -y certbot python3-certbot-dns-cloudflare
 
-# Obtain the wildcard certificate
-sudo certbot certonly \
-    --dns-cloudflare \
-    --dns-cloudflare-credentials /etc/homepie/cloudflare.ini \
-    --dns-cloudflare-propagation-seconds 30 \
-    --cert-name homepie.net \
-    -d homepie.net \
-    -d '*.homepie.net'
+# Obtain the wildcard certificate. An older certificate for the same name without the wildcard (e.g. from the former
+# HTTP-01 setup) is not replaced by certbot on its own, so check what the current one covers.
+if sudo openssl x509 -in /etc/letsencrypt/live/homepie.net/fullchain.pem -noout -ext subjectAltName 2> /dev/null | grep -q '\*\.homepie\.net'; then
+    echo "Wildcard certificate already present, nothing to issue."
+else
+    sudo certbot certonly \
+        --dns-cloudflare \
+        --dns-cloudflare-credentials /etc/homepie/cloudflare.ini \
+        --dns-cloudflare-propagation-seconds 30 \
+        --cert-name homepie.net \
+        --force-renewal \
+        -d homepie.net \
+        -d '*.homepie.net'
+fi
 
 # Reload nginx whenever the certificate was renewed, so that it serves the new one
 sudo install -d /etc/letsencrypt/renewal-hooks/deploy

@@ -34,8 +34,6 @@
 
 -   [![React][React.js]][React-url]
 -   [![TypeScript][TypeScript]][TypeScript-url]
--   [![Django][django]][django-url]
--   [![PostgreSQL][PostgreSQL]][PostgreSQL-url]
 -   [![Redis][redis]][redis-url]
 -   [![Celery][celery]][celery-url]
 -   nginx (reverse proxy), Cloudflare (DNS), Let's Encrypt (TLS)
@@ -279,6 +277,9 @@ Common symptoms afterwards:
 | Certificate warning                      | Wildcard certificate not issued, or `install-ssl` not run                   |
 | Cloudflare error 521/525/526             | Proxied record while nginx is down, or SSL mode is not **Full (strict)**    |
 | `502 Bad Gateway` on `<app>.homepie.net` | The app is not running on the port from `00-homepie-apps.conf`              |
+| Works on mobile data, not at home        | Router without NAT loopback. Add `192.168.2.134 homepie.net lockkliye.homepie.net` to the hosts file of the PC, or a local DNS override on the router |
+| `https://192.168.2.134` closes the connection | Intended: nginx only answers for `homepie.net` and its subdomains (`return 444` for anything else) |
+| Certificate warning on `<app>.homepie.net` only | Certificate lacks `*.homepie.net`. Run `install-ssl` again, it replaces a non-wildcard certificate |
 | `404` on `<app>.homepie.net`             | The subdomain is missing in `00-homepie-apps.conf`                          |
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
@@ -324,10 +325,6 @@ Project Link: [https://github.com/arsonite/homepie](https://github.com/arsonite/
 [React-url]: https://reactjs.org/
 [TypeScript]: https://img.shields.io/badge/TypeScript-20232A?style=for-the-badge&logo=typescript&logoColor=3178C6
 [TypeScript-url]: https://www.typescriptlang.org/
-[django]: https://img.shields.io/badge/Django-092E20?style=for-the-badge&logo=django&logoColor=EEEEEE
-[django-url]: https://www.djangoproject.com/
-[PostgreSQL]: https://img.shields.io/badge/PostgreSQL-EEEEEE?style=for-the-badge&logo=postgresql&logoColor=4169E1
-[PostgreSQL-url]: https://www.postgresql.org/
 [redis]: https://img.shields.io/badge/redis-DC382D?style=for-the-badge&logo=redis&logoColor=EEEEEE
 [redis-url]: https://redis.io/de/
 [Celery]: https://img.shields.io/badge/Celery-37814A?style=for-the-badge&logo=celery&logoColor=EEEEEE
