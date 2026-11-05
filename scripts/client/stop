@@ -14,41 +14,48 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-# From-as package imports
-from teatype.cli import Stop as StopCLI
+# System imports
+import os
 
-class Stop(StopCLI):
+try:
+    # From package imports
+    from teatype.cli import BaseStopCLI
+    from teatype.io import shell
+except:
+    print()
+    print('Error: The "teatype" package is required to run this script.')
+    print()
+    exit(1)
+
+class Stop(BaseStopCLI):
     """
-    The Stop class extends the StopCLI class to provide additional functionality
-    specific to the homepie client scripts. It modifies command-line flags and
-    pre-execution behavior.
+    Stops the development server of the client. Production is static files served by nginx,
+    which keeps running for the other apps (stop it with "sudo systemctl stop nginx").
     """
     def modified_meta(self):
-        """
-        Modifies the metadata for command-line flags by adding a new flag for environment selection.
-
-        Returns:
-            dict: A dictionary containing the updated flags configuration.
-        """
         return {
             'flags': [
                 {
-                    'short': 'e',
-                    'long': 'env',
-                    'help': 'Environment to consider',
-                    'options': ['dev', 'prod'],
-                    'required': True
+                    'shorthand': 'a',
+                    'name': 'auth',
+                    'help': 'Also stop the auth server (it keeps running after a detached start)',
+                    'required': False
                 }
             ]
         }
         
+    #########
+    # Hooks #
+    #########
+    
+    def load_script(self, *args, **kwargs):
+        # Runs before the early exit of the base class for the case that the dev server is already down
+        if self.get_flag('auth'):
+            shell(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'server', 'stop'))
+        return super().load_script(*args, **kwargs)
+        
     def pre_execute(self):
-        """
-        Executes actions before the main execution of the Stop command.
-        Sets specific flags to control the behavior of the stop process.
-        """
-        self.set_flag('sleep', 0.25) # Sets a sleep duration of 0.25 seconds before stopping
+        self.set_flag('sleep', 0.25)
 
-# Entry point of the script when executed from the command line
 if __name__ == '__main__':
     Stop()

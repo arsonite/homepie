@@ -1,0 +1,169 @@
+#!/usr/bin/env python3.11
+
+# Copyright (C) 2024-2025 Burak Günaydin
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+# System imports
+import os
+import shlex
+import shutil
+import subprocess
+import urllib.request
+
+try:
+    # From package imports
+    from teatype.cli import BaseStartCLI
+    from teatype.io import enable_sudo, shell
+    from teatype.logging import *
+except:
+    print()
+    print('Error: The "teatype" package is required to run this script.')
+    print()
+    print('Activate the teatype environment and try to run the script again:')
+    print('     $ source /usr/local/src/teatype/teatype-venv/bin/activate')
+    print()
+    exit(1)
+
+class Start(BaseStartCLI):
+    """
+    Starts the client in development (vite dev server, plus the auth server in development mode) or in
+    production (build, publish and nginx, see start-client-prod).
+    """
+    # The dev server only gets the privileged port on request, nginx usually owns it
+    PRIVILEGED_PORT = 443
+    
+    def modified_meta(self):
+        return {
+            'flags': [
+                {
+                    'shorthand': 'e',
+                    'name': 'env',
+                    'help': 'Environment to consider',
+                    'options': ['dev', 'prod'],
+                    'required': True
+                },
+                {
+                    'shorthand': 'hp',
+                    'name': 'https-port',
+                    'help': f'Serve the dev server on port {self.PRIVILEGED_PORT} (grants node the low-port capability, nginx must not be using it)',
+                    'required': False
+                },
+                {
+                    'shorthand': 'na',
+                    'name': 'no-auth',
+                    'help': 'Do not start the auth server alongside the dev server',
+                    'required': False
+                },
+                {
+                    'shorthand': 'p',
+                    'name': 'port',
+                    'help': 'Port of the dev server (HOMEPIE_CLIENT_DEV_PORT by default)',
+                    'options': int,
+                    'required': False
+                }
+            ]
+        }
+        
+    ###########
+    # Helpers #
+    ###########
+        
+    def _load_homepie_env(self, repository_root:str):
+        """
+        Loads the variables of the root .env (with the defaults of .env.template) the same way the bash scripts do.
+        """
+        # load-env reports to stdout, so the environment is read from a separate descriptor
+        command = f'repository_root={shlex.quote(repository_root)}; source "$repository_root/scripts/load-env" >&2; env -0'
+        output = subprocess.run(['bash', '-c', command], capture_output=True, text=True, check=True).stdout
+        for entry in output.split('\0'):
+            key, _, value = entry.partition('=')
+            if key.startswith('HOMEPIE_'):
+                os.environ.setdefault(key, value)
+                
+    def _auth_server_is_running(self) -> bool:
+        url = f'http://{os.environ["HOMEPIE_AUTH_HOST"]}:{os.environ["HOMEPIE_AUTH_PORT"]}/api/auth/health'
+        try:
+            with urllib.request.urlopen(url, timeout=2):
+                return True
+        except OSError:
+            return False
+        
+    #########
+    # Hooks #
+    #########
+        
+    def implemented_trap(self):
+        """
+        Define actions to perform when the script is interrupted by a signal.
+        """
+        # Only stop what this script started, the auth server may be used by something else
+        if getattr(self, '_started_auth_server', False):
+            shell(f'{self._scripts_directory}/../server/stop', mute=True)
+            
+    def pre_execute(self):
+        """
+        Define actions to perform before executing the main start command.
+        """
+        self._scripts_directory = os.path.dirname(os.path.realpath(__file__))
+        repository_root = os.path.abspath(os.path.join(self._scripts_directory, '..', '..'))
+        client_root = os.path.join(repository_root, 'src', 'client')
+        # The start command runs from the client, which also holds its .env
+        self.parent_path = client_root
+        self._load_homepie_env(repository_root)
+        
+        env = self.get_flag('env')
+        self.process_name = f'homepie-client-{env}'
+        
+        if env == 'prod':
+            if self.get_flag('port') or self.get_flag('https-port'):
+                warn('The port flags only apply to the development server, nginx serves production on its configured ports.')
+            
+            log('Running in production mode')
+            enable_sudo()
+            self.start_command = os.path.join(self._scripts_directory, 'start-client-prod')
+            return
+        
+        log('Running in development mode')
+        
+        if self.get_flag('https-port') and self.get_flag('port'):
+            err('Use either "--https-port" or "--port", not both.', exit=True)
+            
+        if not os.path.isdir(os.path.join(client_root, 'node_modules')):
+            log('Installing the client dependencies')
+            shell(os.path.join(self._scripts_directory, 'install'))
+            
+        port = os.environ['HOMEPIE_CLIENT_DEV_PORT']
+        if self.get_flag('https-port'):
+            port = str(self.PRIVILEGED_PORT)
+            enable_sudo()
+            node_path = os.path.realpath(shutil.which('node'))
+            shell(f'setcap "cap_net_bind_service=+ep" {node_path}', mute=True, sudo=True)
+        elif self.get_flag('port'):
+            port = str(self.get_flag('port'))
+            
+        if not self.get_flag('no-auth'):
+            if self._auth_server_is_running():
+                log('The auth server is already running, using it')
+                hint('If it was started without "--dev", its Secure cookies are rejected on http://, so login will not work here.')
+            else:
+                log('Starting the auth server in development mode')
+                shell(f'{self._scripts_directory}/../server/start --dev --detach')
+                self._started_auth_server = True
+        
+        # vite never falls back to another port, the https flag would silently end up somewhere else otherwise
+        self.start_command = f'{client_root}/node_modules/.bin/vite --port {port} --strictPort'
+        log(f'Client dev server: {port}')
+
+if __name__ == '__main__':
+    Start()
