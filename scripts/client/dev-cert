@@ -1,0 +1,49 @@
+#!/bin/bash
+
+# Copyright (C) 2024-2025 Burak Günaydin
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+# Lets the dev server on port 443 present the same Let's Encrypt certificate as nginx (used by "start --https-port").
+# The key in /etc/letsencrypt is root-only, so the dev server (running as your user) gets a private copy.
+#   dev-cert prepare   copies the certificate into $HOMEPIE_SECRETS_PATH/dev-ssl and prints "<cert> <key>",
+#                      prints nothing (and exits 0) if there is no certificate
+#   dev-cert remove    deletes the copy again
+set -euo pipefail
+
+script_directory=$(dirname "$(readlink -f "$0")")
+repository_root=$(cd "$script_directory/../.." && pwd)
+# shellcheck source=../load-env
+source "$repository_root/scripts/load-env" >&2
+
+live_directory="/etc/letsencrypt/live/$HOMEPIE_DOMAIN"
+copy_directory="$HOMEPIE_SECRETS_PATH/dev-ssl"
+
+case "${1:-}" in
+    prepare)
+        if ! sudo test -r "$live_directory/fullchain.pem"; then
+            exit 0
+        fi
+        install -d -m 700 "$copy_directory"
+        sudo cat "$live_directory/fullchain.pem" >"$copy_directory/fullchain.pem"
+        (umask 077 && sudo cat "$live_directory/privkey.pem" >"$copy_directory/privkey.pem")
+        echo "$copy_directory/fullchain.pem $copy_directory/privkey.pem"
+        ;;
+    remove)
+        rm -rf "$copy_directory"
+        ;;
+    *)
+        echo "Usage: dev-cert prepare|remove" >&2
+        exit 1
+        ;;
+esac

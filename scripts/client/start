@@ -107,6 +107,19 @@ class Start(BaseStartCLI):
             err(f'Port {self.PRIVILEGED_PORT} is in use by nginx, stop it or start without "--https-port".', exit=True)
         shell(f'{self._scripts_directory}/dev-nginx pause')
         
+    def _use_nginx_certificate(self):
+        """
+        Serves the dev server with the certificate nginx uses for the domain, otherwise Cloudflare (Full strict)
+        and browsers reject the plain http it would answer with on port 443.
+        """
+        output = subprocess.run([os.path.join(self._scripts_directory, 'dev-cert'), 'prepare'],
+                                stdout=subprocess.PIPE, text=True, check=True).stdout.split()
+        if len(output) != 2:
+            warn('No Let\'s Encrypt certificate found (scripts/build/install-ssl), the dev server answers with plain http.')
+            return
+        os.environ['VITE_SSL_CERT_PATH'], os.environ['VITE_SSL_KEY_PATH'] = output
+        log('Using the certificate of nginx')
+        
     #########
     # Hooks #
     #########
@@ -117,6 +130,7 @@ class Start(BaseStartCLI):
         """
         # Gives port 443 back, a detached dev server does this in "stop" instead
         shell(f'{self._scripts_directory}/dev-nginx resume')
+        shell(f'{self._scripts_directory}/dev-cert remove')
         
         # Only stop what this script started, the auth server may be used by something else
         if getattr(self, '_started_auth_server', False):
@@ -163,6 +177,7 @@ class Start(BaseStartCLI):
             node_path = os.path.realpath(shutil.which('node'))
             shell(f'setcap "cap_net_bind_service=+ep" {node_path}', mute=True, sudo=True)
             self._pause_nginx()
+            self._use_nginx_certificate()
         elif self.get_flag('port'):
             port = str(self.get_flag('port'))
             

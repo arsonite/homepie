@@ -49,7 +49,10 @@ class Stop(BaseStopCLI):
         }
         
     def _resume_nginx(self):
-        shell(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'dev-nginx') + ' resume')
+        directory = os.path.dirname(os.path.realpath(__file__))
+        shell(os.path.join(directory, 'dev-nginx') + ' resume')
+        # Copy of the certificate that "start --https-port" made for the dev server
+        shell(os.path.join(directory, 'dev-cert') + ' remove')
         
     #########
     # Hooks #
