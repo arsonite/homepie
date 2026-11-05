@@ -30,7 +30,7 @@ interface AppTileProps {
 }
 
 /**
- * Clickable tile that navigates to an app on its own subdomain.
+ * Clickable tile that navigates to an app under /<name>/.
  */
 const AppTile: React.FC<AppTileProps> = ({ app, onHover }: AppTileProps): JSX.Element => {
     const style = { '--app-from': app.gradient[0], '--app-to': app.gradient[1] } as React.CSSProperties;

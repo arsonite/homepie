@@ -56,7 +56,7 @@ const getSession = async (): Promise<string | null> => {
 };
 
 /**
- * Logs in and thereby sets the session cookie (valid for all subdomains).
+ * Logs in and thereby sets the session cookie (valid for all of homepie.net).
  *
  * @throws {AuthError} If the credentials are wrong, there were too many attempts or the server cannot be reached.
  * @returns The name of the logged-in user.

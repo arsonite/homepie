@@ -16,12 +16,8 @@
  */
 
 /**
- * Base domain that all apps are published under, e.g. https://lockkliye.homepie.net
- */
-const BASE_DOMAIN = 'homepie.net';
-
-/**
- * An app that runs on its own subdomain and is reverse-proxied by nginx.
+ * An app that is reverse-proxied by nginx under https://homepie.net/<name>/, so it stays on the same origin as the
+ * hub (a subdomain would leave the fullscreen home screen app on iOS).
  * Every app listed here also needs a line in src/nginx/conf.d/00-homepie-apps.conf.
  */
 interface ExternalApp {
@@ -29,8 +25,8 @@ interface ExternalApp {
     readonly displayName: string;
     /** Two 6-digit hex colors, used for the tile, the hover letter and the Hub background. */
     readonly gradient: readonly [string, string];
+    /** Path segment of the app, the same as in 00-homepie-apps.conf. */
     readonly name: string;
-    readonly subdomain: string;
 }
 
 const EXTERNAL_APPS: readonly ExternalApp[] = [
@@ -39,11 +35,10 @@ const EXTERNAL_APPS: readonly ExternalApp[] = [
         displayName: 'Lockkliye',
         gradient: ['#7a5cff', '#2fc4ff'],
         name: 'lockkliye',
-        subdomain: 'lockkliye',
     },
 ];
 
-const getExternalAppUrl = (app: ExternalApp): string => `https://${app.subdomain}.${BASE_DOMAIN}`;
+const getExternalAppUrl = (app: ExternalApp): string => `/${app.name}/`;
 
 export { EXTERNAL_APPS, getExternalAppUrl };
 export type { ExternalApp };

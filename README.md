@@ -46,8 +46,8 @@
 
 ```
 browser ─► Cloudflare DNS ─► router (80/443) ─► nginx ─┬─ homepie.net           landing page (src/client/build)
-                                                       ├─ lockkliye.homepie.net ─► 127.0.0.1:8101
-                                                       └─ <app>.homepie.net     ─► see src/nginx/conf.d/00-homepie-apps.conf
+                                                       ├─ homepie.net/lockkliye/ ─► 127.0.0.1:8101
+                                                       └─ homepie.net/<app>/     ─► see src/nginx/conf.d/00-homepie-apps.conf
                          every request is checked first by the auth server (FastAPI, 127.0.0.1:8888)
 ```
 
@@ -89,7 +89,7 @@ scripts/client/stop                       # stops a detached (--detached) dev se
 
 The start and stop scripts need the teatype environment (`source /usr/local/src/teatype/teatype-venv/bin/activate`).
 
-Dev mode needs a user too (`manage-users add <name>`). The login works on the dev origin only, not on subdomains.
+Dev mode needs a user too (`manage-users add <name>`). The login works on the dev origin only, not on the apps.
 
 ### Auth server and users
 
@@ -132,12 +132,13 @@ Runtime data of every project lives in `/var/lib/<project>` (`homepie`, `lockkli
 
 ### Adding an app
 
-1. Let it listen on `127.0.0.1:<port>`.
+1. Let it listen on `127.0.0.1:<port>` and build it for the base path `/<name>/` (vite: `base: '/<name>/'`).
 2. Add `<name> 127.0.0.1:<port>;` to [`src/nginx/conf.d/00-homepie-apps.conf`](src/nginx/conf.d/00-homepie-apps.conf).
 3. Add a tile in [`src/client/src/apps/registry.ts`](src/client/src/apps/registry.ts).
 4. `scripts/build/deploy`
 
-No DNS or certificate change needed (wildcard). Unknown subdomains return `404` (after login).
+No DNS or certificate change needed. Apps share the origin of the hub on purpose: tapping a tile then stays inside the
+fullscreen home screen app on iOS, which a subdomain would leave.
 
 ### DNS setup (once)
 
@@ -181,7 +182,7 @@ Not reachable at all? Check in this order, the first failing step is the problem
 | 4 | `systemctl status nginx`, `sudo nginx -t`                          | active, syntax ok                        |
 
 Many routers have no NAT loopback, so inside the home network the domain may fail although everything works: add
-`192.168.2.134 homepie.net lockkliye.homepie.net` to the hosts file or set a local DNS override. If the router's WAN IP
+`192.168.2.134 homepie.net` to the hosts file or set a local DNS override. If the router's WAN IP
 differs from the public IP (CGNAT), port forwarding cannot work, use a Cloudflare Tunnel.
 
 | Symptom                                   | Cause                                                                              |
@@ -197,8 +198,8 @@ differs from the public IP (CGNAT), port forwarding cannot work, use a Cloudflar
 | Login always fails                        | No user yet (`manage-users list`), or a prod-mode auth server used with `client/start --env dev` |
 | Asked to log in again on every subdomain  | Auth server was started with `--dev`, or `HOMEPIE_AUTH_COOKIE_DOMAIN` is not `.homepie.net` |
 | `429` on login                            | Too many failed attempts, wait 15 minutes                                          |
-| `502` on `<app>.homepie.net`              | The app is not running on the port from `00-homepie-apps.conf`                     |
-| `404` on `<app>.homepie.net`              | Subdomain missing in `00-homepie-apps.conf`                                        |
+| `502` on `homepie.net/<app>/`             | The app is not running on the port from `00-homepie-apps.conf`                     |
+| Hub shown instead of the app              | App missing in `00-homepie-apps.conf` (or nginx not reloaded)                      |
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 

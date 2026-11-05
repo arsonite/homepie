@@ -39,7 +39,7 @@ import './_style/Platform.scss';
 
 /**
  * Where an authenticated user ends up on /login: back at the app that sent them here (`?app=<name>`, set by nginx
- * for unauthenticated requests to a subdomain) or else on the hub. Only apps from the registry are accepted, so
+ * for unauthenticated requests to an app path) or else on the hub. Only apps from the registry are accepted, so
  * that /login cannot be abused as an open redirect.
  */
 const PostLoginRedirect: React.FC = (): JSX.Element => {
