@@ -117,7 +117,8 @@ class Start(BaseStartCLI):
         if len(output) != 2:
             warn('No Let\'s Encrypt certificate found (scripts/build/install-ssl), the dev server answers with plain http.')
             return
-        os.environ['VITE_SSL_CERT_PATH'], os.environ['VITE_SSL_KEY_PATH'] = output
+        # Not os.environ, the base class loads the client's .env afterwards, which still lists the old self-signed certificate
+        self._ssl_command_prefix = f'VITE_SSL_CERT_PATH={shlex.quote(output[0])} VITE_SSL_KEY_PATH={shlex.quote(output[1])} '
         log('Using the certificate of nginx')
         
     #########
@@ -191,7 +192,7 @@ class Start(BaseStartCLI):
                 self._started_auth_server = True
         
         # vite never falls back to another port, the https flag would silently end up somewhere else otherwise
-        self.start_command = f'{client_root}/node_modules/.bin/vite --port {port} --strictPort'
+        self.start_command = f'{getattr(self, "_ssl_command_prefix", "")}{client_root}/node_modules/.bin/vite --port {port} --strictPort'
         log(f'Client dev server: {port}')
 
 if __name__ == '__main__':

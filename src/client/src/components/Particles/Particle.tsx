@@ -19,6 +19,7 @@ interface ParticleEffect {
     bulge: { active: boolean; maxPush: number; radius: number; x: number; y: number };
     ctx: CanvasRenderingContext2D;
     gap: number;
+    now: number;
     mouse1: { x: number; y: number; radius: number };
     mouse2: { x: number; y: number; radius: number };
 }
@@ -39,6 +40,7 @@ class Particle {
     effect: ParticleEffect; // Reference to the parent effect
     letterAmount: number; // 0 = plain dot, 1 = fully part of the hovered app's letter
     letterColor: string; // Color of the dot while it is part of the letter
+    letterDepth: number; // 0 at the edge of the letter to 1 in the middle of a stroke, the middle swells the most
     letterRate: number; // How fast this dot moves into and out of the letter
     letterTarget: number; // 1 if the dot belongs to the letter, otherwise 0
     ease: number; // Ease factor for smooth movement
@@ -84,6 +86,7 @@ class Particle {
         this.force = 0; // Initialize force applied to the particle
         this.letterAmount = 0;
         this.letterColor = 'white';
+        this.letterDepth = 0;
         this.letterRate = 0.05 + Math.random() * 0.1; // Varied, so the letter assembles organically
         this.letterTarget = 0;
         this.originX = x; // Set the original x-coordinate
@@ -109,12 +112,27 @@ class Particle {
         this.ctx.fillRect(this.x, this.y, this.size, this.size);
 
         if (letter > 0.01) {
-            // Letter dots grow and rise up-left, which reads as being lifted off the grid
-            const size = this.size + (this.effect.gap * 0.7 - this.size) * letter;
-            const lift = this.effect.gap * 0.25 * letter;
+            // Dome profile: dots in the middle of a stroke swell and rise higher than the ones at its edge,
+            // and the whole letter breathes slowly
+            const gap = this.effect.gap;
+            const breathing = 1 + 0.06 * Math.sin(this.effect.now / 450 + (this.originX + this.originY) / (gap * 6));
+            const swell = letter * (0.35 + 0.65 * this.letterDepth) * breathing;
+            const size = this.size + (gap * 0.95 - this.size) * swell;
+            const lift = gap * 0.7 * swell;
+
+            // Shadow on the grid below the lifted dot
+            this.ctx.fillStyle = '#000';
+            this.ctx.globalAlpha = 0.35 * letter;
+            this.ctx.fillRect(this.x + gap * 0.15, this.y + gap * 0.15, size, size);
+
             this.ctx.fillStyle = this.letterColor;
             this.ctx.globalAlpha = letter;
             this.ctx.fillRect(this.x - lift, this.y - lift, size, size);
+
+            // Highlight on the top edge, which makes the swell read as a surface
+            this.ctx.fillStyle = '#fff';
+            this.ctx.globalAlpha = 0.25 * letter * this.letterDepth;
+            this.ctx.fillRect(this.x - lift, this.y - lift, size, size * 0.3);
         }
 
         this.ctx.globalAlpha = 1; // Reset the alpha transparency

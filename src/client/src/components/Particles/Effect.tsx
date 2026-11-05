@@ -29,6 +29,7 @@ const parseHexColor = (hex: string): number[] => {
 class Effect {
     activeInput: boolean; // Flag to indicate if the input is active
     bulge: { active: boolean; maxPush: number; radius: number; x: number; y: number }; // Subtle bulge around the cursor
+    now: number = 0; // Timestamp of the current frame, drives the breathing of the letter
     letter: string | null = null; // Letter the particles currently form
     letterColors: readonly [string, string] = ['#ffffff', '#ffffff']; // Gradient of the letter
     ctx: CanvasRenderingContext2D; // Canvas rendering context
@@ -186,11 +187,38 @@ class Effect {
         maskContext.fillText(this.letter, columns / 2, rows / 2);
         const pixels = maskContext.getImageData(0, 0, columns, rows).data;
 
-        const isInLetter = (particle: Particle) => {
-            const column = Math.round(particle.originX / this.gap);
-            const row = Math.round(particle.originY / this.gap);
-            return column < columns && row < rows && pixels[(row * columns + column) * 4 + 3] > 128;
-        };
+        const filled = (column: number, row: number) =>
+            column >= 0 && column < columns && row >= 0 && row < rows && pixels[(row * columns + column) * 4 + 3] > 128;
+        const isInLetter = (particle: Particle) =>
+            filled(Math.round(particle.originX / this.gap), Math.round(particle.originY / this.gap));
+
+        // Distance of every filled cell to the edge of the letter (two-pass city-block transform)
+        const depth = new Float32Array(columns * rows);
+        const depthAt = (column: number, row: number) =>
+            column < 0 || column >= columns || row < 0 || row >= rows ? 0 : depth[row * columns + column];
+        for (let row = 0; row < rows; row++) {
+            for (let column = 0; column < columns; column++) {
+                if (filled(column, row)) {
+                    depth[row * columns + column] = Math.min(depthAt(column - 1, row), depthAt(column, row - 1)) + 1;
+                }
+            }
+        }
+        let maxDepth = 1;
+        for (let row = rows - 1; row >= 0; row--) {
+            for (let column = columns - 1; column >= 0; column--) {
+                if (!filled(column, row)) continue;
+                const index = row * columns + column;
+                const value = Math.min(
+                    depth[index],
+                    (column + 1 < columns ? depthAt(column + 1, row) : 0) + 1,
+                    (row + 1 < rows ? depthAt(column, row + 1) : 0) + 1
+                );
+                depth[index] = value;
+                maxDepth = Math.max(maxDepth, value);
+            }
+        }
+        // Cap, so that thick strokes plateau instead of only the very center swelling
+        const depthRange = Math.min(maxDepth, 3);
 
         let minX = Infinity;
         let maxX = -Infinity;
@@ -208,6 +236,9 @@ class Effect {
         for (const particle of this.particlesArray) {
             particle.letterTarget = isInLetter(particle) ? 1 : 0;
             if (!particle.letterTarget) continue;
+
+            const cell = Math.round(particle.originY / this.gap) * columns + Math.round(particle.originX / this.gap);
+            particle.letterDepth = Math.min(depth[cell] / depthRange, 1);
 
             // Diagonal gradient across the letter
             const t = ((particle.originX - minX) / (maxX - minX || 1) + (particle.originY - minY) / (maxY - minY || 1)) / 2;
@@ -281,6 +312,8 @@ class Effect {
      * Clears the canvas and then updates each particle's position and appearance.
      */
     update() {
+        this.now = performance.now();
+
         // Clear the entire canvas to prepare for the next frame
         this.ctx.clearRect(0, 0, this.width, this.height);
 
