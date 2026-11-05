@@ -168,7 +168,11 @@ class Effect {
      */
     private applyLetter() {
         if (!this.letter) {
-            for (const particle of this.particlesArray) particle.letterTarget = 0;
+            for (const particle of this.particlesArray) {
+                particle.letterTarget = 0;
+                particle.haloTargetX = 0;
+                particle.haloTargetY = 0;
+            }
             return;
         }
 
@@ -235,7 +239,12 @@ class Effect {
         const [from, to] = this.letterColors.map(parseHexColor);
         for (const particle of this.particlesArray) {
             particle.letterTarget = isInLetter(particle) ? 1 : 0;
-            if (!particle.letterTarget) continue;
+            particle.haloTargetX = 0;
+            particle.haloTargetY = 0;
+            if (!particle.letterTarget) {
+                this.applyHalo(particle, filled);
+                continue;
+            }
 
             const cell = Math.round(particle.originY / this.gap) * columns + Math.round(particle.originX / this.gap);
             particle.letterDepth = Math.min(depth[cell] / depthRange, 1);
@@ -245,6 +254,34 @@ class Effect {
             const [r, g, b] = from.map((channel, index) => Math.round(channel + (to[index] - channel) * t));
             particle.letterColor = `rgb(${r}, ${g}, ${b})`;
         }
+    }
+
+    /**
+     * Pushes a dot next to the letter away from it, so that the grid bulges around the raised letter.
+     */
+    private applyHalo(particle: Particle, filled: (column: number, row: number) => boolean) {
+        const reach = 3; // In grid cells
+        const column = Math.round(particle.originX / this.gap);
+        const row = Math.round(particle.originY / this.gap);
+
+        let pushX = 0;
+        let pushY = 0;
+        for (let dy = -reach; dy <= reach; dy++) {
+            for (let dx = -reach; dx <= reach; dx++) {
+                const distance = Math.hypot(dx, dy);
+                if (distance === 0 || distance > reach || !filled(column + dx, row + dy)) continue;
+                // Letter cells pull the push away from themselves, the closer the stronger
+                const weight = (1 - distance / (reach + 1)) / distance;
+                pushX -= dx * weight;
+                pushY -= dy * weight;
+            }
+        }
+
+        const length = Math.hypot(pushX, pushY);
+        if (length === 0) return;
+        const strength = Math.min(length / 2, 1) * this.gap * 1.1;
+        particle.haloTargetX = (pushX / length) * strength;
+        particle.haloTargetY = (pushY / length) * strength;
     }
 
     /**

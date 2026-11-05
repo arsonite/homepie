@@ -40,6 +40,10 @@ class Particle {
     effect: ParticleEffect; // Reference to the parent effect
     letterAmount: number; // 0 = plain dot, 1 = fully part of the hovered app's letter
     letterColor: string; // Color of the dot while it is part of the letter
+    haloTargetX: number; // Where the letter pushes this dot to, if it is next to it (the grid bulges around the letter)
+    haloTargetY: number;
+    haloX: number; // Current (eased) offset from the resting position
+    haloY: number;
     letterDepth: number; // 0 at the edge of the letter to 1 in the middle of a stroke, the middle swells the most
     letterRate: number; // How fast this dot moves into and out of the letter
     letterTarget: number; // 1 if the dot belongs to the letter, otherwise 0
@@ -87,6 +91,10 @@ class Particle {
         this.letterAmount = 0;
         this.letterColor = 'white';
         this.letterDepth = 0;
+        this.haloTargetX = 0;
+        this.haloTargetY = 0;
+        this.haloX = 0;
+        this.haloY = 0;
         this.letterRate = 0.05 + Math.random() * 0.1; // Varied, so the letter assembles organically
         this.letterTarget = 0;
         this.originX = x; // Set the original x-coordinate
@@ -115,15 +123,15 @@ class Particle {
             // Dome profile: dots in the middle of a stroke swell and rise higher than the ones at its edge,
             // and the whole letter breathes slowly
             const gap = this.effect.gap;
-            const breathing = 1 + 0.06 * Math.sin(this.effect.now / 450 + (this.originX + this.originY) / (gap * 6));
-            const swell = letter * (0.35 + 0.65 * this.letterDepth) * breathing;
-            const size = this.size + (gap * 0.95 - this.size) * swell;
-            const lift = gap * 0.7 * swell;
+            const breathing = 1 + 0.1 * Math.sin(this.effect.now / 450 + (this.originX + this.originY) / (gap * 6));
+            const swell = letter * (0.55 + 0.45 * this.letterDepth) * breathing;
+            const size = this.size + (gap * 1.3 - this.size) * swell; // Wider than the grid gap, so the dots fuse into one surface
+            const lift = gap * 1.4 * swell;
 
-            // Shadow on the grid below the lifted dot
+            // Shadow on the grid below the lifted dot, cast further the higher it is
             this.ctx.fillStyle = '#000';
-            this.ctx.globalAlpha = 0.35 * letter;
-            this.ctx.fillRect(this.x + gap * 0.15, this.y + gap * 0.15, size, size);
+            this.ctx.globalAlpha = 0.5 * letter;
+            this.ctx.fillRect(this.x + lift * 0.25, this.y + lift * 0.25, size, size);
 
             this.ctx.fillStyle = this.letterColor;
             this.ctx.globalAlpha = letter;
@@ -131,7 +139,7 @@ class Particle {
 
             // Highlight on the top edge, which makes the swell read as a surface
             this.ctx.fillStyle = '#fff';
-            this.ctx.globalAlpha = 0.25 * letter * this.letterDepth;
+            this.ctx.globalAlpha = 0.35 * letter * this.letterDepth;
             this.ctx.fillRect(this.x - lift, this.y - lift, size, size * 0.3);
         }
 
@@ -152,10 +160,12 @@ class Particle {
         const [pushX, pushY] = this.getBulgePush();
 
         this.letterAmount += (this.letterTarget - this.letterAmount) * this.letterRate;
+        this.haloX += (this.haloTargetX - this.haloX) * this.letterRate;
+        this.haloY += (this.haloTargetY - this.haloY) * this.letterRate;
 
         // Apply friction and ease to the particle's velocity and position
-        this.x += (this.vx *= this.friction) + (this.originX + pushX - this.x) * this.ease;
-        this.y += (this.vy *= this.friction) + (this.originY + pushY - this.y) * this.ease;
+        this.x += (this.vx *= this.friction) + (this.originX + pushX + this.haloX - this.x) * this.ease;
+        this.y += (this.vy *= this.friction) + (this.originY + pushY + this.haloY - this.y) * this.ease;
         this.draw(); // Draw the updated particle
     }
 
