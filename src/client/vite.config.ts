@@ -25,7 +25,7 @@ import Terminal from 'vite-plugin-terminal'
 const VITE_PORT = Number(process.env.VITE_PORT) || 443;
 const VITE_SSL_CERT_PATH = process.env.VITE_SSL_CERT_PATH;
 const VITE_SSL_KEY_PATH = process.env.VITE_SSL_KEY_PATH;
-const AUTH_TARGET = `http://${process.env.HOMEPIE_AUTH_HOST || '127.0.0.1'}:${process.env.HOMEPIE_AUTH_PORT || 8888}`;
+const AUTH_TARGET = `http://${process.env.HOMEPIE_AUTH_HOST || '127.0.0.1'}:${process.env.HOMEPIE_AUTH_PORT || 8000}`;
 
 // https://vitejs.dev/config/
 /**

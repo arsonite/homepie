@@ -46,7 +46,7 @@ done
 ##################### SCRIPT START ######################
 #########################################################
 
-# Runs the auth server on $HOMEPIE_AUTH_HOST:$HOMEPIE_AUTH_PORT (127.0.0.1:8888 by default). It is never
+# Runs the auth server on $HOMEPIE_AUTH_HOST:$HOMEPIE_AUTH_PORT (127.0.0.1:8000 by default). It is never
 # exposed directly, nginx (production) or the vite dev server (development) forward /api/auth to it.
 set -euo pipefail
 

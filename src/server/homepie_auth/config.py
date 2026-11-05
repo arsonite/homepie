@@ -118,7 +118,7 @@ def get_settings() -> Settings:
         failed_attempts_file=runtime_path / "failed-logins.json",
         key_file=secrets_path / "users.key",
         max_failed_attempts=max(1, int(env.get("HOMEPIE_AUTH_MAX_FAILED_ATTEMPTS", "3"))),
-        port=int(env.get("HOMEPIE_AUTH_PORT", "8888")),
+        port=int(env.get("HOMEPIE_AUTH_PORT", "8000")),
         runtime_path=runtime_path,
         secrets_path=secrets_path,
         session_idle_seconds=int(float(env.get("HOMEPIE_AUTH_SESSION_IDLE_HOURS", "72")) * 3600),

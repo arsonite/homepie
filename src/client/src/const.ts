@@ -35,7 +35,7 @@ const DEBUG_FLAG: boolean = import.meta.env.DEV;
  * @property {string} protocol - Internet-protocol used (either HTTP or HTTPS). Uses 'http://' if `DEBUG_FLAG` is true, otherwise uses the current window's protocol.
  * @property {string} url - Host URL. Uses '0.0.0.0' if `DEBUG_FLAG` is true, otherwise uses the current window's host.
  * @property {string} tld - Top-level domain, e.g. '.de', '.com', '.org', '.net'.
- * @property {number} port - Exposed port of the API server for access through the internet. Uses port 8888 if `DEBUG_FLAG` is true, otherwise uses port 443.
+ * @property {number} port - Exposed port of the API server for access through the internet. Uses port 8000 if `DEBUG_FLAG` is true, otherwise uses port 443.
  * @property {string} root - Root path of the API.
  */
 const API_ROUTE = {
@@ -43,7 +43,7 @@ const API_ROUTE = {
     protocol: DEBUG_FLAG ? 'http://' : window.location.protocol + '//', // Internet-protocol used (either HTTP or HTTPS)
     url: DEBUG_FLAG ? '0.0.0.0' : window.location.host, // Host-url
     tld: '', // Top-level-domain, e.g. '.de', '.com', '.org', '.net'
-    port: DEBUG_FLAG ? 8888 : 443, // Exposed port of API-server for access through internet
+    port: DEBUG_FLAG ? 8000 : 443, // Exposed port of API-server for access through internet
     root: 'api',
 };
 

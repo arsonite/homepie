@@ -48,6 +48,12 @@ repository_root=$(cd "$script_directory/../.." && pwd)
 # shellcheck source=../load-env
 source "$repository_root/scripts/load-env"
 
+# The key and users.json are created by this script, with sudo they would belong to root
+if [ "$(id -u)" -eq 0 ]; then
+    echo "Run this script as your own user, not with sudo."
+    exit 1
+fi
+
 if [ ! -x "$HOMEPIE_VENV_PATH/bin/python" ]; then
     echo "No python environment in $HOMEPIE_VENV_PATH. Run scripts/server/install-auth-server first."
     exit 1

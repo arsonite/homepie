@@ -40,7 +40,7 @@ def settings(tmp_path) -> Settings:
         host="127.0.0.1",
         key_file=tmp_path / "secrets" / "users.key",
         max_failed_attempts=3,
-        port=8888,
+        port=8000,
         runtime_path=tmp_path / "run",
         secrets_path=tmp_path / "secrets",
         session_idle_seconds=3600,
