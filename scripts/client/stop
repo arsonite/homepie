@@ -32,8 +32,9 @@ except:
 
 class Stop(BaseStopCLI):
     """
-    Stops the development server of the client. Production is static files served by nginx,
-    which keeps running for the other apps (stop it with "sudo systemctl stop nginx").
+    Stops the development server of the client and starts nginx again if "start --https-port" paused it.
+    Production is static files served by nginx, which keeps running for the other apps
+    (stop it with "sudo systemctl stop nginx").
     """
     def modified_meta(self):
         return {
@@ -47,6 +48,9 @@ class Stop(BaseStopCLI):
             ]
         }
         
+    def _resume_nginx(self):
+        shell(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'dev-nginx') + ' resume')
+        
     #########
     # Hooks #
     #########
@@ -55,7 +59,17 @@ class Stop(BaseStopCLI):
         # Runs before the early exit of the base class for the case that the dev server is already down
         if self.get_flag('auth'):
             shell(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'server', 'stop'))
-        return super().load_script(*args, **kwargs)
+        result = super().load_script(*args, **kwargs)
+        if not self._is_running:
+            # The dev server is gone already (e.g. crashed), so port 443 is free for nginx
+            self._resume_nginx()
+        return result
+    
+    def execute(self):
+        result = super().execute()
+        # Only after the dev server released port 443
+        self._resume_nginx()
+        return result
         
     def pre_execute(self):
         self.set_flag('sleep', 0.25)

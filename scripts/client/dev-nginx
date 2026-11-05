@@ -1,0 +1,51 @@
+#!/bin/bash
+
+# Copyright (C) 2024-2025 Burak Günaydin
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+# Hands port 443 over to the dev server and back (used by "start --env dev --https-port" and "stop").
+#   dev-nginx pause    stops nginx if it is running and remembers that it was stopped here
+#   dev-nginx resume   starts nginx again, but only if "pause" stopped it
+set -euo pipefail
+
+script_directory=$(dirname "$(readlink -f "$0")")
+repository_root=$(cd "$script_directory/../.." && pwd)
+# shellcheck source=../load-env
+source "$repository_root/scripts/load-env" >&2
+
+marker="$HOMEPIE_RUNTIME_PATH/nginx-paused-for-dev"
+
+case "${1:-}" in
+    pause)
+        if ! systemctl is-active --quiet nginx; then
+            exit 0
+        fi
+        mkdir -p "$HOMEPIE_RUNTIME_PATH"
+        sudo systemctl stop nginx
+        touch "$marker"
+        echo "nginx stopped, it is started again when the dev server stops."
+        ;;
+    resume)
+        if [ ! -f "$marker" ]; then
+            exit 0
+        fi
+        sudo systemctl start nginx
+        rm -f "$marker"
+        echo "nginx started again."
+        ;;
+    *)
+        echo "Usage: dev-nginx pause|resume" >&2
+        exit 1
+        ;;
+esac

@@ -24,7 +24,7 @@ import urllib.request
 try:
     # From package imports
     from teatype.cli import BaseStartCLI
-    from teatype.io import enable_sudo, shell
+    from teatype.io import enable_sudo, prompt, shell
     from teatype.logging import *
 except:
     print()
@@ -52,7 +52,7 @@ class Start(BaseStartCLI):
                 {
                     'shorthand': 'hp',
                     'name': 'https-port',
-                    'help': f'Serve the dev server on port {self.PRIVILEGED_PORT} (grants node the low-port capability, nginx must not be using it)',
+                    'help': f'Serve the dev server on port {self.PRIVILEGED_PORT} (grants node the low-port capability, offers to pause nginx while it runs)',
                     'required': False
                 },
                 {
@@ -95,6 +95,18 @@ class Start(BaseStartCLI):
         except OSError:
             return False
         
+    def _pause_nginx(self):
+        """
+        Port 443 belongs to nginx once the production deployment is running, the dev server can only have it
+        while nginx is stopped (and so are the apps behind it).
+        """
+        if subprocess.run(['systemctl', 'is-active', '--quiet', 'nginx']).returncode != 0:
+            return
+        warn(f'nginx is using port {self.PRIVILEGED_PORT}. While it is stopped, the apps behind it (e.g. lockkliye) are not reachable.')
+        if not prompt('Stop nginx while the dev server runs?', default='Y'):
+            err(f'Port {self.PRIVILEGED_PORT} is in use by nginx, stop it or start without "--https-port".', exit=True)
+        shell(f'{self._scripts_directory}/dev-nginx pause')
+        
     #########
     # Hooks #
     #########
@@ -103,6 +115,9 @@ class Start(BaseStartCLI):
         """
         Define actions to perform when the script is interrupted by a signal.
         """
+        # Gives port 443 back, a detached dev server does this in "stop" instead
+        shell(f'{self._scripts_directory}/dev-nginx resume')
+        
         # Only stop what this script started, the auth server may be used by something else
         if getattr(self, '_started_auth_server', False):
             shell(f'{self._scripts_directory}/../server/stop', mute=True)
@@ -127,6 +142,8 @@ class Start(BaseStartCLI):
             
             log('Running in production mode')
             enable_sudo()
+            # A dev server on port 443 would keep nginx from starting, stop also hands the port back to a paused nginx
+            shell(os.path.join(self._scripts_directory, 'stop'), mute=True)
             self.start_command = os.path.join(self._scripts_directory, 'start-client-prod')
             return
         
@@ -145,6 +162,7 @@ class Start(BaseStartCLI):
             enable_sudo()
             node_path = os.path.realpath(shutil.which('node'))
             shell(f'setcap "cap_net_bind_service=+ep" {node_path}', mute=True, sudo=True)
+            self._pause_nginx()
         elif self.get_flag('port'):
             port = str(self.get_flag('port'))
             
