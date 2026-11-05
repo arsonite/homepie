@@ -1,4 +1,4 @@
-#!/usr/bin/env python3.11
+#!/usr/bin/env python3
 
 # Copyright (C) 2024-2025 Burak Günaydin
 #
@@ -36,10 +36,6 @@ except:
     exit(1)
 
 class Start(BaseStartCLI):
-    """
-    Starts the client in development (vite dev server, plus the auth server in development mode) or in
-    production (build, publish and nginx, see start-client-prod).
-    """
     # The dev server only gets the privileged port on request, nginx usually owns it
     PRIVILEGED_PORT = 443
     

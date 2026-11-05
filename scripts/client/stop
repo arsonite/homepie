@@ -1,4 +1,4 @@
-#!/usr/bin/env python3.11
+#!/usr/bin/env python3
 
 # Copyright (C) 2024-2025 Burak Günaydin
 #
@@ -24,6 +24,9 @@ try:
 except:
     print()
     print('Error: The "teatype" package is required to run this script.')
+    print()
+    print('Activate the teatype environment and try to run the script again:')
+    print('     $ source /usr/local/src/teatype/teatype-venv/bin/activate')
     print()
     exit(1)
 
