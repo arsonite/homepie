@@ -382,6 +382,7 @@ const LoginPage: React.FC = (): JSX.Element => {
             {/* Particle effects component */}
             <CollisionParticles
                 activeInput={activeInput}
+                mouseTracking
                 effectGap={20}
                 effectRadius={3000}
                 particleEase={0.2}

@@ -18,11 +18,19 @@
 // Components
 import Particle from '@/components/Particles/Particle.tsx';
 
+const parseHexColor = (hex: string): number[] => {
+    const value = hex.replace('#', '');
+    return [0, 2, 4].map((offset) => parseInt(value.slice(offset, offset + 2), 16));
+};
+
 /**
  * Represents the effect that manages and updates the particles.
  */
 class Effect {
     activeInput: boolean; // Flag to indicate if the input is active
+    bulge: { active: boolean; maxPush: number; radius: number; x: number; y: number }; // Subtle bulge around the cursor
+    letter: string | null = null; // Letter the particles currently form
+    letterColors: readonly [string, string] = ['#ffffff', '#ffffff']; // Gradient of the letter
     ctx: CanvasRenderingContext2D; // Canvas rendering context
     gap: number; // Gap between particles
     height: number; // Height of the canvas
@@ -74,8 +82,16 @@ class Effect {
         // Initialize the angle for automatic mouse rotation
         this.angle = 0;
 
-        // TODO: Remove this line
+        // The strong repulsion stays off until the login input is activated
         this.mouse1.radius = 0;
+
+        this.bulge = {
+            active: false,
+            maxPush: 12 * window.devicePixelRatio,
+            radius: 110 * window.devicePixelRatio,
+            x: 0,
+            y: 0,
+        };
 
         // Start the automatic mouse rotation
         // this.updateMousePosition();
@@ -119,31 +135,86 @@ class Effect {
     };
 
     /**
-     * Handles mouse move events.
+     * Handles mouse move events by moving the bulge to the cursor.
      * @param event - The mouse event.
      */
     handleMouseMove = (event: MouseEvent) => {
-        this.mouse1.x = event.clientX * window.devicePixelRatio; // Update mouse x-coordinate
-        this.mouse1.y = event.pageY * window.devicePixelRatio; // Update mouse y-coordinate
-        this.mouse1.radius = this.activeInput ? 150000 : 3000; // Radius of the circular path
-
-        let timeout;
-        (() => {
-            clearTimeout(timeout);
-            timeout = setTimeout(() => {
-                this.mouse1.radius = 0;
-            }, 1000);
-        })();
+        this.bulge.x = event.clientX * window.devicePixelRatio;
+        this.bulge.y = event.clientY * window.devicePixelRatio;
+        this.bulge.active = true;
     };
 
     /**
-     * Handles mouse leave events.
+     * Handles the cursor leaving the page.
      */
     handleMouseLeave = () => {
-        this.mouse1.x = -Infinity; // Move mouse x-coordinate out of bounds
-        this.mouse1.y = -Infinity; // Move mouse y-coordinate out of bounds
-        this.mouse1.radius = 0; // Set mouse interaction radius to zero
+        this.bulge.active = false;
     };
+
+    /**
+     * Makes the particles form a letter, or return to the plain grid when `letter` is null.
+     * @param letter - The character to form.
+     * @param colors - Start and end color (6-digit hex) of the gradient the letter is painted in.
+     */
+    setLetter(letter: string | null, colors?: readonly [string, string]) {
+        this.letter = letter;
+        if (colors) this.letterColors = colors;
+        this.applyLetter();
+    }
+
+    /**
+     * Assigns every particle to the letter or releases it, by rasterizing the letter at one pixel per grid cell.
+     */
+    private applyLetter() {
+        if (!this.letter) {
+            for (const particle of this.particlesArray) particle.letterTarget = 0;
+            return;
+        }
+
+        const columns = Math.ceil(this.width / this.gap);
+        const rows = Math.ceil(this.height / this.gap);
+        const mask = document.createElement('canvas');
+        mask.width = columns;
+        mask.height = rows;
+        const maskContext = mask.getContext('2d');
+        if (!maskContext) return;
+
+        maskContext.fillStyle = '#fff';
+        maskContext.font = `700 ${Math.min(rows * 0.9, columns * 1.2)}px sans-serif`;
+        maskContext.textAlign = 'center';
+        maskContext.textBaseline = 'middle';
+        maskContext.fillText(this.letter, columns / 2, rows / 2);
+        const pixels = maskContext.getImageData(0, 0, columns, rows).data;
+
+        const isInLetter = (particle: Particle) => {
+            const column = Math.round(particle.originX / this.gap);
+            const row = Math.round(particle.originY / this.gap);
+            return column < columns && row < rows && pixels[(row * columns + column) * 4 + 3] > 128;
+        };
+
+        let minX = Infinity;
+        let maxX = -Infinity;
+        let minY = Infinity;
+        let maxY = -Infinity;
+        for (const particle of this.particlesArray) {
+            if (!isInLetter(particle)) continue;
+            minX = Math.min(minX, particle.originX);
+            maxX = Math.max(maxX, particle.originX);
+            minY = Math.min(minY, particle.originY);
+            maxY = Math.max(maxY, particle.originY);
+        }
+
+        const [from, to] = this.letterColors.map(parseHexColor);
+        for (const particle of this.particlesArray) {
+            particle.letterTarget = isInLetter(particle) ? 1 : 0;
+            if (!particle.letterTarget) continue;
+
+            // Diagonal gradient across the letter
+            const t = ((particle.originX - minX) / (maxX - minX || 1) + (particle.originY - minY) / (maxY - minY || 1)) / 2;
+            const [r, g, b] = from.map((channel, index) => Math.round(channel + (to[index] - channel) * t));
+            particle.letterColor = `rgb(${r}, ${g}, ${b})`;
+        }
+    }
 
     /**
      * Handles window resize events.
@@ -201,6 +272,8 @@ class Effect {
                 this.particlesArray.push(new Particle(x, y, this, this.particleEase, this.particleFriction)); // Create a new particle and add it to the array
             }
         }
+
+        if (this.letter) this.applyLetter();
     }
 
     /**

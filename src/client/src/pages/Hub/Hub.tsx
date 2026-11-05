@@ -16,13 +16,13 @@
  */
 
 // React imports
-import React from 'react';
+import React, { useState } from 'react';
 
 // API
 import { useAuth } from '@/api/AuthContext.tsx';
 
 // Apps
-import { EXTERNAL_APPS } from '@/apps/registry.ts';
+import { EXTERNAL_APPS, ExternalApp } from '@/apps/registry.ts';
 
 // Components
 import AppTile from '@/components/AppTile.tsx';
@@ -33,11 +33,26 @@ import './_style/Hub.scss';
 
 const Hub: React.FC = () => {
     const { logout, username } = useAuth();
+    const [hoveredApp, setHoveredApp] = useState<ExternalApp | null>(null);
 
     return (
         <div id='hub'>
+            <div id='hub-backdrop'>
+                {EXTERNAL_APPS.map((app) => (
+                    <div
+                        className={`hub-backdrop-layer${hoveredApp === app ? ' active' : ''}`}
+                        key={app.name}
+                        style={{
+                            background: `radial-gradient(circle at 50% 50%, ${app.gradient[0]}, ${app.gradient[1]} 75%)`,
+                        }}
+                    />
+                ))}
+            </div>
+
             <CollisionParticles
-                // mouseTracking
+                letter={hoveredApp?.displayName.charAt(0)}
+                letterColors={hoveredApp?.gradient}
+                mouseTracking
                 effectGap={20}
                 effectRadius={3000}
                 particleEase={0.2}
@@ -46,14 +61,14 @@ const Hub: React.FC = () => {
 
             <div id='hub-session'>
                 <span id='hub-username'>{username}</span>
-                <button id='hub-logout' onClick={logout} type='button'>
+                <button id='hub-logout' onClick={() => void logout()} type='button'>
                     Log out
                 </button>
             </div>
 
             <div id='hub-apps'>
                 {EXTERNAL_APPS.map((app) => (
-                    <AppTile key={app.name} app={app} />
+                    <AppTile key={app.name} app={app} onHover={setHoveredApp} />
                 ))}
             </div>
         </div>

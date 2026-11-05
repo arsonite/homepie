@@ -56,5 +56,24 @@
         align-content: center;
         justify-content: center;
         padding: 2rem;
+        pointer-events: none; // Otherwise the overlay swallows clicks meant for the logout button
+    }
+
+    #hub-backdrop {
+        position: absolute;
+        inset: 0;
+        z-index: 0; // Below the particle canvas, which comes later in the DOM
+        pointer-events: none;
+
+        .hub-backdrop-layer {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            transition: opacity 600ms ease;
+
+            &.active {
+                opacity: 0.4;
+            }
+        }
     }
 }

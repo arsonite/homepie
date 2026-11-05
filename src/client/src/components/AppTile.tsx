@@ -26,14 +26,26 @@ import './_style/AppTile.scss';
 
 interface AppTileProps {
     app: ExternalApp;
+    onHover?: (app: ExternalApp | null) => void;
 }
 
 /**
  * Clickable tile that navigates to an app on its own subdomain.
  */
-const AppTile: React.FC<AppTileProps> = ({ app }: AppTileProps): JSX.Element => {
+const AppTile: React.FC<AppTileProps> = ({ app, onHover }: AppTileProps): JSX.Element => {
+    const style = { '--app-from': app.gradient[0], '--app-to': app.gradient[1] } as React.CSSProperties;
+
     return (
-        <a className='app-tile' href={getExternalAppUrl(app)} title={app.description}>
+        <a
+            className='app-tile'
+            href={getExternalAppUrl(app)}
+            onBlur={() => onHover?.(null)}
+            onFocus={() => onHover?.(app)}
+            onMouseEnter={() => onHover?.(app)}
+            onMouseLeave={() => onHover?.(null)}
+            style={style}
+            title={app.description}
+        >
             <span className='app-tile-icon'>{app.displayName.charAt(0)}</span>
             <span className='app-tile-name'>{app.displayName}</span>
         </a>

@@ -80,9 +80,14 @@ Router: forward **TCP 80 and 443** to the server (`192.168.2.134`, pinned by `mo
 ### Development
 
 ```bash
-scripts/client/install-client        # once
-scripts/client/start-client-dev      # http://localhost:5173, also starts the auth server (dev mode). Ctrl+C stops both
+scripts/client/install                    # once
+scripts/client/start --env dev            # https://localhost:5173, also starts the auth server (dev mode). Ctrl+C stops both
+scripts/client/start --env dev --https-port   # port 443 instead (grants node the low-port capability, stop nginx first)
+scripts/client/start --env prod           # build, publish and nginx, same as start-client-prod
+scripts/client/stop                       # stops a detached (--detached) dev server, --auth also stops the auth server
 ```
+
+The start and stop scripts need the teatype environment (`source /usr/local/src/teatype/teatype-venv/bin/activate`).
 
 Dev mode needs a user too (`manage-users add <name>`). The login works on the dev origin only, not on subdomains.
 

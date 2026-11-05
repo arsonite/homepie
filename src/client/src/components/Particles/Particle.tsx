@@ -15,6 +15,14 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+interface ParticleEffect {
+    bulge: { active: boolean; maxPush: number; radius: number; x: number; y: number };
+    ctx: CanvasRenderingContext2D;
+    gap: number;
+    mouse1: { x: number; y: number; radius: number };
+    mouse2: { x: number; y: number; radius: number };
+}
+
 /**
  * Represents a single particle in the particle effect.
  */
@@ -28,11 +36,11 @@ class Particle {
     distance: number; // Squared distance from the mouse
     dx: number; // Distance in the x-direction from the mouse
     dy: number; // Distance in the y-direction from the mouse
-    effect: {
-        ctx: CanvasRenderingContext2D;
-        mouse1: { x: number; y: number; radius: number };
-        mouse2: { x: number; y: number; radius: number };
-    }; // Reference to the parent effect
+    effect: ParticleEffect; // Reference to the parent effect
+    letterAmount: number; // 0 = plain dot, 1 = fully part of the hovered app's letter
+    letterColor: string; // Color of the dot while it is part of the letter
+    letterRate: number; // How fast this dot moves into and out of the letter
+    letterTarget: number; // 1 if the dot belongs to the letter, otherwise 0
     ease: number; // Ease factor for smooth movement
     force: number; // Force applied to the particle
     friction: number; // Friction factor to slow down the particle
@@ -54,11 +62,7 @@ class Particle {
     constructor(
         x: number,
         y: number,
-        effect: {
-            ctx: CanvasRenderingContext2D;
-            mouse1: { x: number; y: number; radius: number };
-            mouse2: { x: number; y: number; radius: number };
-        },
+        effect: ParticleEffect,
         ease: number = 0.2,
         friction: number = 0.95
     ) {
@@ -78,6 +82,10 @@ class Particle {
         this.dx = 0; // Initialize distance in the x-direction from the mouse
         this.dy = 0; // Initialize distance in the y-direction from the mouse
         this.force = 0; // Initialize force applied to the particle
+        this.letterAmount = 0;
+        this.letterColor = 'white';
+        this.letterRate = 0.05 + Math.random() * 0.1; // Varied, so the letter assembles organically
+        this.letterTarget = 0;
         this.originX = x; // Set the original x-coordinate
         this.originY = y; // Set the original y-coordinate
         this.opacity = 1; // Set the default opacity of the particle
@@ -92,10 +100,23 @@ class Particle {
      * Draws the particle on the canvas.
      */
     draw() {
-        this.ctx.fillStyle = this.color; // Set the fill color
-        this.ctx.globalAlpha = this.alpha; // Set the alpha transparency
+        const letter = this.letterAmount;
         this.ctx.beginPath(); // Begin a new path
-        this.ctx.fillRect(this.x, this.y, this.size, this.size); // Draw a rectangle representing the particle
+
+        // The plain dot fades out while the letter dot fades in
+        this.ctx.fillStyle = this.color;
+        this.ctx.globalAlpha = this.alpha * (1 - letter);
+        this.ctx.fillRect(this.x, this.y, this.size, this.size);
+
+        if (letter > 0.01) {
+            // Letter dots grow and rise up-left, which reads as being lifted off the grid
+            const size = this.size + (this.effect.gap * 0.7 - this.size) * letter;
+            const lift = this.effect.gap * 0.25 * letter;
+            this.ctx.fillStyle = this.letterColor;
+            this.ctx.globalAlpha = letter;
+            this.ctx.fillRect(this.x - lift, this.y - lift, size, size);
+        }
+
         this.ctx.globalAlpha = 1; // Reset the alpha transparency
     }
 
@@ -109,10 +130,37 @@ class Particle {
         // Update based on the second mouse
         // this.updateMouseInteraction(this.effect.mouse2);
 
+        // The bulge shifts the resting position away from the cursor
+        const [pushX, pushY] = this.getBulgePush();
+
+        this.letterAmount += (this.letterTarget - this.letterAmount) * this.letterRate;
+
         // Apply friction and ease to the particle's velocity and position
-        this.x += (this.vx *= this.friction) + (this.originX - this.x) * this.ease;
-        this.y += (this.vy *= this.friction) + (this.originY - this.y) * this.ease;
+        this.x += (this.vx *= this.friction) + (this.originX + pushX - this.x) * this.ease;
+        this.y += (this.vy *= this.friction) + (this.originY + pushY - this.y) * this.ease;
         this.draw(); // Draw the updated particle
+    }
+
+    /**
+     * Gentle displacement away from the cursor, strongest right at the cursor and smoothly fading out.
+     * Also lights the dots up a little so the bulge is visible.
+     */
+    getBulgePush(): [number, number] {
+        const bulge = this.effect.bulge;
+        if (!bulge.active) return [0, 0];
+
+        const dx = this.originX - bulge.x;
+        const dy = this.originY - bulge.y;
+        const distance = Math.hypot(dx, dy);
+        if (distance >= bulge.radius) return [0, 0];
+
+        const t = 1 - distance / bulge.radius;
+        const strength = t * t * (3 - 2 * t); // Smoothstep
+        this.alpha = Math.max(this.alpha, 0.25 + 0.35 * strength);
+
+        // A dot exactly under the cursor has no direction, so it stays put
+        if (distance < 1) return [0, 0];
+        return [(dx / distance) * strength * bulge.maxPush, (dy / distance) * strength * bulge.maxPush];
     }
 
     /**
@@ -147,3 +195,4 @@ class Particle {
 }
 
 export default Particle;
+export type { ParticleEffect };

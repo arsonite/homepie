@@ -27,6 +27,8 @@ const BASE_DOMAIN = 'homepie.net';
 interface ExternalApp {
     readonly description: string;
     readonly displayName: string;
+    /** Two 6-digit hex colors, used for the tile, the hover letter and the Hub background. */
+    readonly gradient: readonly [string, string];
     readonly name: string;
     readonly subdomain: string;
 }
@@ -35,6 +37,7 @@ const EXTERNAL_APPS: readonly ExternalApp[] = [
     {
         description: 'A powerful and convenient web text editor',
         displayName: 'Lockkliye',
+        gradient: ['#7a5cff', '#2fc4ff'],
         name: 'lockkliye',
         subdomain: 'lockkliye',
     },

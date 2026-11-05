@@ -28,6 +28,8 @@ interface CollisionParticlesProps {
     activeInput?: boolean;
     effectGap?: number;
     effectRadius?: number;
+    letter?: string;
+    letterColors?: readonly [string, string];
     mouseTracking?: boolean;
     particleEase?: number;
     particleFriction?: number;
@@ -45,6 +47,8 @@ interface CollisionParticlesProps {
  * @param {number} props.effectRadius - The radius of each particle in the effect.
  * @param {number} props.particleEase - The easing factor for particle movement.
  * @param {number} props.particleFriction - The friction applied to particle movement.
+ * @param {string} props.letter - Letter the particles form, e.g. while an app tile is hovered.
+ * @param {boolean} props.mouseTracking - Whether the particles bulge subtly around the cursor.
  * @param {boolean} props.activeInput - Flag to activate or deactivate input interactions.
  *
  * @remarks
@@ -116,7 +120,7 @@ const CollisionParticles: React.FC<CollisionParticlesProps> = (props) => {
         if (props.mouseTracking) {
             // Add mouse interaction event listeners to the window
             // window.addEventListener('click', effectRef.current.handleMouseClick);
-            // window.addEventListener('mouseleave', effectRef.current.handleMouseLeave);
+            document.documentElement.addEventListener('mouseleave', effectRef.current.handleMouseLeave);
             window.addEventListener('mousemove', effectRef.current.handleMouseMove);
         }
 
@@ -131,13 +135,20 @@ const CollisionParticles: React.FC<CollisionParticlesProps> = (props) => {
             window.removeEventListener('resize', setCanvasSize);
             if (effectRef.current) {
                 window.removeEventListener('click', effectRef.current.handleMouseClick);
-                window.removeEventListener('mouseleave', effectRef.current.handleMouseLeave);
+                document.documentElement.removeEventListener('mouseleave', effectRef.current.handleMouseLeave);
                 window.removeEventListener('mousemove', effectRef.current.handleMouseMove);
             }
             effectRef.current?.destroy();
             effectRef.current = null;
         };
     }, [props.effectGap, props.effectRadius, props.particleEase, props.particleFriction]);
+
+    /**
+     * Forms (or releases) the letter whenever the `letter` prop changes.
+     */
+    useEffect(() => {
+        effectRef.current?.setLetter(props.letter ?? null, props.letterColors);
+    }, [props.letter, props.letterColors]);
 
     /**
      * Updates the active input state and refreshes the mouse position in the effect.
