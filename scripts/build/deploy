@@ -98,11 +98,21 @@ deploy_nginx() {
 
 deploy_auth() {
     # Idempotent: creates the data directories and the venv if they are missing, installs the pinned requirements
-    "$repository_root/scripts/server/install-auth-server"
+    "$repository_root/scripts/server/install"
 
-    # Python only reads the code on start
-    "$repository_root/scripts/server/stop-auth-server" || true
-    "$repository_root/scripts/server/start-auth-server" --detach
+    # The start script is a teatype CLI. It stops a running server first, python only reads the code on start.
+    (
+        if ! python3 -c 'import teatype' 2>/dev/null; then
+            teatype_activate=/usr/local/src/teatype/teatype-venv/bin/activate
+            if [ ! -f "$teatype_activate" ]; then
+                echo "The teatype package is required to start the auth server. Activate its environment and try again."
+                exit 1
+            fi
+            # shellcheck disable=SC1090
+            source "$teatype_activate"
+        fi
+        "$repository_root/scripts/server/start" --env prod --detached
+    )
 }
 
 if [ "$target" = "client" ] || [ "$target" = "all" ]; then

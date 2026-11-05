@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env python3
 
 # Copyright (C) 2024-2025 Burak Günaydin
 #
@@ -14,96 +14,131 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-#########################################################
-#################### START CMD PARSE ####################
-#########################################################
+# System imports
+import os
+import shlex
+import subprocess
+import time
+import urllib.request
 
-# Usage: ./start-auth-server [--dev] [--detach]
-development=false
-detach=false
+try:
+    # From package imports
+    from teatype.cli import BaseStartCLI
+    from teatype.io import shell
+    from teatype.logging import *
+except:
+    print()
+    print('Error: The "teatype" package is required to run this script.')
+    print()
+    print('Activate the teatype environment and try to run the script again:')
+    print('     $ source /usr/local/src/teatype/teatype-venv/bin/activate')
+    print()
+    exit(1)
 
-for argument in "$@"; do
-    case "$argument" in
-        --dev) development=true ;;
-        --detach) detach=true ;;
-        *)
-            echo
-            echo "Unknown argument '$argument'."
-            echo "Usage: ./start-auth-server [--dev] [--detach]"
-            echo "    --dev     Auto-reload on code changes, cookies that work on plain http (use with start-client-dev)"
-            echo "    --detach  Run in the background, logs go to \$HOMEPIE_RUNTIME_PATH/auth-server.log"
-            echo
-            exit 1
-            ;;
-    esac
-done
+class Start(BaseStartCLI):
+    """
+    Starts the auth server on HOMEPIE_AUTH_HOST:HOMEPIE_AUTH_PORT (127.0.0.1:8000 by default). It is never exposed
+    directly, nginx (production) or the vite dev server (development) forward /api/auth to it.
+    A server that is already running gets stopped first.
+    """
+    HEALTH_TIMEOUT_SECONDS = 10
+    
+    def modified_meta(self):
+        return {
+            'flags': [
+                {
+                    'shorthand': 'e',
+                    'name': 'env',
+                    'help': 'Environment to consider (dev: auto-reload and cookies that work on plain http, prod: Secure cookies)',
+                    'options': ['dev', 'prod'],
+                    'required': True
+                }
+            ]
+        }
+        
+    ###########
+    # Helpers #
+    ###########
+        
+    def _load_homepie_env(self, repository_root:str):
+        """
+        Loads the variables of the root .env (with the defaults of .env.template) the same way the bash scripts do.
+        """
+        # load-env reports to stdout, so the environment is read from a separate descriptor
+        command = f'repository_root={shlex.quote(repository_root)}; source "$repository_root/scripts/load-env" >&2; env -0'
+        output = subprocess.run(['bash', '-c', command], capture_output=True, text=True, check=True).stdout
+        for entry in output.split('\0'):
+            key, _, value = entry.partition('=')
+            if key.startswith('HOMEPIE_'):
+                os.environ.setdefault(key, value)
+                
+    def _health_url(self) -> str:
+        return f'http://{os.environ["HOMEPIE_AUTH_HOST"]}:{os.environ["HOMEPIE_AUTH_PORT"]}/api/auth/health'
+    
+    def _is_healthy(self) -> bool:
+        try:
+            with urllib.request.urlopen(self._health_url(), timeout=2):
+                return True
+        except OSError:
+            return False
+        
+    #########
+    # Hooks #
+    #########
+    
+    def execute(self):
+        super().execute()
+        
+        # Only a detached start returns here, a foreground server ends the script when it stops
+        if not self.get_flag('detached') or self.get_flag('tail'):
+            return
+        
+        deadline = time.monotonic() + self.HEALTH_TIMEOUT_SECONDS
+        while time.monotonic() < deadline:
+            if self._is_healthy():
+                log(f'Auth server is running on {self._health_url().rsplit("/api", 1)[0]}')
+                hint(f'Logs: {os.path.abspath(self.stdout_path)}')
+                return
+            time.sleep(0.5)
+        
+        err(f'The auth server did not answer within {self.HEALTH_TIMEOUT_SECONDS} seconds, last log lines:')
+        shell(f'tail -n 20 {shlex.quote(self.stdout_path)}')
+        exit(1)
+            
+    def pre_execute(self):
+        scripts_directory = os.path.dirname(os.path.realpath(__file__))
+        repository_root = os.path.abspath(os.path.join(scripts_directory, '..', '..'))
+        server_root = os.path.join(repository_root, 'src', 'server')
+        self._load_homepie_env(repository_root)
+        
+        venv_path = os.environ['HOMEPIE_VENV_PATH']
+        runtime_path = os.environ['HOMEPIE_RUNTIME_PATH']
+        python_binary = os.path.join(venv_path, 'bin', 'python')
+        if not os.access(python_binary, os.X_OK):
+            err(f'No python environment in {venv_path}. Run scripts/server/install first.', exit=True)
+        if not os.path.isdir(runtime_path):
+            err(f'{runtime_path} does not exist. Run scripts/server/install first.', exit=True)
+        
+        env = self.get_flag('env')
+        self.process_name = f'homepie-auth-{env}'
+        # The module is imported from the server directory, which also holds the .env of the server
+        self.parent_path = server_root
+        self.venv_name = venv_path
+        # Under the data directory, so that no sudo is needed (the default is /var/log)
+        self.LOGS_PATH = os.path.join(runtime_path, 'logs')
+        
+        if env == 'dev':
+            log('Running in development mode')
+            command_prefix = 'HOMEPIE_AUTH_DEV=1 '
+            server_arguments = f'--reload --reload-dir {shlex.quote(server_root)}'
+        else:
+            log('Running in production mode')
+            command_prefix = ''
+            server_arguments = '--no-server-header'
+            
+        self.start_command = (f'{command_prefix}{shlex.quote(python_binary)} -m uvicorn --factory homepie_auth.app:create_app '
+                              f'--host {shlex.quote(os.environ["HOMEPIE_AUTH_HOST"])} '
+                              f'--port {shlex.quote(os.environ["HOMEPIE_AUTH_PORT"])} {server_arguments}')
 
-#########################################################
-##################### END CMD PARSE #####################
-#########################################################
-
-#########################################################
-##################### SCRIPT START ######################
-#########################################################
-
-# Runs the auth server on $HOMEPIE_AUTH_HOST:$HOMEPIE_AUTH_PORT (127.0.0.1:8000 by default). It is never
-# exposed directly, nginx (production) or the vite dev server (development) forward /api/auth to it.
-set -euo pipefail
-
-script_directory=$(dirname "$(readlink -f "$0")")
-repository_root=$(cd "$script_directory/../.." && pwd)
-# shellcheck source=../load-env
-source "$repository_root/scripts/load-env"
-
-pid_file="$HOMEPIE_RUNTIME_PATH/auth-server.pid"
-log_file="$HOMEPIE_RUNTIME_PATH/auth-server.log"
-
-if [ ! -x "$HOMEPIE_VENV_PATH/bin/python" ]; then
-    echo "No python environment in $HOMEPIE_VENV_PATH. Run scripts/server/install-auth-server first."
-    exit 1
-fi
-
-if [ ! -d "$HOMEPIE_RUNTIME_PATH" ]; then
-    echo "$HOMEPIE_RUNTIME_PATH does not exist. Run scripts/server/install-auth-server first."
-    exit 1
-fi
-
-# A pid file of a crashed server is not a running server
-if [ -f "$pid_file" ] && kill -0 "$(cat "$pid_file")" 2>/dev/null && grep -q homepie_auth "/proc/$(cat "$pid_file")/cmdline" 2>/dev/null; then
-    echo "The auth server is already running (pid $(cat "$pid_file")). Stop it with scripts/server/stop-auth-server."
-    exit 1
-fi
-
-if [ "$development" = true ]; then
-    export HOMEPIE_AUTH_DEV=1
-    server_arguments=(--reload --reload-dir "$repository_root/src/server")
-else
-    server_arguments=(--no-server-header)
-fi
-
-cd "$repository_root/src/server"
-command=("$HOMEPIE_VENV_PATH/bin/python" -m uvicorn --factory homepie_auth.app:create_app
-    --host "$HOMEPIE_AUTH_HOST" --port "$HOMEPIE_AUTH_PORT" "${server_arguments[@]}")
-
-if [ "$detach" = true ]; then
-    nohup "${command[@]}" >>"$log_file" 2>&1 &
-    echo $! >"$pid_file"
-
-    for _ in $(seq 1 20); do
-        if curl -fsS "http://$HOMEPIE_AUTH_HOST:$HOMEPIE_AUTH_PORT/api/auth/health" >/dev/null 2>&1; then
-            echo "Auth server is running (pid $(cat "$pid_file")) on http://$HOMEPIE_AUTH_HOST:$HOMEPIE_AUTH_PORT"
-            echo "Logs: $log_file"
-            exit 0
-        fi
-        sleep 0.5
-    done
-
-    echo "The auth server did not come up. Last log lines:"
-    tail -n 20 "$log_file"
-    rm -f "$pid_file"
-    exit 1
-fi
-
-echo $$ >"$pid_file"
-# exec keeps the pid, so that stop-auth-server stops the server itself and not just this script
-exec "${command[@]}"
+if __name__ == '__main__':
+    Start()

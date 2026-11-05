@@ -88,7 +88,7 @@ class Vault:
         if not key_file.exists():
             if not create:
                 raise VaultError(
-                    f"Encryption key {key_file} does not exist. On a fresh install run scripts/server/install-auth-server, "
+                    f"Encryption key {key_file} does not exist. On a fresh install run scripts/server/install, "
                     "otherwise restore the key from your backup, users.json cannot be decrypted without it."
                 )
             key_file.parent.mkdir(parents=True, exist_ok=True, mode=0o700)

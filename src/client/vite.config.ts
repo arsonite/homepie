@@ -120,7 +120,7 @@ export default defineConfig({
     } : undefined,
     open: false, // Set this to false to prevent opening a browser
     port: VITE_PORT,
-    // Same origin for the page and the auth API, so the session cookie works without CORS (see `start-auth-server --dev`)
+    // Same origin for the page and the auth API, so the session cookie works without CORS (see `scripts/server/start --env dev`)
     proxy: {
       '/api/auth': { changeOrigin: false, target: AUTH_TARGET }
     }

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env python3
 
 # Copyright (C) 2024-2025 Burak Günaydin
 #
@@ -14,60 +14,28 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-#########################################################
-#################### START CMD PARSE ####################
-#########################################################
+try:
+    # From package imports
+    from teatype.cli import BaseStopCLI
+except:
+    print()
+    print('Error: The "teatype" package is required to run this script.')
+    print()
+    print('Activate the teatype environment and try to run the script again:')
+    print('     $ source /usr/local/src/teatype/teatype-venv/bin/activate')
+    print()
+    exit(1)
 
-# Check if there are any arguments
-if [ "$#" -gt 0 ]; then
-    echo
-    echo "Hint: This script does not accept any arguments. Proceeding anyways ..."
-    echo
-fi
+class Stop(BaseStopCLI):
+    """
+    Stops the auth server, no matter if it runs in the foreground, detached, in development or in production.
+    """
+    #########
+    # Hooks #
+    #########
+        
+    def pre_execute(self):
+        self.set_flag('sleep', 0.25)
 
-#########################################################
-##################### END CMD PARSE #####################
-#########################################################
-
-#########################################################
-##################### SCRIPT START ######################
-#########################################################
-
-# Stops the auth server that was started with start-auth-server.
-set -euo pipefail
-
-script_directory=$(dirname "$(readlink -f "$0")")
-repository_root=$(cd "$script_directory/../.." && pwd)
-# shellcheck source=../load-env
-source "$repository_root/scripts/load-env"
-
-pid_file="$HOMEPIE_RUNTIME_PATH/auth-server.pid"
-
-if [ ! -f "$pid_file" ]; then
-    echo "The auth server is not running."
-    exit 0
-fi
-
-pid=$(cat "$pid_file")
-
-# Never signal a pid that has been reused by an unrelated process
-if ! kill -0 "$pid" 2>/dev/null || ! grep -q homepie_auth "/proc/$pid/cmdline" 2>/dev/null; then
-    echo "The auth server is not running (removing the stale pid file)."
-    rm -f "$pid_file"
-    exit 0
-fi
-
-echo "Stopping the auth server (pid $pid) ..."
-kill "$pid"
-
-for _ in $(seq 1 20); do
-    if ! kill -0 "$pid" 2>/dev/null; then
-        rm -f "$pid_file"
-        echo "Stopped."
-        exit 0
-    fi
-    sleep 0.5
-done
-
-echo "The auth server did not stop within 10 seconds. Stop it manually with: kill -9 $pid"
-exit 1
+if __name__ == '__main__':
+    Stop()

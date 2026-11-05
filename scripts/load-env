@@ -58,7 +58,7 @@ while IFS= read -r homepie_env_line || [ -n "$homepie_env_line" ]; do
             case "$homepie_env_value" in
                 \"*\" | \'*\') homepie_env_value="${homepie_env_value:1:${#homepie_env_value}-2}" ;;
             esac
-            # Variables that are already set (e.g. `HOMEPIE_AUTH_PORT=9000 ./start-auth-server`) win over .env
+            # Variables that are already set (e.g. `HOMEPIE_AUTH_PORT=9000 scripts/server/start --env prod`) win over .env
             if [ -z "$(printenv "$homepie_env_key")" ]; then
                 export "$homepie_env_key=$homepie_env_value"
             fi

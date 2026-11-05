@@ -142,7 +142,7 @@ step "nginx" y \
 
 step "Auth server" y \
     "Creates /var/lib/homepie, the python environment and the encryption key." \
-    scripts/server/install-auth-server
+    scripts/server/install
 
 step "First user" y \
     "Without a user nobody can log in. The password is asked for next." \

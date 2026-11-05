@@ -188,7 +188,7 @@ class Start(BaseStartCLI):
                 hint('If it was started without "--dev", its Secure cookies are rejected on http://, so login will not work here.')
             else:
                 log('Starting the auth server in development mode')
-                shell(f'{self._scripts_directory}/../server/start --dev --detach')
+                shell(f'{self._scripts_directory}/../server/start --env dev --detached')
                 self._started_auth_server = True
         
         # vite never falls back to another port, the https flag would silently end up somewhere else otherwise

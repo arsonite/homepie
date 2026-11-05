@@ -63,7 +63,7 @@ def main(argv: list[str] | None = None) -> int:
     ):
         commands.add_parser(name, help=help_text).add_argument("username")
     commands.add_parser("list", help="list all users")
-    commands.add_parser("init", help="create the encryption key (done by scripts/server/install-auth-server)")
+    commands.add_parser("init", help="create the encryption key (done by scripts/server/install)")
 
     arguments = parser.parse_args(argv)
 

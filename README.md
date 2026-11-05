@@ -68,7 +68,7 @@ scripts/build/setup-periodic-cloudflare-ddns   # DNS records follow the public I
 scripts/build/install-ssl                      # wildcard certificate for homepie.net + *.homepie.net
 scripts/build/install-nginx                    # nginx + firewall
 
-scripts/server/install-auth-server             # /var/lib/homepie, python venv, encryption key
+scripts/server/install                         # /var/lib/homepie, python venv, encryption key
 scripts/server/manage-users add <name>         # without a user nobody can log in
 scripts/client/start-client-prod               # build client, install nginx config, start auth server, health check
 ```
@@ -94,13 +94,17 @@ Dev mode needs a user too (`manage-users add <name>`). The login works on the de
 ### Auth server and users
 
 ```bash
-scripts/server/start-auth-server --detach    # background, log: /var/lib/homepie/run/auth-server.log
-scripts/server/start-auth-server             # foreground (--dev: auto-reload, cookies for plain http)
-scripts/server/stop-auth-server
+scripts/server/start --env prod --detached   # background, stops a running one first. Logs: /var/lib/homepie/run/logs/
+scripts/server/start --env prod              # foreground
+scripts/server/start --env dev               # auto-reload, cookies for plain http (add --detached for the background)
+scripts/server/stop
+scripts/server/is-running
 scripts/server/manage-users add|passwd|delete|list [name]
 ```
 
--   Nothing starts at boot. After a reboot run `start-auth-server --detach`; until then nginx answers `500`.
+The start, stop and is-running scripts need the teatype environment, like the client ones (`deploy` activates it itself).
+
+-   Nothing starts at boot. After a reboot run `scripts/server/start --env prod --detached`; until then nginx answers `500`.
 -   User changes apply immediately. Changing a password logs that user out everywhere.
 -   Users live in `/var/lib/homepie/users.json` (scrypt hashes, additionally encrypted with
     `/var/lib/homepie/secrets/users.key`). **Back up that key**, without it the users are unreadable.
@@ -189,8 +193,8 @@ differs from the public IP (CGNAT), port forwarding cannot work, use a Cloudflar
 | Certificate warning                       | Run `install-ssl` (it replaces a non-wildcard certificate)                         |
 | Cloudflare 521/525/526                    | Proxied record while nginx is down, or SSL mode is not **Full (strict)**           |
 | `https://192.168.2.134` closes connection | Intended, nginx only answers for `homepie.net` and its subdomains                  |
-| `500` on every page                       | Auth server not running: `start-auth-server --detach`                              |
-| Login always fails                        | No user yet (`manage-users list`), or a prod-mode auth server used with `start-client-dev` |
+| `500` on every page                       | Auth server not running: `scripts/server/start --env prod --detached`              |
+| Login always fails                        | No user yet (`manage-users list`), or a prod-mode auth server used with `client/start --env dev` |
 | Asked to log in again on every subdomain  | Auth server was started with `--dev`, or `HOMEPIE_AUTH_COOKIE_DOMAIN` is not `.homepie.net` |
 | `429` on login                            | Too many failed attempts, wait 15 minutes                                          |
 | `502` on `<app>.homepie.net`              | The app is not running on the port from `00-homepie-apps.conf`                     |

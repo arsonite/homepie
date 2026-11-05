@@ -73,4 +73,4 @@ cd "$repository_root/src/server"
 echo
 echo "Auth server installed. Next steps:"
 echo "    scripts/server/manage-users add <username>   Create your first user"
-echo "    scripts/server/start-auth-server             Start it"
+echo "    scripts/server/start --env prod --detached   Start it"
