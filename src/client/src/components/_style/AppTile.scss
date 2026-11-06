@@ -32,10 +32,11 @@
         height: 6rem;
         width: 6rem;
 
-        border-radius: 1.5rem;
-        background: linear-gradient(135deg, var(--app-from, #{$global_blue}), var(--app-to, #{$global_homepie_accent}));
-        box-shadow: 0 0.5rem 1.5rem rgba($global_black_pure, 0.5);
-        color: $global_black;
+        box-sizing: border-box;
+        border: 0.4rem solid var(--app-color);
+        border-radius: 1.75rem;
+        background: transparent;
+        color: var(--app-color);
         font-size: 3rem;
         font-weight: 700;
         transition: $global_transition_default;
@@ -48,6 +49,8 @@
 
     &:hover .app-tile-icon,
     &:focus-visible .app-tile-icon {
+        background: var(--app-color);
+        color: $global_black;
         transform: scale(1.08);
     }
 }

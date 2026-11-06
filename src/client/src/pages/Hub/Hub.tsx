@@ -27,6 +27,7 @@ import { EXTERNAL_APPS, ExternalApp } from '@/apps/registry.ts';
 // Components
 import AppTile from '@/components/AppTile.tsx';
 import CollisionParticles from '@/components/Particles/CollisionParticles.tsx';
+import { ParticleFocus } from '@/components/Particles/Effect.tsx';
 
 // Style
 import './_style/Hub.scss';
@@ -34,6 +35,12 @@ import './_style/Hub.scss';
 const Hub: React.FC = () => {
     const { logout, username } = useAuth();
     const [hoveredApp, setHoveredApp] = useState<ExternalApp | null>(null);
+    const [focus, setFocus] = useState<ParticleFocus | undefined>(undefined);
+
+    const hover = (app: ExternalApp | null, where?: ParticleFocus) => {
+        setHoveredApp(app);
+        setFocus(where);
+    };
 
     return (
         <div id='hub'>
@@ -50,8 +57,8 @@ const Hub: React.FC = () => {
             </div>
 
             <CollisionParticles
-                letter={hoveredApp?.displayName.charAt(0)}
-                letterColors={hoveredApp?.gradient}
+                focus={focus}
+                focusColors={hoveredApp?.gradient}
                 mouseTracking
                 effectGap={20}
                 effectRadius={3000}
@@ -68,7 +75,7 @@ const Hub: React.FC = () => {
 
             <div id='hub-apps'>
                 {EXTERNAL_APPS.map((app) => (
-                    <AppTile key={app.name} app={app} onHover={setHoveredApp} />
+                    <AppTile key={app.name} app={app} onHover={hover} />
                 ))}
             </div>
         </div>

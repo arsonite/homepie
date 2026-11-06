@@ -19,7 +19,7 @@
 import React, { useEffect, useRef } from 'react';
 
 // Components
-import Effect from '@/components/Particles/Effect';
+import Effect, { ParticleFocus } from '@/components/Particles/Effect';
 
 // Style
 import './_style/CollisionParticles.scss';
@@ -28,8 +28,8 @@ interface CollisionParticlesProps {
     activeInput?: boolean;
     effectGap?: number;
     effectRadius?: number;
-    letter?: string;
-    letterColors?: readonly [string, string];
+    focus?: ParticleFocus;
+    focusColors?: readonly [string, string];
     mouseTracking?: boolean;
     particleEase?: number;
     particleFriction?: number;
@@ -47,7 +47,7 @@ interface CollisionParticlesProps {
  * @param {number} props.effectRadius - The radius of each particle in the effect.
  * @param {number} props.particleEase - The easing factor for particle movement.
  * @param {number} props.particleFriction - The friction applied to particle movement.
- * @param {string} props.letter - Letter the particles form, e.g. while an app tile is hovered.
+ * @param {ParticleFocus} props.focus - Where the grid bulges in the colors of `focusColors`, e.g. around an app tile while it is hovered.
  * @param {boolean} props.mouseTracking - Whether the particles bulge subtly around the cursor.
  * @param {boolean} props.activeInput - Flag to activate or deactivate input interactions.
  *
@@ -144,11 +144,11 @@ const CollisionParticles: React.FC<CollisionParticlesProps> = (props) => {
     }, [props.effectGap, props.effectRadius, props.particleEase, props.particleFriction]);
 
     /**
-     * Forms (or releases) the letter whenever the `letter` prop changes.
+     * Raises (or releases) the bulge whenever the `focus` prop changes.
      */
     useEffect(() => {
-        effectRef.current?.setLetter(props.letter ?? null, props.letterColors);
-    }, [props.letter, props.letterColors]);
+        effectRef.current?.setFocus(props.focus ?? null, props.focusColors);
+    }, [props.focus, props.focusColors]);
 
     /**
      * Updates the active input state and refreshes the mouse position in the effect.

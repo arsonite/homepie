@@ -23,15 +23,38 @@ const parseHexColor = (hex: string): number[] => {
     return [0, 2, 4].map((offset) => parseInt(value.slice(offset, offset + 2), 16));
 };
 
+/** Where the grid bulges, in CSS pixels relative to the viewport. */
+interface ParticleFocus {
+    radius: number;
+    x: number;
+    y: number;
+}
+
+interface FocusState {
+    colors: number[][];
+    maxPush: number;
+    radius: number;
+    strength: number;
+    target: number;
+    x: number;
+    y: number;
+}
+
 /**
  * Represents the effect that manages and updates the particles.
  */
 class Effect {
     activeInput: boolean; // Flag to indicate if the input is active
     bulge: { active: boolean; maxPush: number; radius: number; x: number; y: number }; // Subtle bulge around the cursor
-    now: number = 0; // Timestamp of the current frame, drives the breathing of the letter
-    letter: string | null = null; // Letter the particles currently form
-    letterColors: readonly [string, string] = ['#ffffff', '#ffffff']; // Gradient of the letter
+    focusState: FocusState = {
+        colors: [[255, 255, 255], [255, 255, 255]],
+        maxPush: 14 * window.devicePixelRatio,
+        radius: 0,
+        strength: 0, // Eased towards `target`, so the bulge rises and fades smoothly
+        target: 0,
+        x: 0,
+        y: 0,
+    }; // Wide bulge around the hovered app tile
     ctx: CanvasRenderingContext2D; // Canvas rendering context
     gap: number; // Gap between particles
     height: number; // Height of the canvas
@@ -153,135 +176,22 @@ class Effect {
     };
 
     /**
-     * Makes the particles form a letter, or return to the plain grid when `letter` is null.
-     * @param letter - The character to form.
-     * @param colors - Start and end color (6-digit hex) of the gradient the letter is painted in.
+     * Makes the grid bulge around a point like it does around the cursor, but wider and in the colors of an app.
+     * Releases the bulge again when `focus` is null.
+     * @param focus - Center and radius of the bulge, in CSS pixels relative to the viewport.
+     * @param colors - Start and end color (6-digit hex) of the gradient the dots in the bulge are tinted in.
      */
-    setLetter(letter: string | null, colors?: readonly [string, string]) {
-        this.letter = letter;
-        if (colors) this.letterColors = colors;
-        this.applyLetter();
-    }
-
-    /**
-     * Assigns every particle to the letter or releases it, by rasterizing the letter at one pixel per grid cell.
-     */
-    private applyLetter() {
-        if (!this.letter) {
-            for (const particle of this.particlesArray) {
-                particle.letterTarget = 0;
-                particle.haloTargetX = 0;
-                particle.haloTargetY = 0;
-            }
+    setFocus(focus: ParticleFocus | null, colors?: readonly [string, string]) {
+        if (colors) this.focusState.colors = colors.map(parseHexColor);
+        if (!focus) {
+            this.focusState.target = 0; // Keeps the position, so the bulge fades out where it was
             return;
         }
 
-        const columns = Math.ceil(this.width / this.gap);
-        const rows = Math.ceil(this.height / this.gap);
-        const mask = document.createElement('canvas');
-        mask.width = columns;
-        mask.height = rows;
-        const maskContext = mask.getContext('2d');
-        if (!maskContext) return;
-
-        maskContext.fillStyle = '#fff';
-        maskContext.font = `700 ${Math.min(rows * 0.9, columns * 1.2)}px sans-serif`;
-        maskContext.textAlign = 'center';
-        maskContext.textBaseline = 'middle';
-        maskContext.fillText(this.letter, columns / 2, rows / 2);
-        const pixels = maskContext.getImageData(0, 0, columns, rows).data;
-
-        const filled = (column: number, row: number) =>
-            column >= 0 && column < columns && row >= 0 && row < rows && pixels[(row * columns + column) * 4 + 3] > 128;
-        const isInLetter = (particle: Particle) =>
-            filled(Math.round(particle.originX / this.gap), Math.round(particle.originY / this.gap));
-
-        // Distance of every filled cell to the edge of the letter (two-pass city-block transform)
-        const depth = new Float32Array(columns * rows);
-        const depthAt = (column: number, row: number) =>
-            column < 0 || column >= columns || row < 0 || row >= rows ? 0 : depth[row * columns + column];
-        for (let row = 0; row < rows; row++) {
-            for (let column = 0; column < columns; column++) {
-                if (filled(column, row)) {
-                    depth[row * columns + column] = Math.min(depthAt(column - 1, row), depthAt(column, row - 1)) + 1;
-                }
-            }
-        }
-        let maxDepth = 1;
-        for (let row = rows - 1; row >= 0; row--) {
-            for (let column = columns - 1; column >= 0; column--) {
-                if (!filled(column, row)) continue;
-                const index = row * columns + column;
-                const value = Math.min(
-                    depth[index],
-                    (column + 1 < columns ? depthAt(column + 1, row) : 0) + 1,
-                    (row + 1 < rows ? depthAt(column, row + 1) : 0) + 1
-                );
-                depth[index] = value;
-                maxDepth = Math.max(maxDepth, value);
-            }
-        }
-        // Cap, so that thick strokes plateau instead of only the very center swelling
-        const depthRange = Math.min(maxDepth, 3);
-
-        let minX = Infinity;
-        let maxX = -Infinity;
-        let minY = Infinity;
-        let maxY = -Infinity;
-        for (const particle of this.particlesArray) {
-            if (!isInLetter(particle)) continue;
-            minX = Math.min(minX, particle.originX);
-            maxX = Math.max(maxX, particle.originX);
-            minY = Math.min(minY, particle.originY);
-            maxY = Math.max(maxY, particle.originY);
-        }
-
-        const [from, to] = this.letterColors.map(parseHexColor);
-        for (const particle of this.particlesArray) {
-            particle.letterTarget = isInLetter(particle) ? 1 : 0;
-            particle.haloTargetX = 0;
-            particle.haloTargetY = 0;
-            if (!particle.letterTarget) {
-                this.applyHalo(particle, filled);
-                continue;
-            }
-
-            const cell = Math.round(particle.originY / this.gap) * columns + Math.round(particle.originX / this.gap);
-            particle.letterDepth = Math.min(depth[cell] / depthRange, 1);
-
-            // Diagonal gradient across the letter
-            const t = ((particle.originX - minX) / (maxX - minX || 1) + (particle.originY - minY) / (maxY - minY || 1)) / 2;
-            const [r, g, b] = from.map((channel, index) => Math.round(channel + (to[index] - channel) * t));
-            particle.letterColor = `rgb(${r}, ${g}, ${b})`;
-        }
-    }
-
-    /**
-     * Pushes a dot next to the letter away from it, so that the grid bulges around the raised letter.
-     */
-    private applyHalo(particle: Particle, filled: (column: number, row: number) => boolean) {
-        const reach = 3; // In grid cells
-        const column = Math.round(particle.originX / this.gap);
-        const row = Math.round(particle.originY / this.gap);
-
-        let pushX = 0;
-        let pushY = 0;
-        for (let dy = -reach; dy <= reach; dy++) {
-            for (let dx = -reach; dx <= reach; dx++) {
-                const distance = Math.hypot(dx, dy);
-                if (distance === 0 || distance > reach || !filled(column + dx, row + dy)) continue;
-                // Letter cells pull the push away from themselves, the closer the stronger
-                const weight = (1 - distance / (reach + 1)) / distance;
-                pushX -= dx * weight;
-                pushY -= dy * weight;
-            }
-        }
-
-        const length = Math.hypot(pushX, pushY);
-        if (length === 0) return;
-        const strength = Math.min(length / 2, 1) * this.gap * 1.1;
-        particle.haloTargetX = (pushX / length) * strength;
-        particle.haloTargetY = (pushY / length) * strength;
+        this.focusState.radius = focus.radius * window.devicePixelRatio;
+        this.focusState.target = 1;
+        this.focusState.x = focus.x * window.devicePixelRatio;
+        this.focusState.y = focus.y * window.devicePixelRatio;
     }
 
     /**
@@ -341,7 +251,6 @@ class Effect {
             }
         }
 
-        if (this.letter) this.applyLetter();
     }
 
     /**
@@ -349,7 +258,8 @@ class Effect {
      * Clears the canvas and then updates each particle's position and appearance.
      */
     update() {
-        this.now = performance.now();
+        this.focusState.strength += (this.focusState.target - this.focusState.strength) * 0.08;
+        if (this.focusState.strength < 0.002 && !this.focusState.target) this.focusState.strength = 0;
 
         // Clear the entire canvas to prepare for the next frame
         this.ctx.clearRect(0, 0, this.width, this.height);
@@ -363,3 +273,4 @@ class Effect {
 }
 
 export default Effect;
+export type { ParticleFocus };

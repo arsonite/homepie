@@ -23,7 +23,9 @@
 interface ExternalApp {
     readonly description: string;
     readonly displayName: string;
-    /** Two 6-digit hex colors, used for the tile, the hover letter and the Hub background. */
+    /** 6-digit hex color of the tile: border, letter and the fill while hovered. */
+    readonly color: string;
+    /** Two 6-digit hex colors, used for the bulge behind the tile and the Hub background while it is hovered. */
     readonly gradient: readonly [string, string];
     /** Path segment of the app, the same as in 00-homepie-apps.conf. */
     readonly name: string;
@@ -33,7 +35,9 @@ const EXTERNAL_APPS: readonly ExternalApp[] = [
     {
         description: 'A powerful and convenient web text editor',
         displayName: 'Lockkliye',
-        gradient: ['#7a5cff', '#2fc4ff'],
+        // The accent of Lockkliye (light orange) and its lighter hover shade
+        color: '#ff9500',
+        gradient: ['#ffaa33', '#ff9500'],
         name: 'lockkliye',
     },
 ];
