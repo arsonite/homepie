@@ -16,7 +16,7 @@
  */
 
 // React imports
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect } from 'react';
 import { Navigate, Route, Routes, useSearchParams } from 'react-router-dom';
 
 // API
@@ -27,12 +27,6 @@ import { useAuth } from '@/api/AuthContext.tsx';
 import Hub from '@/pages/Hub/Hub.tsx';
 import LoginPage from '@/pages/LoginPage/LoginPage.tsx';
 import NoMatch from '@/pages/NoMatch/NoMatch.tsx';
-
-// Classes
-import { AppClass } from '@/classes/AppClass.ts';
-
-// Utility
-import Path from '@/util/Path.ts';
 
 // Style
 import './_style/Platform.scss';
@@ -58,48 +52,7 @@ const PostLoginRedirect: React.FC = (): JSX.Element => {
 const Platform: React.FC = (): JSX.Element => {
     const { status } = useAuth();
 
-    const [apps, setApps] = useState<AppClass[]>([]);
-
     const login: boolean = status === 'authenticated';
-
-    const appsPath: string = Path.getAbsolutePath(import.meta.url) + 'apps';
-    const appsWhitelist: string[] = useMemo(
-        () => [
-            // 'behance',
-            // 'clover',
-            // 'crastinathor',
-            'fingerwarmer',
-            // 'lockkliye',
-            'namegen',
-            'quickquill',
-            // 'scrumbag',
-            // 'tickfit',
-            // 'timely',
-        ],
-        []
-    );
-
-    useEffect(() => {
-        if (!login) {
-            return;
-        }
-
-        async function importComponents() {
-            const importedApps = await Promise.all(
-                appsWhitelist.map(async (page_name) => {
-                    const component_name = page_name;
-                    const imported_component = await import(`./${appsPath}/${component_name}/App.tsx`);
-                    const component_meta = imported_component.meta;
-                    return new AppClass({ ...component_meta, component: imported_component.default });
-                })
-            );
-            setApps(importedApps);
-        }
-
-        importComponents();
-        // Intended behaviour
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [login]);
 
     return (
         <div id='homepie-platform'>
@@ -125,18 +78,6 @@ const Platform: React.FC = (): JSX.Element => {
                             <Route path='/login' element={<PostLoginRedirect />} />
 
                             <Route key='hub' path='/hub' element={<Hub />} />
-
-                            {/* {apps.map((app) => {
-                                const Component = app.component as React.FC;
-                                return (
-                                    <Route
-                                        key={app.name}
-                                        // Trailing '*' necessary to render nested routes
-                                        path={`${app.encodedName}/*`}
-                                        element={<Component />}
-                                    />
-                                );
-                            })} */}
 
                             {/* Catching all manually typed non-matches and automatic miss-matches */}
                             <Route path='*' element={<NoMatch />} />

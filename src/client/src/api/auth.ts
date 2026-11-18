@@ -97,4 +97,5 @@ const logout = async (): Promise<void> => {
 };
 
 export { AuthError, getSession, login, logout };
+
 export type { AuthFailure };

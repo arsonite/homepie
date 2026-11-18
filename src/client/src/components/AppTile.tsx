@@ -44,7 +44,7 @@ const AppTile: React.FC<AppTileProps> = ({ app, onHover }: AppTileProps): JSX.El
         const rect = iconRef.current?.getBoundingClientRect();
         if (!rect) return onHover?.(app);
         onHover?.(app, {
-            radius: rect.width * 2.8, // Wider than the bulge around the cursor (110px)
+            radius: rect.width * 5.5, // Wider than the bulge around the cursor (110px)
             x: rect.left + rect.width / 2,
             y: rect.top + rect.height / 2,
         });

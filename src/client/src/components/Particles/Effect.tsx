@@ -48,7 +48,7 @@ class Effect {
     bulge: { active: boolean; maxPush: number; radius: number; x: number; y: number }; // Subtle bulge around the cursor
     focusState: FocusState = {
         colors: [[255, 255, 255], [255, 255, 255]],
-        maxPush: 14 * window.devicePixelRatio,
+        maxPush: 34 * window.devicePixelRatio,
         radius: 0,
         strength: 0, // Eased towards `target`, so the bulge rises and fades smoothly
         target: 0,

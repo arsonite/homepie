@@ -183,6 +183,7 @@ class Particle {
         this.tintAmount = Math.min(strength * 1.4, 1);
 
         if (distance < 1) return [0, 0];
+
         return [(dx / distance) * strength * focus.maxPush, (dy / distance) * strength * focus.maxPush];
     }
 
