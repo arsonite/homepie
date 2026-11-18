@@ -47,6 +47,7 @@
 ```
 browser ─► Cloudflare DNS ─► router (80/443) ─► nginx ─┬─ homepie.net           landing page (client/build)
                                                        ├─ homepie.net/lockkliye/ ─► 127.0.0.1:8101
+                                                       ├─ homepie.net/tickfit/ ─► 127.0.0.1:8104
                                                        └─ homepie.net/<app>/     ─► see nginx/conf.d/00-homepie-apps.conf
                          every request is checked first by the auth server (FastAPI, 127.0.0.1:8888)
 ```
@@ -127,7 +128,7 @@ The start, stop and is-running scripts need the teatype environment, like the cl
 [`.env.template`](.env.template) defines all settings; the scripts copy it to the git-ignored `.env` on first use and
 never overwrite your values (precedence: environment > `.env` > `DEFAULT_*`).
 
-Runtime data of every project lives in `/var/lib/<project>` (`homepie`, `lockkliye`, `teatype`), never in the repo:
+Runtime data of every project lives in `/var/lib/<project>` (`homepie`, `lockkliye`, `teatype`, `tickfit`), never in the repo:
 `run/` (pids, logs, sessions), `secrets/` (mode 700), `tmp/`. `setup-data-dirs [project|all]` creates them.
 
 ### Adding an app

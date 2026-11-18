@@ -18,15 +18,15 @@
 #################### START CMD PARSE ####################
 #########################################################
 
-# Usage: ./setup-data-dirs [homepie|lockkliye|teatype|all]
+# Usage: ./setup-data-dirs [homepie|lockkliye|teatype|tickfit|all]
 target="${1:-all}"
 
 case "$target" in
-    homepie | lockkliye | teatype | all) ;;
+    homepie | lockkliye | teatype | tickfit | all) ;;
     *)
         echo
         echo "Unknown project '$target'."
-        echo "Usage: ./setup-data-dirs [homepie|lockkliye|teatype|all]"
+        echo "Usage: ./setup-data-dirs [homepie|lockkliye|teatype|tickfit|all]"
         echo
         exit 1
         ;;
@@ -88,6 +88,10 @@ fi
 
 if [ "$target" = "lockkliye" ] || [ "$target" = "all" ]; then
     setup_project lockkliye "$LOCKKLIYE_DATA_PATH" "$LOCKKLIYE_RUNTIME_PATH" "$LOCKKLIYE_SECRETS_PATH" "$LOCKKLIYE_TEMP_PATH"
+fi
+
+if [ "$target" = "tickfit" ] || [ "$target" = "all" ]; then
+    setup_project tickfit "$TICKFIT_DATA_PATH" "$TICKFIT_RUNTIME_PATH" "$TICKFIT_SECRETS_PATH" "$TICKFIT_TEMP_PATH"
 fi
 
 if [ "$target" = "teatype" ] || [ "$target" = "all" ]; then

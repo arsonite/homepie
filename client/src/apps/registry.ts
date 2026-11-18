@@ -40,6 +40,14 @@ const EXTERNAL_APPS: readonly ExternalApp[] = [
         gradient: ['#ffaa33', '#ff9500'],
         name: 'lockkliye',
     },
+    {
+        description: 'Workout plans, weekly schedule and training log',
+        displayName: 'Tickfit',
+        // The accent of Tickfit (green) and its lighter hover shade
+        color: '#30d158',
+        gradient: ['#5ae07f', '#30d158'],
+        name: 'tickfit',
+    },
 ];
 
 const getExternalAppUrl = (app: ExternalApp): string => `/${app.name}/`;
