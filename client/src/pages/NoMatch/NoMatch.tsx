@@ -29,11 +29,13 @@ const NoMatch: React.FC = () => {
 
     return (
         <div id='no-match'>
-            <p id='url'>{'>' + currentPath}</p>
+            <div id='error-container'>
+                <p id='url'>{'>' + currentPath}</p>
 
-            <Icon src={['pages', 'no-match']} />
+                <Icon src={['pages', 'no-match']} />
 
-            <p id='error-text'>This path does not exist.</p>
+                <p id='error-text'>This path does not exist.</p>
+            </div>
         </div>
     );
 };
