@@ -45,9 +45,9 @@
 ## Deployment
 
 ```
-browser ─► Cloudflare DNS ─► router (80/443) ─► nginx ─┬─ homepie.net           landing page (src/client/build)
+browser ─► Cloudflare DNS ─► router (80/443) ─► nginx ─┬─ homepie.net           landing page (client/build)
                                                        ├─ homepie.net/lockkliye/ ─► 127.0.0.1:8101
-                                                       └─ homepie.net/<app>/     ─► see src/nginx/conf.d/00-homepie-apps.conf
+                                                       └─ homepie.net/<app>/     ─► see nginx/conf.d/00-homepie-apps.conf
                          every request is checked first by the auth server (FastAPI, 127.0.0.1:8888)
 ```
 
@@ -108,7 +108,7 @@ The start, stop and is-running scripts need the teatype environment, like the cl
 -   User changes apply immediately. Changing a password logs that user out everywhere.
 -   Users live in `/var/lib/homepie/users.json` (scrypt hashes, additionally encrypted with
     `/var/lib/homepie/secrets/users.key`). **Back up that key**, without it the users are unreadable.
--   Tests: `pip install -r src/server/requirements/auth-test.txt && python -m pytest src/server`.
+-   Tests: `pip install -r server/requirements/auth-test.txt && python -m pytest server`.
 
 ### How the login works
 
@@ -133,8 +133,8 @@ Runtime data of every project lives in `/var/lib/<project>` (`homepie`, `lockkli
 ### Adding an app
 
 1. Let it listen on `127.0.0.1:<port>` and build it for the base path `/<name>/` (vite: `base: '/<name>/'`).
-2. Add `<name> 127.0.0.1:<port>;` to [`src/nginx/conf.d/00-homepie-apps.conf`](src/nginx/conf.d/00-homepie-apps.conf).
-3. Add a tile in [`src/client/src/apps/registry.ts`](src/client/src/apps/registry.ts).
+2. Add `<name> 127.0.0.1:<port>;` to [`nginx/conf.d/00-homepie-apps.conf`](nginx/conf.d/00-homepie-apps.conf).
+3. Add a tile in [`client/src/apps/registry.ts`](client/src/apps/registry.ts).
 4. `scripts/build/deploy`
 
 No DNS or certificate change needed. Apps share the origin of the hub on purpose: tapping a tile then stays inside the

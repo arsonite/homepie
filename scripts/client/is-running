@@ -28,12 +28,12 @@ class IsRunning(BaseIsRunningCLI):
     def pre_execute(self):
         # The stop script loads this file from a temporary copy in a subdirectory, so the repository is searched from here
         directory = os.path.dirname(os.path.realpath(__file__))
-        while not os.path.isdir(os.path.join(directory, 'src', 'client')):
+        while not os.path.isfile(os.path.join(directory, 'client', 'package.json')):
             directory = os.path.dirname(directory)
         
         # Scoped to this client's vite (the pnpm shim runs it as node_modules/.bin/../.pnpm/vite@<version>/...),
         # other projects (e.g. lockkliye) run their own
-        self.process_names = [os.path.join(directory, 'src', 'client', 'node_modules', '.bin', '..', '.pnpm', 'vite@')]
+        self.process_names = [os.path.join(directory, 'client', 'node_modules', '.bin', '..', '.pnpm', 'vite@')]
 
 if __name__ == '__main__':
     IsRunning()

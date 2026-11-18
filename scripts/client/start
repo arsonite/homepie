@@ -143,7 +143,7 @@ class Start(BaseStartCLI):
         """
         self._scripts_directory = os.path.dirname(os.path.realpath(__file__))
         repository_root = os.path.abspath(os.path.join(self._scripts_directory, '..', '..'))
-        client_root = os.path.join(repository_root, 'src', 'client')
+        client_root = os.path.join(repository_root, 'client')
         # The start command runs from the client, which also holds its .env
         self.parent_path = client_root
         self._load_homepie_env(repository_root)

@@ -108,7 +108,7 @@ class Start(BaseStartCLI):
     def pre_execute(self):
         scripts_directory = os.path.dirname(os.path.realpath(__file__))
         repository_root = os.path.abspath(os.path.join(scripts_directory, '..', '..'))
-        server_root = os.path.join(repository_root, 'src', 'server')
+        server_root = os.path.join(repository_root, 'server')
         self._load_homepie_env(repository_root)
         
         venv_path = os.environ['HOMEPIE_VENV_PATH']
