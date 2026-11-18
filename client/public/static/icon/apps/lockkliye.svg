@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="148 108 216 296">
+    <mask id="lines">
+        <rect x="148" y="108" width="216" height="296" fill="#fff"/>
+        <rect x="184" y="190" width="144" height="22" rx="11"/>
+        <rect x="184" y="250" width="144" height="22" rx="11"/>
+        <rect x="184" y="310" width="86" height="22" rx="11"/>
+    </mask>
+    <rect x="148" y="108" width="216" height="296" rx="28" fill="#ff9500" mask="url(#lines)"/>
+</svg>

@@ -24,6 +24,9 @@ import { ExternalApp, getExternalAppUrl } from '@/apps/registry.ts';
 // Components
 import { ParticleFocus } from '@/components/Particles/Effect.tsx';
 
+// Utility
+import Path from '@/util/Path.ts';
+
 // Style
 import './_style/AppTile.scss';
 
@@ -38,7 +41,8 @@ interface AppTileProps {
  */
 const AppTile: React.FC<AppTileProps> = ({ app, onHover }: AppTileProps): JSX.Element => {
     const iconRef = useRef<HTMLSpanElement>(null);
-    const style = { '--app-color': app.color } as React.CSSProperties;
+    // The icon is used as a mask, so it takes the color of the tile (also while hovered)
+    const style = { '--app-color': app.color, '--app-icon': `url(${Path.getIconPath('apps', app.name)})` } as React.CSSProperties;
 
     const hover = () => {
         const rect = iconRef.current?.getBoundingClientRect();
@@ -61,7 +65,7 @@ const AppTile: React.FC<AppTileProps> = ({ app, onHover }: AppTileProps): JSX.El
             style={style}
             title={app.description}
         >
-            <span className='app-tile-icon' ref={iconRef}>{app.displayName.charAt(0)}</span>
+            <span className='app-tile-icon' ref={iconRef}><span className='app-tile-glyph' /></span>
             <span className='app-tile-name'>{app.displayName}</span>
         </a>
     );

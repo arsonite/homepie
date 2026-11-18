@@ -23,7 +23,7 @@
 interface ExternalApp {
     readonly description: string;
     readonly displayName: string;
-    /** 6-digit hex color of the tile: border, letter and the fill while hovered. */
+    /** 6-digit hex color of the tile: border, icon and the fill while hovered. The icon is public/static/icon/apps/<name>.svg. */
     readonly color: string;
     /** Two 6-digit hex colors, used for the bulge behind the tile and the Hub background while it is hovered. */
     readonly gradient: readonly [string, string];
