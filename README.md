@@ -134,13 +134,15 @@ Runtime data of every project lives in `/var/lib/<project>` (`homepie`, `lockkli
 ### Adding an app
 
 1. Let it listen on `127.0.0.1:<port>` and let it run on `/` (no base path).
-2. Add `<name> 127.0.0.1:<port>;` to [`nginx/conf.d/00-homepie-apps.conf`](nginx/conf.d/00-homepie-apps.conf).
+2. Add `<name> 127.0.0.1:<port>;` to the first map of [`nginx/conf.d/00-homepie-apps.conf`](nginx/conf.d/00-homepie-apps.conf). To support a production build as well, add the app to `$homepie_static` (its `dist/`, readable by `www-data`) and `$homepie_api` (its HSDB server `host:port`) there.
 3. Add a tile in [`client/src/apps/registry.ts`](client/src/apps/registry.ts).
 4. `scripts/build/deploy`
 
 No DNS or certificate change needed. Every app is its own origin (`<name>.homepie.net`), so it can be added to the iOS
 home screen as a separate web app. The session cookie covers all subdomains: while you are logged in there is no
 redirect at all, only an expired session sends you to the lockscreen and back.
+
+**Production builds**: `nginx/snippets/homepie-app.conf` serves `dist/` of an app (`$homepie_static`) when it has an `index.html`, and otherwise proxies to the dev server of the map, decided per request. The app's `start build` puts `dist/` there, its `start client` removes it, so switching needs no nginx reload. `/hsdb/` always goes to `$homepie_api`, `/assets/` is cached for a year, `index.html` and the service worker never. Needs `deploy nginx` once.
 
 ### DNS setup (once)
 
