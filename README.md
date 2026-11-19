@@ -46,9 +46,9 @@
 
 ```
 browser ─► Cloudflare DNS ─► router (80/443) ─► nginx ─┬─ homepie.net           landing page (client/build)
-                                                       ├─ homepie.net/lockkliye/ ─► 127.0.0.1:8101
-                                                       ├─ homepie.net/tickfit/ ─► 127.0.0.1:8104
-                                                       └─ homepie.net/<app>/     ─► see nginx/conf.d/00-homepie-apps.conf
+                                                       ├─ lockkliye.homepie.net ─► 127.0.0.1:8101
+                                                       ├─ tickfit.homepie.net   ─► 127.0.0.1:8104
+                                                       └─ <app>.homepie.net     ─► see nginx/conf.d/00-homepie-apps.conf
                          every request is checked first by the auth server (FastAPI, 127.0.0.1:8888)
 ```
 
@@ -133,13 +133,14 @@ Runtime data of every project lives in `/var/lib/<project>` (`homepie`, `lockkli
 
 ### Adding an app
 
-1. Let it listen on `127.0.0.1:<port>` and build it for the base path `/<name>/` (vite: `base: '/<name>/'`).
+1. Let it listen on `127.0.0.1:<port>` and let it run on `/` (no base path).
 2. Add `<name> 127.0.0.1:<port>;` to [`nginx/conf.d/00-homepie-apps.conf`](nginx/conf.d/00-homepie-apps.conf).
 3. Add a tile in [`client/src/apps/registry.ts`](client/src/apps/registry.ts).
 4. `scripts/build/deploy`
 
-No DNS or certificate change needed. Apps share the origin of the hub on purpose: tapping a tile then stays inside the
-fullscreen home screen app on iOS, which a subdomain would leave.
+No DNS or certificate change needed. Every app is its own origin (`<name>.homepie.net`), so it can be added to the iOS
+home screen as a separate web app. The session cookie covers all subdomains: while you are logged in there is no
+redirect at all, only an expired session sends you to the lockscreen and back.
 
 ### DNS setup (once)
 
@@ -199,7 +200,7 @@ differs from the public IP (CGNAT), port forwarding cannot work, use a Cloudflar
 | Login always fails                        | No user yet (`manage-users list`), or a prod-mode auth server used with `client/start --env dev` |
 | Asked to log in again on every subdomain  | Auth server was started with `--dev`, or `HOMEPIE_AUTH_COOKIE_DOMAIN` is not `.homepie.net` |
 | `429` on login                            | Too many failed attempts, wait 15 minutes                                          |
-| `502` on `homepie.net/<app>/`             | The app is not running on the port from `00-homepie-apps.conf`                     |
+| `502` on `<app>.homepie.net`              | The app is not running on the port from `00-homepie-apps.conf`                     |
 | Hub shown instead of the app              | App missing in `00-homepie-apps.conf` (or nginx not reloaded)                      |
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>

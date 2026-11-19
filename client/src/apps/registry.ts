@@ -16,9 +16,9 @@
  */
 
 /**
- * An app that is reverse-proxied by nginx under https://homepie.net/<name>/, so it stays on the same origin as the
- * hub (a subdomain would leave the fullscreen home screen app on iOS).
- * Every app listed here also needs a line in src/nginx/conf.d/00-homepie-apps.conf.
+ * An app that is reverse-proxied by nginx at https://<name>.homepie.net. Each app is its own origin, so it can be added
+ * to the iOS home screen as a separate web app.
+ * Every app listed here also needs a line in nginx/conf.d/00-homepie-apps.conf.
  */
 interface ExternalApp {
     readonly description: string;
@@ -27,7 +27,7 @@ interface ExternalApp {
     readonly color: string;
     /** Two 6-digit hex colors, used for the bulge behind the tile and the Hub background while it is hovered. */
     readonly gradient: readonly [string, string];
-    /** Path segment of the app, the same as in 00-homepie-apps.conf. */
+    /** Subdomain of the app, the same as in 00-homepie-apps.conf. */
     readonly name: string;
 }
 
@@ -50,7 +50,9 @@ const EXTERNAL_APPS: readonly ExternalApp[] = [
     },
 ];
 
-const getExternalAppUrl = (app: ExternalApp): string => `/${app.name}/`;
+const BASE_DOMAIN = 'homepie.net';
+
+const getExternalAppUrl = (app: ExternalApp): string => `https://${app.name}.${BASE_DOMAIN}/`;
 
 export { EXTERNAL_APPS, getExternalAppUrl };
 export type { ExternalApp };
